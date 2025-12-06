@@ -98,33 +98,33 @@
       border:1px solid rgba(148,163,184,0.18);
     }
 
-    /* TAB HALAMAN */
+    /* PAGE TABS */
     .page-tabs{
       display:flex;
-      gap:8px;
-      margin-bottom:10px;
       flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:14px;
     }
     .tab-btn{
       border-radius:999px;
       border:1px solid var(--line);
       background:#f9fafb;
-      font-size:0.78rem;
-      padding:6px 14px;
+      font-size:0.8rem;
+      padding:6px 12px;
       cursor:pointer;
       color:var(--muted);
-      font-weight:500;
     }
     .tab-btn.active{
-      background:var(--brand);
-      color:#ffffff;
+      background:var(--brand-soft);
+      color:var(--brand);
       border-color:var(--brand);
+      font-weight:600;
     }
 
     .page{
       display:none;
     }
-    .page.page-active{
+    .page.active{
       display:block;
     }
 
@@ -566,6 +566,7 @@
 
     .status-right{
       font-style:italic;
+      text-align:right;
     }
 
     .loading{
@@ -602,7 +603,7 @@
   <header>
     <div class="title-block">
       <h1>Applicant Cycle Management</h1>
-      <p>Preview analisa Applicant Valid &amp; Buffer + Sourcing Analyst.</p>
+      <p>Preview analisa Applicant Valid &amp; Buffer + biaya per metode sourcing (Sourcing Analyst).</p>
     </div>
     <div class="title-right">
       <span class="pill">
@@ -612,22 +613,20 @@
     </div>
   </header>
 
-  <!-- TAB NAVIGASI HALAMAN -->
-  <nav class="page-tabs">
-    <button type="button" class="tab-btn active" data-page="main">Dashboard Utama</button>
-    <button type="button" class="tab-btn" data-page="sa">Sourcing Analyst</button>
-  </nav>
+  <!-- TABS -->
+  <div class="page-tabs">
+    <button type="button" id="tab-dashboard" class="tab-btn active">Dashboard Applicant</button>
+    <button type="button" id="tab-sa" class="tab-btn">Sourcing Analyst</button>
+  </div>
 
-  <!-- =============== HALAMAN 1: DASHBOARD UTAMA =============== -->
-  <main id="page-main" class="page page-active">
-
+  <!-- PAGE 1: DASHBOARD APPLICANT -->
+  <div id="page-dashboard" class="page active">
     <!-- FILTER -->
     <section class="card filter-card">
       <div class="card-title-row">
         <div class="card-title">Filter Data Applicant</div>
         <div class="header-right-flex">
           <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
-          <div class="card-tag">Dashboard Utama</div>
         </div>
       </div>
       <div class="card-subtext">
@@ -988,28 +987,25 @@
         </div>
       </article>
     </section>
+  </div>
 
-  </main>
-
-  <!-- =============== HALAMAN 2: SOURCING ANALYST =============== -->
-  <main id="page-sa" class="page">
-
-    <!-- FILTER SA -->
+  <!-- PAGE 2: SOURCING ANALYST -->
+  <div id="page-sa" class="page">
+    <!-- FILTER SA (STICKY) -->
     <section class="card filter-card">
       <div class="card-title-row">
         <div class="card-title">Filter Sourcing Analyst</div>
         <div class="header-right-flex">
           <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter SA</button>
-          <div class="card-tag">Sourcing Analyst</div>
         </div>
       </div>
       <div class="card-subtext">
-        Filter Provinsi (kolom V) dan Kota (kolom W). Analisa cost per metode sourcing + Job Parent terbanyak di area tersebut.
+        Analisa biaya per metode sourcing berdasarkan <strong>Provinsi</strong> dan <strong>Kota</strong>. Angka cost diambil dari kolom <strong>Cost Per Applicant (AJ)</strong>.
       </div>
 
       <div class="filters" style="grid-template-columns:repeat(2,minmax(0,1fr));">
         <div class="filter-group">
-          <label class="filter-label">Provinsi (Kolom V)</label>
+          <label class="filter-label">Provinsi</label>
           <div class="ms" id="sa-ms-prov">
             <button type="button" class="ms-toggle">
               <span class="ms-placeholder">Semua Provinsi</span>
@@ -1025,7 +1021,7 @@
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Kota (Kolom W)</label>
+          <label class="filter-label">Kota</label>
           <div class="ms ms-disabled" id="sa-ms-kota">
             <button type="button" class="ms-toggle">
               <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
@@ -1042,45 +1038,59 @@
       </div>
 
       <div class="filter-hint">
-        * Halaman ini fokus ke analisa biaya: Cost Per Applicant (kolom AJ) per metode sourcing (Offline / Job Portal / Media Sosial) dan Job Parent terbanyak di area.
+        * Halaman ini fokus untuk menganalisa <strong>Job Parent</strong> vs metode sourcing (Offline, Online - Media Sosial, Online Job Portal) dan biaya per applicant.
       </div>
     </section>
 
-    <!-- TABEL COST PER METODE -->
+    <!-- TABEL SA JOB PARENT x METODE -->
     <section class="card">
       <div class="card-title-row">
-        <div class="card-title">Analisa Cost Per Applicant per Metode Sourcing</div>
-        <div class="card-tag">Sourcing Analyst</div>
+        <div class="card-title">Analisa Biaya per Metode Sourcing</div>
+        <div class="card-tag">Job Parent × Metode</div>
       </div>
       <p class="card-subtext">
-        Menghitung total & rata-rata Cost Per Applicant (kolom AJ) untuk OFFLINE, ONLINE - JOB PORTAL, dan ONLINE - MEDIA SOSIAL,
-        lalu menampilkan Job Parent yang paling banyak di area (Provinsi/Kota) berdasarkan filter.
+        Baris = <strong>Job Parent</strong> (fixed list). Kolom = <strong>OFFLINE</strong>, <strong>ONLINE - MEDIA SOSIAL</strong>, <strong>ONLINE JOB PORTAL</strong>.<br/>
+        Setiap metode berisi: Jumlah Applicant, Rata-rata Cost / Applicant, dan Total Cost.
       </p>
+
       <div class="table-wrap">
         <table>
           <thead>
           <tr>
-            <th>Metode Sourcing</th>
+            <th rowspan="2">Job Parent</th>
+            <th colspan="3">OFFLINE</th>
+            <th colspan="3">ONLINE - MEDIA SOSIAL</th>
+            <th colspan="3">ONLINE JOB PORTAL</th>
+          </tr>
+          <tr>
             <th>Jumlah Applicant</th>
-            <th>Total Cost</th>
             <th>Rata-rata Cost / Applicant</th>
-            <th>Job Parent Terbanyak</th>
-            <th>Jumlah di Job Parent</th>
+            <th>Total Cost</th>
+
+            <th>Jumlah Applicant</th>
+            <th>Rata-rata Cost / Applicant</th>
+            <th>Total Cost</th>
+
+            <th>Jumlah Applicant</th>
+            <th>Rata-rata Cost / Applicant</th>
+            <th>Total Cost</th>
           </tr>
           </thead>
           <tbody id="sa-cost-body"></tbody>
         </table>
       </div>
+
       <div class="status-bar">
         <div class="status-left">
           <span class="status-dot"></span>
           <span id="sa-status-cost">Menunggu data...</span>
         </div>
-        <div class="status-right">Cost Per Applicant dari kolom AJ · Berdasarkan filter Provinsi &amp; Kota (kolom V &amp; W).</div>
+        <div class="status-right">
+          Cost diambil dari kolom <strong>"Cost Per Applicant" (AJ)</strong>, hanya untuk baris yang memiliki nilai cost &amp; Job Parent sesuai list.
+        </div>
       </div>
     </section>
-
-  </main>
+  </div>
 </div>
 
 <script>
@@ -1097,14 +1107,10 @@
   const COL_MEDIA_PREF= "MEDIA SOURCING";      // kolom AG
   const COL_EDU       = "PENDIDIKAN TERAKHIR";
   const COL_GENDER    = "JENIS KELAMIN";
+  const COL_COST_PER_APP = "Cost Per Applicant"; // kolom AJ (header di sheet)
 
   let COL_JOB_PARENT = "JOB PARENT";
   let COL_JOB_TYPE   = "JOB TYPE";
-
-  // Untuk halaman Sourcing Analyst (Provinsi/Kota dari kolom V & W) dan Cost Per Applicant (AJ)
-  let COL_SA_PROV = null;          // akan diisi dari fields[21] (kolom V)
-  let COL_SA_KOTA = null;          // akan diisi dari fields[22] (kolom W)
-  let COL_COST_PER_APP = "Cost Per Applicant";
 
   const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
   const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
@@ -1167,6 +1173,36 @@
 
   const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
 
+  // Job Parent untuk halaman Sourcing Analyst
+  const SA_JOB_PARENT_LIST = [
+    "ADMINISTRATION",
+    "BACK OFFICE",
+    "BEAUTICIAN",
+    "CLEANING",
+    "COLLECTION",
+    "CONTACT CENTER",
+    "CUSTOMER SERVICE",
+    "DRIVER",
+    "IT",
+    "KITCHEN",
+    "LABORAN",
+    "LEGAL",
+    "MANUFACTURE",
+    "MARKETING",
+    "MARKETING CREDIT",
+    "MEDICAL",
+    "MESSENGER",
+    "PHARMACIST",
+    "PROJECT MANAGEMENT",
+    "PUBLIC RELATION",
+    "SALES",
+    "SECURITY",
+    "SPV",
+    "TECHNICIAN",
+    "VERIFIER",
+    "WAREHOUSE"
+  ];
+
   const MONTHS = [
     {idx:1,label:"Januari"},
     {idx:2,label:"Februari"},
@@ -1188,16 +1224,26 @@
   const provKotaMap = new Map();
   const jobParentTypeMap = new Map();
 
-  // Untuk Sourcing Analyst
-  const saProvKotaMap = new Map();
-
   let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
-  let msSaProv, msSaKota;
+  let saProvMS, saKotaMS;
 
   const $ = id => document.getElementById(id);
   const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
   const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
   const norm = v => String(v ?? "").trim().toUpperCase();
+
+  function parseCostValue(v){
+    if(v == null) return 0;
+    let s = String(v).trim();
+    if(!s) return 0;
+    // buang simbol selain angka, titik, koma
+    s = s.replace(/[^0-9.,]/g,"");
+    // asumsikan format Indonesia -> titik pemisah ribuan, koma desimal
+    // hapus semua titik, ganti koma dengan titik
+    s = s.replace(/\./g,"").replace(",",".");
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+  }
 
   function getApplicantValidValue(raw){
     return norm(raw) === norm(KATEGORI_VALID_TARGET) ? 1 : 0;
@@ -1354,19 +1400,6 @@
     return { parent: parent || COL_JOB_PARENT, type: type || COL_JOB_TYPE };
   }
 
-  function detectCostColumn(fields){
-    if(!fields || !fields.length) return COL_COST_PER_APP;
-    const target = "COST PER APPLICANT";
-    let found = fields.find(f=>norm(f)===target);
-    if(found) return found;
-
-    found = fields.find(f=>{
-      const s = norm(f);
-      return s.includes("COST") && s.includes("APPLICANT");
-    });
-    return found || COL_COST_PER_APP;
-  }
-
   function buildProvKotaMap(){
     provKotaMap.clear();
     rawRows.forEach(row=>{
@@ -1391,19 +1424,6 @@
     });
   }
 
-  // Map untuk Sourcing Analyst (kolom V & W)
-  function buildSaProvKotaMap(){
-    saProvKotaMap.clear();
-    rawRows.forEach(row=>{
-      const p = row[COL_SA_PROV];
-      const k = row[COL_SA_KOTA];
-      if(!p || !k) return;
-      const provStr = String(p);
-      if(!saProvKotaMap.has(provStr)) saProvKotaMap.set(provStr,new Set());
-      saProvKotaMap.get(provStr).add(String(k));
-    });
-  }
-
   function updateKotaOptionsByProv(selectedProv){
     if(!msKota) return;
     if(!selectedProv || !selectedProv.length){
@@ -1421,6 +1441,24 @@
     msKota.setDisabled(false);
   }
 
+  // SA: update kota berdasarkan provinsi (filter khusus SA)
+  function updateSaKotaOptions(selectedProv){
+    if(!saKotaMS) return;
+    if(!selectedProv || !selectedProv.length){
+      saKotaMS.setOptions([]);
+      saKotaMS.setDisabled(true);
+      return;
+    }
+    const citySet = new Set();
+    selectedProv.forEach(p=>{
+      const s = provKotaMap.get(p);
+      if(s) s.forEach(c=>citySet.add(c));
+    });
+    const cityList = uniqueSorted(Array.from(citySet));
+    saKotaMS.setOptions(cityList);
+    saKotaMS.setDisabled(false);
+  }
+
   function updateJobTypeOptionsByParent(selectedParents){
     if(!msJobType) return;
     if(!selectedParents || !selectedParents.length){
@@ -1436,23 +1474,6 @@
     const typeList = uniqueSorted(Array.from(typeSet));
     msJobType.setOptions(typeList);
     msJobType.setDisabled(false);
-  }
-
-  function updateSaKotaOptions(selectedProv){
-    if(!msSaKota) return;
-    if(!selectedProv || !selectedProv.length){
-      msSaKota.setOptions([]);
-      msSaKota.setDisabled(true);
-      return;
-    }
-    const citySet = new Set();
-    selectedProv.forEach(p=>{
-      const s = saProvKotaMap.get(p);
-      if(s) s.forEach(c=>citySet.add(c));
-    });
-    const cityList = uniqueSorted(Array.from(citySet));
-    msSaKota.setOptions(cityList);
-    msSaKota.setDisabled(false);
   }
 
   function initFilters(){
@@ -1487,15 +1508,16 @@
     });
   }
 
+  // Inisialisasi filter untuk halaman Sourcing Analyst
   function initSourcingAnalystFilters(){
-    buildSaProvKotaMap();
-    const provVals = uniqueSorted(Array.from(saProvKotaMap.keys()));
+    const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
 
-    msSaProv = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
+    saProvMS = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
       updateSaKotaOptions(sel);
       updateSourcingAnalystTable();
     });
-    msSaKota = createMultiSelect("sa-ms-kota",[], "Semua kota di provinsi ini",true,()=>{
+
+    saKotaMS = createMultiSelect("sa-ms-kota",[], "Semua Kota",true,()=>{
       updateSourcingAnalystTable();
     });
   }
@@ -1517,10 +1539,10 @@
   }
 
   function clearSaFilters(){
-    if(msSaProv) msSaProv.clear();
-    if(msSaKota){
-      msSaKota.setOptions([]);
-      msSaKota.setDisabled(true);
+    if(saProvMS) saProvMS.clear();
+    if(saKotaMS){
+      saKotaMS.setOptions([]);
+      saKotaMS.setDisabled(true);
     }
     updateSourcingAnalystTable();
   }
@@ -1552,21 +1574,22 @@
     });
   }
 
-  // Filter khusus Sourcing Analyst (Provinsi/Kota kolom V & W)
+  // Filter khusus untuk halaman Sourcing Analyst (hanya Prov & Kota)
   function getSourcingAnalystFilteredRows(){
-    const provSel = new Set(msSaProv ? msSaProv.getSelected() : []);
-    const kotaSel = new Set(msSaKota ? msSaKota.getSelected() : []);
+    const provSel = new Set(saProvMS ? saProvMS.getSelected() : []);
+    const kotaSel = new Set(saKotaMS ? saKotaMS.getSelected() : []);
 
     return rawRows.filter(row=>{
-      const rowProv = String(row[COL_SA_PROV] ?? "");
-      const rowKota = String(row[COL_SA_KOTA] ?? "");
+      const rowProv = String(row[COL_PROV] ?? "");
+      const rowKota = String(row[COL_KOTA] ?? "");
+
       if(provSel.size && !provSel.has(rowProv)) return false;
       if(kotaSel.size && !kotaSel.has(rowKota)) return false;
       return true;
     });
   }
 
-  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali (dashboard utama)
+  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali
   function isNoFilterActive(){
     const provSel      = msProv      ? msProv.getSelected()      : [];
     const kotaSel      = msKota      ? msKota.getSelected()      : [];
@@ -2188,83 +2211,48 @@
       `Grand Total Valid: ${numberFmt.format(totalOffline.grandValid)}, Buffer: ${numberFmt.format(totalOffline.grandBuffer)}`;
   }
 
-  /********** LOGIKA COST PER APPLICANT + JOB PARENT TERBANYAK (SOURCING ANALYST) **********/
-  function parseCostValue(raw){
-    if(raw == null) return 0;
-    const str = String(raw).trim();
-    if(!str) return 0;
-    // Hilangkan karakter non-angka kecuali . , -
-    let cleaned = str.replace(/[^\d,.-]/g,"");
-    // Asumsi format Indonesia: titik = ribuan, koma = desimal
-    cleaned = cleaned.replace(/\./g,"").replace(/,/g,".");
-    const num = Number(cleaned);
-    return isNaN(num) ? 0 : num;
-  }
+  /********** SOURCING ANALYST: AGREGASI PER JOB PARENT × METODE **********/
+  function aggregateSaJobParentCost(rows){
+    const result = SA_JOB_PARENT_LIST.map(name => ({
+      jobParent: name,
+      offline: { count: 0, totalCost: 0, avgCost: 0 },
+      media:   { count: 0, totalCost: 0, avgCost: 0 }, // ONLINE - MEDIA SOSIAL
+      portal:  { count: 0, totalCost: 0, avgCost: 0 }  // ONLINE - JOB PORTAL
+    }));
 
-  function aggregateCostByMethodAndTopJobParent(rows){
-    const buckets = {
-      "OFFLINE": {
-        name:"Offline",
-        totalCost:0,
-        count:0,
-        jobParentCounts:new Map()
-      },
-      "ONLINE - JOB PORTAL": {
-        name:"Online - Job Portal",
-        totalCost:0,
-        count:0,
-        jobParentCounts:new Map()
-      },
-      "ONLINE - MEDIA SOSIAL": {
-        name:"Online - Media Sosial",
-        totalCost:0,
-        count:0,
-        jobParentCounts:new Map()
-      }
-    };
-
-    rows.forEach(row=>{
-      const cat = getMethodCategory(row);
-      const bucket = buckets[cat];
-      if(!bucket) return; // hanya 3 kategori utama yang dianalisa
-
-      const cost = parseCostValue(row[COL_COST_PER_APP]);
-      if(cost <= 0) return; // skip jika tidak ada cost
-
-      bucket.totalCost += cost;
-      bucket.count += 1;
-
-      const jpRaw = row[COL_JOB_PARENT];
-      const jp = jpRaw && String(jpRaw).trim()
-        ? String(jpRaw).trim()
-        : "(Tanpa Job Parent)";
-      const current = bucket.jobParentCounts.get(jp) || 0;
-      bucket.jobParentCounts.set(jp,current+1);
+    const idxMap = new Map();
+    SA_JOB_PARENT_LIST.forEach((name, i) => {
+      idxMap.set(name.toUpperCase(), i);
     });
 
-    function getTopJobParent(map){
-      let bestName = "-";
-      let bestCount = 0;
-      for(const [name,count] of map.entries()){
-        if(count > bestCount){
-          bestCount = count;
-          bestName = name;
-        }
-      }
-      return {name:bestName,count:bestCount};
-    }
+    rows.forEach(row => {
+      const jpRaw = row[COL_JOB_PARENT];
+      if (!jpRaw) return;
 
-    const result = [];
-    ["OFFLINE","ONLINE - JOB PORTAL","ONLINE - MEDIA SOSIAL"].forEach(key=>{
-      const b = buckets[key];
-      const top = getTopJobParent(b.jobParentCounts);
-      result.push({
-        metode: b.name,
-        totalCost: b.totalCost,
-        applicantCount: b.count,
-        avgCost: b.count ? b.totalCost / b.count : 0,
-        topJobParent: top.name,
-        topJobParentCount: top.count
+      const jpNorm = String(jpRaw).trim().toUpperCase();
+      const idx = idxMap.get(jpNorm);
+      if (idx === undefined) return; // hanya job parent di list
+
+      const cat = getMethodCategory(row);
+      let bucketKey = null;
+      if (cat === "OFFLINE") bucketKey = "offline";
+      else if (cat === "ONLINE - MEDIA SOSIAL") bucketKey = "media";
+      else if (cat === "ONLINE - JOB PORTAL") bucketKey = "portal";
+      else return; // LAINNYA / kategori lain di-skip
+
+      const cost = parseCostValue(row[COL_COST_PER_APP]);
+      if (cost <= 0) return; // hanya yang punya cost
+
+      const bucket = result[idx][bucketKey];
+      bucket.count += 1;
+      bucket.totalCost += cost;
+    });
+
+    // hitung rata-rata
+    result.forEach(r => {
+      ["offline","media","portal"].forEach(k => {
+        const b = r[k];
+        b.avgCost = b.count ? (b.totalCost / b.count) : 0;
       });
     });
 
@@ -2277,74 +2265,96 @@
     if(!tbody || !status) return;
 
     const rows = getSourcingAnalystFilteredRows();
-    const buckets = aggregateCostByMethodAndTopJobParent(rows);
+    const jobRows = aggregateSaJobParentCost(rows);
 
     tbody.innerHTML = "";
 
-    let totalAllCost = 0;
-    let totalAllApplicants = 0;
+    let grand = {
+      offline: { count:0, totalCost:0 },
+      media:   { count:0, totalCost:0 },
+      portal:  { count:0, totalCost:0 }
+    };
 
-    buckets.forEach(b=>{
+    jobRows.forEach(r => {
       const tr = document.createElement("tr");
-      if(b.applicantCount === 0) tr.classList.add("muted-row");
 
-      function addTd(text,cls){
+      // Jika semua nol, buat row agak abu-abu
+      if(
+        r.offline.count === 0 && r.media.count === 0 && r.portal.count === 0
+      ){
+        tr.classList.add("muted-row");
+      }
+
+      function addTd(text, cls){
         const td = document.createElement("td");
         td.textContent = text;
         if(cls) td.className = cls;
         tr.appendChild(td);
       }
 
-      addTd(b.metode,"col-label");
-      addTd(numberFmt.format(b.applicantCount || 0),"col-number");
-      addTd(b.totalCost ? currencyFmt.format(b.totalCost) : "-","col-number");
-      addTd(b.avgCost ? currencyFmt.format(b.avgCost) : "-","col-number");
-      addTd(b.topJobParent,"col-label");
-      addTd(b.topJobParentCount ? numberFmt.format(b.topJobParentCount) : "0","col-number");
+      addTd(r.jobParent,"col-label");
 
-      totalAllCost += b.totalCost || 0;
-      totalAllApplicants += b.applicantCount || 0;
+      // OFFLINE
+      addTd(numberFmt.format(r.offline.count || 0),"col-number");
+      addTd(r.offline.avgCost ? currencyFmt.format(r.offline.avgCost) : "-","col-number");
+      addTd(r.offline.totalCost ? currencyFmt.format(r.offline.totalCost) : "-","col-number");
+
+      // ONLINE - MEDIA SOSIAL
+      addTd(numberFmt.format(r.media.count || 0),"col-number");
+      addTd(r.media.avgCost ? currencyFmt.format(r.media.avgCost) : "-","col-number");
+      addTd(r.media.totalCost ? currencyFmt.format(r.media.totalCost) : "-","col-number");
+
+      // ONLINE JOB PORTAL
+      addTd(numberFmt.format(r.portal.count || 0),"col-number");
+      addTd(r.portal.avgCost ? currencyFmt.format(r.portal.avgCost) : "-","col-number");
+      addTd(r.portal.totalCost ? currencyFmt.format(r.portal.totalCost) : "-","col-number");
+
+      // akumulasi grand total
+      grand.offline.count += r.offline.count || 0;
+      grand.offline.totalCost += r.offline.totalCost || 0;
+      grand.media.count += r.media.count || 0;
+      grand.media.totalCost += r.media.totalCost || 0;
+      grand.portal.count += r.portal.count || 0;
+      grand.portal.totalCost += r.portal.totalCost || 0;
 
       tbody.appendChild(tr);
     });
 
-    // GRAND TOTAL row
+    // GRAND TOTAL baris paling bawah
     const trTotal = document.createElement("tr");
     trTotal.className = "total-row";
 
-    const tdLabel = document.createElement("td");
-    tdLabel.textContent = "GRAND TOTAL";
-    tdLabel.className = "col-label";
-    trTotal.appendChild(tdLabel);
+    function addTdTotal(text, cls){
+      const td = document.createElement("td");
+      td.textContent = text;
+      if(cls) td.className = cls;
+      trTotal.appendChild(td);
+    }
 
-    const tdTotalApp = document.createElement("td");
-    tdTotalApp.textContent = numberFmt.format(totalAllApplicants);
-    tdTotalApp.className = "col-number";
-    trTotal.appendChild(tdTotalApp);
+    addTdTotal("GRAND TOTAL","col-label");
 
-    const tdTotalCost = document.createElement("td");
-    tdTotalCost.textContent = totalAllCost ? currencyFmt.format(totalAllCost) : "-";
-    tdTotalCost.className = "col-number";
-    trTotal.appendChild(tdTotalCost);
+    // OFFLINE
+    const offAvg = grand.offline.count ? grand.offline.totalCost / grand.offline.count : 0;
+    addTdTotal(numberFmt.format(grand.offline.count),"col-number");
+    addTdTotal(offAvg ? currencyFmt.format(offAvg) : "-","col-number");
+    addTdTotal(grand.offline.totalCost ? currencyFmt.format(grand.offline.totalCost) : "-","col-number");
 
-    const avgAllCost = totalAllApplicants ? totalAllCost / totalAllApplicants : 0;
-    const tdAvgAll = document.createElement("td");
-    tdAvgAll.textContent = avgAllCost ? currencyFmt.format(avgAllCost) : "-";
-    tdAvgAll.className = "col-number";
-    trTotal.appendChild(tdAvgAll);
+    // MEDIA
+    const medAvg = grand.media.count ? grand.media.totalCost / grand.media.count : 0;
+    addTdTotal(numberFmt.format(grand.media.count),"col-number");
+    addTdTotal(medAvg ? currencyFmt.format(medAvg) : "-","col-number");
+    addTdTotal(grand.media.totalCost ? currencyFmt.format(grand.media.totalCost) : "-","col-number");
 
-    const tdEmpty1 = document.createElement("td");
-    tdEmpty1.textContent = "";
-    trTotal.appendChild(tdEmpty1);
-    const tdEmpty2 = document.createElement("td");
-    tdEmpty2.textContent = "";
-    trTotal.appendChild(tdEmpty2);
+    // PORTAL
+    const porAvg = grand.portal.count ? grand.portal.totalCost / grand.portal.count : 0;
+    addTdTotal(numberFmt.format(grand.portal.count),"col-number");
+    addTdTotal(porAvg ? currencyFmt.format(porAvg) : "-","col-number");
+    addTdTotal(grand.portal.totalCost ? currencyFmt.format(grand.portal.totalCost) : "-","col-number");
 
     tbody.appendChild(trTotal);
 
     status.textContent =
-      `Ditampilkan 3 metode · ${numberFmt.format(rows.length)} baris terfilter · ` +
-      `Total Applicant: ${numberFmt.format(totalAllApplicants)} · Total Cost: ${totalAllCost ? currencyFmt.format(totalAllCost) : "-"}`;
+      `Ditampilkan ${jobRows.length} Job Parent · ${numberFmt.format(rows.length)} baris data (sesuai filter Provinsi & Kota).`;
   }
 
   async function loadCsv(){
@@ -2368,13 +2378,6 @@
       COL_JOB_PARENT = jobCols.parent;
       COL_JOB_TYPE   = jobCols.type;
 
-      // Kolom V & W untuk Sourcing Analyst (index 21 & 22 jika ada)
-      COL_SA_PROV = fields[21] || COL_PROV;
-      COL_SA_KOTA = fields[22] || COL_KOTA;
-
-      // Cost Per Applicant
-      COL_COST_PER_APP = detectCostColumn(fields);
-
       $("load-state").style.display = "none";
 
       if(!rawRows.length){
@@ -2383,11 +2386,11 @@
         return;
       }
 
-      // Inisialisasi filter & tabel untuk kedua halaman
       initFilters();
-      initSourcingAnalystFilters();
-
       updateAllTables();
+
+      // Inisialisasi filter & tabel untuk Sourcing Analyst
+      initSourcingAnalystFilters();
       updateSourcingAnalystTable();
 
     }catch(e){
@@ -2400,24 +2403,6 @@
     }
   }
 
-  function switchPage(page){
-    const mainPage = $("page-main");
-    const saPage = $("page-sa");
-    if(!mainPage || !saPage) return;
-
-    if(page === "sa"){
-      mainPage.classList.remove("page-active");
-      saPage.classList.add("page-active");
-    }else{
-      mainPage.classList.add("page-active");
-      saPage.classList.remove("page-active");
-    }
-
-    document.querySelectorAll(".tab-btn").forEach(btn=>{
-      btn.classList.toggle("active",btn.dataset.page === page);
-    });
-  }
-
   document.addEventListener("DOMContentLoaded",()=>{
     const clearBtn = $("clear-filters-btn");
     if(clearBtn) clearBtn.addEventListener("click",clearFilters);
@@ -2425,13 +2410,29 @@
     const saClearBtn = $("sa-clear-filters-btn");
     if(saClearBtn) saClearBtn.addEventListener("click",clearSaFilters);
 
-    document.querySelectorAll(".tab-btn").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        const page = btn.dataset.page;
-        switchPage(page);
-      });
-    });
+    const tabDashboard = $("tab-dashboard");
+    const tabSa = $("tab-sa");
+    const pageDashboard = $("page-dashboard");
+    const pageSa = $("page-sa");
 
+    function setPage(name){
+      if(name === "sa"){
+        pageDashboard.classList.remove("active");
+        pageSa.classList.add("active");
+        tabDashboard.classList.remove("active");
+        tabSa.classList.add("active");
+      }else{
+        pageDashboard.classList.add("active");
+        pageSa.classList.remove("active");
+        tabDashboard.classList.add("active");
+        tabSa.classList.remove("active");
+      }
+    }
+
+    if(tabDashboard) tabDashboard.addEventListener("click",()=>setPage("dashboard"));
+    if(tabSa) tabSa.addEventListener("click",()=>setPage("sa"));
+
+    setPage("dashboard");
     loadCsv();
   });
 </script>
