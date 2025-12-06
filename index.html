@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Applicant Cycle Management</title>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- PapaParse untuk parsing CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-soft:#e0edff;
+      --line:#e5e7eb;
+      --radius:18px;
+      --shadow:0 18px 40px rgba(15,23,42,0.08);
+      --male:#1d4ed8;
+      --female:#db2777;
+      --total:#059669;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      width:100%;
+      min-height:100%;
+      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background: radial-gradient(circle at top left,#e0edff 0,#f5f7fb 40%,#f5f7fb 100%);
+      color:var(--ink);
+    }
+
+    body{
+      display:flex;
+      justify-content:center;
+      padding:16px;
+    }
+
+    .app-shell{
+      width:100%;
+      max-width:1240px;
+    }
+
+    header{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-bottom:12px;
+    }
+
+    .title-block h1{
+      font-size:1.6rem;
+      font-weight:700;
+      letter-spacing:0.02em;
+      color:var(--ink);
+    }
+    .title-block p{
+      margin-top:4px;
+      font-size:0.9rem;
+      color:var(--muted);
+    }
+
+    .pill{
+      padding:8px 14px;
+      background:rgba(37,99,235,0.06);
+      border-radius:999px;
+      font-size:0.8rem;
+      color:var(--brand);
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .pill-dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--brand);
+      box-shadow:0 0 0 4px rgba(37,99,235,0.18);
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px 18px 16px;
+      border:1px solid rgba(148,163,184,0.18);
+    }
+
+    /* TAB HALAMAN */
+    .page-tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .tab-btn{
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      font-size:0.78rem;
+      padding:6px 14px;
+      cursor:pointer;
+      color:var(--muted);
+      font-weight:500;
+    }
+    .tab-btn.active{
+      background:var(--brand);
+      color:#ffffff;
+      border-color:var(--brand);
+    }
+
+    .page{
+      display:none;
+    }
+    .page.page-active{
+      display:block;
+    }
+
+    /* FILTER – STICKY (FREEZE) */
+    .filter-card{
+      margin-bottom:14px;
+      position:sticky;
+      top:0;
+      z-index:30;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+
+    @media (max-width:1024px){
+      .filters{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media (max-width:640px){
+      .filters{grid-template-columns:1fr;}
+      header{gap:8px;}
+      .title-block h1{font-size:1.3rem;}
+    }
+
+    .filter-group{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:0.8rem;
+    }
+
+    .filter-group-double{
+      gap:6px;
+    }
+
+    .filter-label{
+      font-weight:600;
+      color:var(--muted);
+      font-size:0.78rem;
+    }
+
+    /* Multi-select custom */
+    .ms{
+      position:relative;
+    }
+    .ms-toggle{
+      width:100%;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      padding:7px 9px;
+      font-size:0.78rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      cursor:pointer;
+    }
+    .ms-placeholder{
+      flex:1;
+      text-align:left;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .ms-counter{
+      font-size:0.68rem;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .ms-arrow{
+      font-size:0.68rem;
+    }
+    .ms-panel{
+      position:absolute;
+      left:0;
+      right:0;
+      top:100%;
+      margin-top:4px;
+      background:#ffffff;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(15,23,42,0.12);
+      border:1px solid rgba(148,163,184,0.4);
+      padding:8px;
+      z-index:20;
+      display:none;
+    }
+    .ms.open .ms-panel{
+      display:block;
+    }
+    .ms-search{
+      width:100%;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:0.75rem;
+      margin-bottom:6px;
+      outline:none;
+    }
+    .ms-options{
+      max-height:220px;
+      overflow-y:auto;
+    }
+    .ms-option{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 4px;
+      font-size:0.76rem;
+      cursor:pointer;
+    }
+    .ms-option input{
+      accent-color:var(--brand);
+    }
+    .ms-empty{
+      font-size:0.74rem;
+      color:var(--muted);
+      padding:4px 2px;
+      display:none;
+    }
+    .ms-disabled .ms-toggle{
+      background:#e5e7eb;
+      color:#9ca3af;
+      cursor:not-allowed;
+    }
+
+    .filter-hint{
+      margin-top:8px;
+      font-size:0.75rem;
+      color:var(--muted);
+    }
+
+    .card-title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      gap:8px;
+    }
+
+    .card-title{
+      font-size:0.95rem;
+      font-weight:600;
+    }
+
+    .card-tag{
+      font-size:0.7rem;
+      padding:4px 10px;
+      border-radius:999px;
+      background:var(--brand-soft);
+      color:var(--brand);
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    .header-right-flex{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .clear-btn{
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      font-size:0.75rem;
+      padding:5px 10px;
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .clear-btn:hover{
+      background:#eef2ff;
+      border-color:var(--brand);
+      color:var(--brand);
+    }
+
+    /* Grafik bulanan – VERTIKAL */
+    .chart-card{
+      margin-bottom:14px;
+    }
+    .chart-legend{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      font-size:0.75rem;
+      color:var(--muted);
+      margin-bottom:6px;
+      flex-wrap:wrap;
+    }
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .legend-dot{
+      width:14px;
+      height:8px;
+      border-radius:999px;
+    }
+
+    .legend-valid{background:#2563eb;}
+    .legend-buffer{background:#f97316;}
+
+    .chart-body{
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+      height:260px;
+      padding:8px 8px 4px;
+      border-radius:16px;
+      background:linear-gradient(to top,#f9fafb,#ffffff);
+      border:1px solid var(--line);
+      overflow-x:auto;
+    }
+
+    .chart-col{
+      flex:1;
+      min-width:48px;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-end;
+      gap:4px;
+    }
+
+    .chart-col-bars{
+      flex:1;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      gap:4px;
+      width:100%;
+    }
+
+    .chart-bar-vert{
+      width:14px;
+      border-radius:6px 6px 0 0;
+      background:#e5e7eb;
+      transition:height .25s ease-out;
+    }
+
+    .bar-valid{background:#2563eb;}
+    .bar-buffer{background:#f97316;}
+
+    .chart-col-values{
+      font-size:0.7rem;
+      text-align:center;
+      font-variant-numeric:tabular-nums;
+      color:#111827;
+      line-height:1.2;
+    }
+
+    .chart-col-label{
+      font-size:0.7rem;
+      text-align:center;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .chart-footer{
+      margin-top:6px;
+      font-size:0.72rem;
+      color:var(--muted);
+      font-style:italic;
+    }
+
+    /* Summary cards */
+    .summary-row{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+    @media (max-width:900px){
+      .summary-row{grid-template-columns:1fr;}
+    }
+
+    .summary-card{
+      border-radius:16px;
+      padding:12px 14px;
+      background:#ffffff;
+      box-shadow:0 14px 30px rgba(15,23,42,0.06);
+      border:1px solid rgba(148,163,184,0.2);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .summary-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:0.78rem;
+    }
+
+    .summary-title{
+      font-weight:600;
+    }
+
+    .summary-tag{
+      font-size:0.7rem;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#f3f4f6;
+    }
+
+    .summary-body{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:0.8rem;
+      margin-top:4px;
+    }
+
+    .summary-metric{
+      flex:1;
+    }
+
+    .summary-label{
+      color:var(--muted);
+      font-size:0.73rem;
+    }
+
+    .summary-value{
+      font-weight:700;
+      font-size:0.95rem;
+    }
+
+    .summary-card.male .summary-title{color:var(--male);}
+    .summary-card.female .summary-title{color:var(--female);}
+    .summary-card.total .summary-title{color:var(--total);}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:12px;
+    }
+    @media (max-width:960px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    .card-subtext{
+      font-size:0.75rem;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.78rem;
+      min-width:360px;
+    }
+
+    thead{
+      background:#111827;
+      color:#f9fafb;
+    }
+
+    th,td{
+      padding:7px 10px;
+      text-align:left;
+      border-bottom:1px solid var(--line);
+      white-space:nowrap;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    tbody tr:nth-child(even){
+      background:#f3f4f6;
+    }
+
+    tbody tr:last-child td:first-child{
+      border-bottom-left-radius:12px;
+    }
+    tbody tr:last-child td:last-child{
+      border-bottom-right-radius:12px;
+    }
+
+    .col-label{
+      font-weight:600;
+      color:#111827;
+    }
+
+    .col-number{
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .muted-row{
+      color:var(--muted);
+    }
+
+    .total-row{
+      background:#e5e7eb;
+      color:#111827;
+      font-weight:700;
+    }
+
+    .status-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:4px 2px 0;
+      font-size:0.72rem;
+      color:var(--muted);
+    }
+
+    .status-left{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:#22c55e;
+      box-shadow:0 0 0 3px rgba(34,197,94,0.3);
+    }
+
+    .status-right{
+      font-style:italic;
+    }
+
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:0.8rem;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .spinner{
+      width:14px;
+      height:14px;
+      border-radius:999px;
+      border:2px solid rgba(37,99,235,0.18);
+      border-top-color:var(--brand);
+      animation:spin 0.7s linear infinite;
+    }
+
+    @keyframes spin{
+      to{transform:rotate(360deg);}
+    }
+
+    .error{
+      margin-top:8px;
+      font-size:0.8rem;
+      color:#b91c1c;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header>
+    <div class="title-block">
+      <h1>Applicant Cycle Management</h1>
+      <p>Preview analisa Applicant Valid &amp; Buffer + Sourcing Analyst.</p>
+    </div>
+    <div class="title-right">
+      <span class="pill">
+        <span class="pill-dot"></span>
+        Live from Google Sheets CSV
+      </span>
+    </div>
+  </header>
+
+  <!-- TAB NAVIGASI HALAMAN -->
+  <nav class="page-tabs">
+    <button type="button" class="tab-btn active" data-page="main">Dashboard Utama</button>
+    <button type="button" class="tab-btn" data-page="sa">Sourcing Analyst</button>
+  </nav>
+
+  <!-- =============== HALAMAN 1: DASHBOARD UTAMA =============== -->
+  <main id="page-main" class="page page-active">
+
+    <!-- FILTER -->
+    <section class="card filter-card">
+      <div class="card-title-row">
+        <div class="card-title">Filter Data Applicant</div>
+        <div class="header-right-flex">
+          <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
+          <div class="card-tag">Dashboard Utama</div>
+        </div>
+      </div>
+      <div class="card-subtext">
+        Sesuaikan filter di bawah untuk melihat preview analisa. Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
+      </div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label class="filter-label">Provinsi Minat Penempatan</label>
+          <div class="ms" id="ms-prov">
+            <button type="button" class="ms-toggle">
+              <span class="ms-placeholder">Semua Provinsi</span>
+              <span class="ms-counter"></span>
+              <span class="ms-arrow">▾</span>
+            </button>
+            <div class="ms-panel">
+              <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+              <div class="ms-options"></div>
+              <div class="ms-empty">Tidak ada provinsi</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Kota Minat Penempatan</label>
+          <div class="ms ms-disabled" id="ms-kota">
+            <button type="button" class="ms-toggle">
+              <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+              <span class="ms-counter"></span>
+              <span class="ms-arrow">▾</span>
+            </button>
+            <div class="ms-panel">
+              <input class="ms-search" type="text" placeholder="Cari kota..." />
+              <div class="ms-options"></div>
+              <div class="ms-empty">Tidak ada kota</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Cycle Hired</label>
+          <div class="ms" id="ms-cycle">
+            <button type="button" class="ms-toggle">
+              <span class="ms-placeholder">Semua Cycle</span>
+              <span class="ms-counter"></span>
+              <span class="ms-arrow">▾</span>
+            </button>
+            <div class="ms-panel">
+              <input class="ms-search" type="text" placeholder="Cari cycle..." />
+              <div class="ms-options"></div>
+              <div class="ms-empty">Tidak ada cycle</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Periode Pelamar</label>
+          <div class="ms" id="ms-periode">
+            <button type="button" class="ms-toggle">
+              <span class="ms-placeholder">Semua Periode</span>
+              <span class="ms-counter"></span>
+              <span class="ms-arrow">▾</span>
+            </button>
+            <div class="ms-panel">
+              <input class="ms-search" type="text" placeholder="Cari periode..." />
+              <div class="ms-options"></div>
+              <div class="ms-empty">Tidak ada periode</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom ke-5: Job Parent + Job Type -->
+        <div class="filter-group filter-group-double">
+          <div>
+            <label class="filter-label">Job Parent</label>
+            <div class="ms" id="ms-job-parent">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Semua Job Parent</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada job parent</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="filter-label">Job Type</label>
+            <div class="ms ms-disabled" id="ms-job-type">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari job type..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada job type</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-hint">
+        * Klik filter untuk membuka daftar + kolom search. Bisa memilih lebih dari satu nilai di setiap filter. Job Type baru muncul setelah Job Parent dipilih.
+      </div>
+
+      <div id="load-state" class="loading">
+        <div class="spinner"></div>
+        <span>Memuat data dari Google Sheets...</span>
+      </div>
+      <div id="error-state" class="error" style="display:none;"></div>
+    </section>
+
+    <!-- GRAFIK BULANAN -->
+    <section class="card chart-card">
+      <div class="card-title-row">
+        <div class="card-title">Trend Applicant Valid &amp; Buffer per Bulan</div>
+        <div class="card-tag">Vertical bar · Jan–Des</div>
+      </div>
+      <p class="card-subtext">
+        Pertumbuhan Applicant Valid (APLIKAN VALID - CTC 1) dan Buffer berdasarkan <strong>PERIODE PELAMAR</strong>. Mengikuti filter di atas.
+      </p>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <span class="legend-dot legend-valid"></span>
+          <span>Applicant Valid</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot legend-buffer"></span>
+          <span>Buffer</span>
+        </div>
+      </div>
+      <div id="chart-body" class="chart-body"></div>
+      <div id="chart-summary-text" class="chart-footer">
+        Menunggu data...
+      </div>
+    </section>
+
+    <!-- SUMMARY BOXES -->
+    <section class="summary-row">
+      <div class="summary-card male">
+        <div class="summary-header">
+          <div class="summary-title">Summary Laki-Laki</div>
+          <div class="summary-tag">Jenis Kelamin: L</div>
+        </div>
+        <div class="summary-body">
+          <div class="summary-metric">
+            <div class="summary-label">Applicant Valid</div>
+            <div id="sum-male-valid" class="summary-value">0</div>
+          </div>
+          <div class="summary-metric">
+            <div class="summary-label">Buffer</div>
+            <div id="sum-male-buffer" class="summary-value">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card female">
+        <div class="summary-header">
+          <div class="summary-title">Summary Perempuan</div>
+          <div class="summary-tag">Jenis Kelamin: P</div>
+        </div>
+        <div class="summary-body">
+          <div class="summary-metric">
+            <div class="summary-label">Applicant Valid</div>
+            <div id="sum-female-valid" class="summary-value">0</div>
+          </div>
+          <div class="summary-metric">
+            <div class="summary-label">Buffer</div>
+            <div id="sum-female-buffer" class="summary-value">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card total">
+        <div class="summary-header">
+          <div class="summary-title">Total Nasional</div>
+          <div class="summary-tag">Semua gender</div>
+        </div>
+        <div class="summary-body">
+          <div class="summary-metric">
+            <div class="summary-label">Applicant Valid</div>
+            <div id="sum-total-valid" class="summary-value">0</div>
+          </div>
+          <div class="summary-metric">
+            <div class="summary-label">Buffer</div>
+            <div id="sum-total-buffer" class="summary-value">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABEL 1 & 2 -->
+    <section class="grid">
+      <article class="card">
+        <div class="card-title-row">
+          <div class="card-title">Preview Applicant Valid X Buffer</div>
+          <div class="card-tag">By Provinsi Minat Penempatan</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Provinsi</th>
+              <th>Applicant Valid</th>
+              <th>Buffer</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-prov-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="status-prov">Menunggu data...</span>
+          </div>
+          <div class="status-right">KATEGORI APP = "APLIKAN VALID - CTC 1" · QUALIFIED = "YES"</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <div class="card-title">Preview Metode Sourcing</div>
+          <div class="card-tag">Offline vs Online</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Metode Sourcing (MEDIA SOURCING)</th>
+              <th>Applicant Valid</th>
+              <th>Buffer</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-metode-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="status-metode">Menunggu data...</span>
+          </div>
+          <div class="status-right">Sumber kategori: kolom "MEDIA SOURCING" + fallback METODE SOURCING</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- TABEL 3 & 4 -->
+    <section class="grid">
+      <article class="card">
+        <div class="card-title-row">
+          <div class="card-title">Preview Sourcing Media Sosial</div>
+          <div class="card-tag">Per Platform</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Media Sosial</th>
+              <th>Applicant Valid</th>
+              <th>Buffer</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-media-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="status-media">Menunggu data...</span>
+          </div>
+          <div class="status-right">Baris: kategori ONLINE - MEDIA SOSIAL</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <div class="card-title">Preview Profiling Applicant</div>
+          <div class="card-tag">Tingkat Pendidikan</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Pendidikan Terakhir</th>
+              <th>Applicant Valid</th>
+              <th>Buffer</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-edu-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="status-edu">Menunggu data...</span>
+          </div>
+          <div class="status-right">Sumber: kolom PENDIDIKAN TERAKHIR</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- TABEL 5 & 6 -->
+    <section class="grid">
+      <article class="card">
+        <div class="card-title-row">
+          <div class="card-title">Preview Sourcing Job Portal</div>
+          <div class="card-tag">Per Portal</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Job Portal</th>
+              <th>Applicant Valid</th>
+              <th>Buffer</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-portal-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="status-portal">Menunggu data...</span>
+          </div>
+          <div class="status-right">Baris: kategori ONLINE - JOB PORTAL</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <div class="card-title">Preview Sourcing Offline</div>
+          <div class="card-tag">Aktivitas Offline</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Aktivitas Offline</th>
+              <th>Applicant Valid</th>
+              <th>Buffer</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-offline-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="status-offline">Menunggu data...</span>
+          </div>
+          <div class="status-right">Baris: kategori OFFLINE</div>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <!-- =============== HALAMAN 2: SOURCING ANALYST =============== -->
+  <main id="page-sa" class="page">
+
+    <!-- FILTER SA -->
+    <section class="card filter-card">
+      <div class="card-title-row">
+        <div class="card-title">Filter Sourcing Analyst</div>
+        <div class="header-right-flex">
+          <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter SA</button>
+          <div class="card-tag">Sourcing Analyst</div>
+        </div>
+      </div>
+      <div class="card-subtext">
+        Filter Provinsi (kolom V) dan Kota (kolom W). Analisa cost per metode sourcing + Job Parent terbanyak di area tersebut.
+      </div>
+
+      <div class="filters" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+        <div class="filter-group">
+          <label class="filter-label">Provinsi (Kolom V)</label>
+          <div class="ms" id="sa-ms-prov">
+            <button type="button" class="ms-toggle">
+              <span class="ms-placeholder">Semua Provinsi</span>
+              <span class="ms-counter"></span>
+              <span class="ms-arrow">▾</span>
+            </button>
+            <div class="ms-panel">
+              <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+              <div class="ms-options"></div>
+              <div class="ms-empty">Tidak ada provinsi</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Kota (Kolom W)</label>
+          <div class="ms ms-disabled" id="sa-ms-kota">
+            <button type="button" class="ms-toggle">
+              <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+              <span class="ms-counter"></span>
+              <span class="ms-arrow">▾</span>
+            </button>
+            <div class="ms-panel">
+              <input class="ms-search" type="text" placeholder="Cari kota..." />
+              <div class="ms-options"></div>
+              <div class="ms-empty">Tidak ada kota</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-hint">
+        * Halaman ini fokus ke analisa biaya: Cost Per Applicant (kolom AJ) per metode sourcing (Offline / Job Portal / Media Sosial) dan Job Parent terbanyak di area.
+      </div>
+    </section>
+
+    <!-- TABEL COST PER METODE -->
+    <section class="card">
+      <div class="card-title-row">
+        <div class="card-title">Analisa Cost Per Applicant per Metode Sourcing</div>
+        <div class="card-tag">Sourcing Analyst</div>
+      </div>
+      <p class="card-subtext">
+        Menghitung total & rata-rata Cost Per Applicant (kolom AJ) untuk OFFLINE, ONLINE - JOB PORTAL, dan ONLINE - MEDIA SOSIAL,
+        lalu menampilkan Job Parent yang paling banyak di area (Provinsi/Kota) berdasarkan filter.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>Metode Sourcing</th>
+            <th>Jumlah Applicant</th>
+            <th>Total Cost</th>
+            <th>Rata-rata Cost / Applicant</th>
+            <th>Job Parent Terbanyak</th>
+            <th>Jumlah di Job Parent</th>
+          </tr>
+          </thead>
+          <tbody id="sa-cost-body"></tbody>
+        </table>
+      </div>
+      <div class="status-bar">
+        <div class="status-left">
+          <span class="status-dot"></span>
+          <span id="sa-status-cost">Menunggu data...</span>
+        </div>
+        <div class="status-right">Cost Per Applicant dari kolom AJ · Berdasarkan filter Provinsi &amp; Kota (kolom V &amp; W).</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  /********** KONFIGURASI URL CSV **********/
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
+
+  const COL_PROV      = "PROVINSI MINAT PENEMPATAN";
+  const COL_KOTA      = "KOTA MINAT PENEMPATAN";
+  const COL_CYCLE     = "CYCLE HIRED";
+  const COL_PERIODE   = "PERIODE PELAMAR";
+  const COL_KATEGORI  = "KATEGORI APP";
+  const COL_QUALIFIED = "QUALIFIED";
+  const COL_METODE    = "METODE SOURCING";     // kolom AF
+  const COL_MEDIA_PREF= "MEDIA SOURCING";      // kolom AG
+  const COL_EDU       = "PENDIDIKAN TERAKHIR";
+  const COL_GENDER    = "JENIS KELAMIN";
+
+  let COL_JOB_PARENT = "JOB PARENT";
+  let COL_JOB_TYPE   = "JOB TYPE";
+
+  // Untuk halaman Sourcing Analyst (Provinsi/Kota dari kolom V & W) dan Cost Per Applicant (AJ)
+  let COL_SA_PROV = null;          // akan diisi dari fields[21] (kolom V)
+  let COL_SA_KOTA = null;          // akan diisi dari fields[22] (kolom W)
+  let COL_COST_PER_APP = "Cost Per Applicant";
+
+  const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
+  const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
+
+  const FIXED_PROV_LIST = [
+    "ACEH (NAD)","BALI","BANTEN","BENGKULU","DI YOGYAKARTA","DKI JAKARTA",
+    "GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR",
+    "KALIMANTAN BARAT","KALIMANTAN SELATAN","KALIMANTAN TENGAH",
+    "KALIMANTAN TIMUR","KALIMANTAN UTARA","KEPULAUAN BANGKA BELITUNG",
+    "KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA",
+    "NUSA TENGGARA BARAT (NTB)","NUSA TENGGARA TIMUR (NTT)",
+    "PAPUA","PAPUA BARAT DAYA","PAPUA SELATAN","PAPUA TENGAH",
+    "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGAH",
+    "SULAWESI TENGGARA","SULAWESI TIMUR","SULAWESI UTARA",
+    "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
+  ];
+
+  // Tabel media sosial – hanya ini yang tampil
+  const FIXED_MEDIA_LIST = [
+    "Facebook",
+    "FLK",
+    "Instagram",
+    "Linkedin",
+    "SIM Talent Search",
+    "Telegram",
+    "Tiktok",
+    "Twitter",
+    "Whatsapp / Media Chat"
+  ];
+
+  // Tabel job portal
+  const FIXED_PORTAL_LIST = [
+    "Glints",
+    "Hired Today",
+    "Indeed",
+    "JobStreet",
+    "Jobstreet Express",
+    "KarirHub",
+    "KitaLulus",
+    "Lumina",
+    "Pintarnya"
+  ];
+
+  // Tabel offline
+  const FIXED_OFFLINE_LIST = [
+    "Academy/Training/Seminar",
+    "Balai Latian Kerja (BLK)",
+    "Brosur/Banner/Spanduk/Flyer",
+    "Campus Hiring",
+    "Disnaker",
+    "Drop CV",
+    "Freelance Recruiter",
+    "Job Fair",
+    "Komunitas Informal",
+    "Referensi Client",
+    "Referensi Teman/Keluarga/Komunitas",
+    "School Hiring",
+    "Walk In Interview (WI)"
+  ];
+
+  const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
+
+  const MONTHS = [
+    {idx:1,label:"Januari"},
+    {idx:2,label:"Februari"},
+    {idx:3,label:"Maret"},
+    {idx:4,label:"April"},
+    {idx:5,label:"Mei"},
+    {idx:6,label:"Juni"},
+    {idx:7,label:"Juli"},
+    {idx:8,label:"Agustus"},
+    {idx:9,label:"September"},
+    {idx:10,label:"Oktober"},
+    {idx:11,label:"November"},
+    {idx:12,label:"Desember"}
+  ];
+
+  let rawRows = [];
+  let DETECTED_COL_MEDIA = COL_MEDIA_PREF;
+
+  const provKotaMap = new Map();
+  const jobParentTypeMap = new Map();
+
+  // Untuk Sourcing Analyst
+  const saProvKotaMap = new Map();
+
+  let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
+  let msSaProv, msSaKota;
+
+  const $ = id => document.getElementById(id);
+  const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
+  const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
+  const norm = v => String(v ?? "").trim().toUpperCase();
+
+  function getApplicantValidValue(raw){
+    return norm(raw) === norm(KATEGORI_VALID_TARGET) ? 1 : 0;
+  }
+  function isQualifiedYes(raw){
+    const s = norm(raw);
+    return s === "YES" || s === "YA";
+  }
+
+  function uniqueSorted(list){
+    return Array.from(new Set(list.filter(Boolean)))
+      .sort((a,b)=>String(a).localeCompare(String(b),"id"));
+  }
+
+  function createMultiSelect(rootId, options, placeholder, disabled, onChange){
+    const root = $(rootId);
+    const toggle = root.querySelector(".ms-toggle");
+    const panel = root.querySelector(".ms-panel");
+    const searchInput = root.querySelector(".ms-search");
+    const optsContainer = root.querySelector(".ms-options");
+    const emptyEl = root.querySelector(".ms-empty");
+    const labelSpan = root.querySelector(".ms-placeholder");
+    const counterSpan = root.querySelector(".ms-counter");
+
+    const state = { options:[...(options || [])], selected:new Set() };
+
+    function updateLabel(){
+      const count = state.selected.size;
+      if(count === 0){
+        labelSpan.textContent = placeholder;
+        counterSpan.textContent = "";
+      }else if(count <= 2){
+        labelSpan.textContent = Array.from(state.selected).join(", ");
+        counterSpan.textContent = "";
+      }else{
+        labelSpan.textContent = placeholder;
+        counterSpan.textContent = count + " dipilih";
+      }
+    }
+
+    function renderOptions(){
+      optsContainer.innerHTML = "";
+      const term = searchInput.value.toLowerCase();
+      let visibleCount = 0;
+
+      state.options.forEach(val=>{
+        const text = String(val);
+        if(term && !text.toLowerCase().includes(term)) return;
+
+        visibleCount++;
+        const label = document.createElement("label");
+        label.className = "ms-option";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = text;
+        cb.checked = state.selected.has(text);
+
+        cb.addEventListener("change",()=>{
+          if(cb.checked) state.selected.add(text);
+          else state.selected.delete(text);
+          updateLabel();
+          if(onChange) onChange(getSelected());
+        });
+
+        const span = document.createElement("span");
+        span.textContent = text;
+
+        label.appendChild(cb);
+        label.appendChild(span);
+        optsContainer.appendChild(label);
+      });
+
+      emptyEl.style.display = visibleCount ? "none" : "block";
+    }
+
+    function getSelected(){ return Array.from(state.selected); }
+
+    function setOptions(newOptions){
+      state.options = [...(newOptions || [])];
+      state.selected.clear();
+      searchInput.value = "";
+      renderOptions();
+      updateLabel();
+      if(onChange) onChange(getSelected());
+    }
+
+    function setDisabled(flag){
+      if(flag){
+        root.classList.add("ms-disabled");
+        root.classList.remove("open");
+      }else{
+        root.classList.remove("ms-disabled");
+      }
+    }
+
+    function clear(){
+      state.selected.clear();
+      searchInput.value = "";
+      renderOptions();
+      updateLabel();
+      if(onChange) onChange(getSelected());
+    }
+
+    toggle.addEventListener("click",()=>{
+      if(root.classList.contains("ms-disabled")) return;
+      const isOpen = root.classList.toggle("open");
+      if(isOpen){
+        searchInput.value = "";
+        renderOptions();
+        searchInput.focus();
+      }
+    });
+
+    searchInput.addEventListener("input",renderOptions);
+
+    document.addEventListener("click",(e)=>{
+      if(!root.contains(e.target)){
+        root.classList.remove("open");
+      }
+    });
+
+    setDisabled(!!disabled);
+    renderOptions();
+    updateLabel();
+
+    return {getSelected,setOptions,setDisabled,clear};
+  }
+
+  function detectMediaColumn(fields){
+    if(!fields || !fields.length) return COL_MEDIA_PREF;
+    const preferredNorm = norm(COL_MEDIA_PREF);
+    let found = fields.find(f=>norm(f)===preferredNorm);
+    if(found) return found;
+
+    const candidates = fields.filter(f=>{
+      const s = norm(f);
+      return s.includes("MEDIA") || s.includes("SOURCING");
+    });
+    return candidates[0] || COL_MEDIA_PREF;
+  }
+
+  function detectJobColumns(fields){
+    if(!fields || !fields.length) return {parent:COL_JOB_PARENT,type:COL_JOB_TYPE};
+    let parent = null;
+    let type   = null;
+
+    for(const f of fields){
+      const s = norm(f);
+      if(!parent && s.includes("JOB") && s.includes("PARENT")) parent = f;
+      if(!type && s.includes("JOB") && s.includes("TYPE")) type = f;
+    }
+
+    return { parent: parent || COL_JOB_PARENT, type: type || COL_JOB_TYPE };
+  }
+
+  function detectCostColumn(fields){
+    if(!fields || !fields.length) return COL_COST_PER_APP;
+    const target = "COST PER APPLICANT";
+    let found = fields.find(f=>norm(f)===target);
+    if(found) return found;
+
+    found = fields.find(f=>{
+      const s = norm(f);
+      return s.includes("COST") && s.includes("APPLICANT");
+    });
+    return found || COL_COST_PER_APP;
+  }
+
+  function buildProvKotaMap(){
+    provKotaMap.clear();
+    rawRows.forEach(row=>{
+      const p = row[COL_PROV];
+      const k = row[COL_KOTA];
+      if(!p || !k) return;
+      const provStr = String(p);
+      if(!provKotaMap.has(provStr)) provKotaMap.set(provStr,new Set());
+      provKotaMap.get(provStr).add(String(k));
+    });
+  }
+
+  function buildJobParentTypeMap(){
+    jobParentTypeMap.clear();
+    rawRows.forEach(row=>{
+      const jp = row[COL_JOB_PARENT];
+      const jt = row[COL_JOB_TYPE];
+      if(!jp || !jt) return;
+      const parentStr = String(jp);
+      if(!jobParentTypeMap.has(parentStr)) jobParentTypeMap.set(parentStr,new Set());
+      jobParentTypeMap.get(parentStr).add(String(jt));
+    });
+  }
+
+  // Map untuk Sourcing Analyst (kolom V & W)
+  function buildSaProvKotaMap(){
+    saProvKotaMap.clear();
+    rawRows.forEach(row=>{
+      const p = row[COL_SA_PROV];
+      const k = row[COL_SA_KOTA];
+      if(!p || !k) return;
+      const provStr = String(p);
+      if(!saProvKotaMap.has(provStr)) saProvKotaMap.set(provStr,new Set());
+      saProvKotaMap.get(provStr).add(String(k));
+    });
+  }
+
+  function updateKotaOptionsByProv(selectedProv){
+    if(!msKota) return;
+    if(!selectedProv || !selectedProv.length){
+      msKota.setOptions([]);
+      msKota.setDisabled(true);
+      return;
+    }
+    const citySet = new Set();
+    selectedProv.forEach(p=>{
+      const s = provKotaMap.get(p);
+      if(s) s.forEach(c=>citySet.add(c));
+    });
+    const cityList = uniqueSorted(Array.from(citySet));
+    msKota.setOptions(cityList);
+    msKota.setDisabled(false);
+  }
+
+  function updateJobTypeOptionsByParent(selectedParents){
+    if(!msJobType) return;
+    if(!selectedParents || !selectedParents.length){
+      msJobType.setOptions([]);
+      msJobType.setDisabled(true);
+      return;
+    }
+    const typeSet = new Set();
+    selectedParents.forEach(p=>{
+      const s = jobParentTypeMap.get(p);
+      if(s) s.forEach(t=>typeSet.add(t));
+    });
+    const typeList = uniqueSorted(Array.from(typeSet));
+    msJobType.setOptions(typeList);
+    msJobType.setDisabled(false);
+  }
+
+  function updateSaKotaOptions(selectedProv){
+    if(!msSaKota) return;
+    if(!selectedProv || !selectedProv.length){
+      msSaKota.setOptions([]);
+      msSaKota.setDisabled(true);
+      return;
+    }
+    const citySet = new Set();
+    selectedProv.forEach(p=>{
+      const s = saProvKotaMap.get(p);
+      if(s) s.forEach(c=>citySet.add(c));
+    });
+    const cityList = uniqueSorted(Array.from(citySet));
+    msSaKota.setOptions(cityList);
+    msSaKota.setDisabled(false);
+  }
+
+  function initFilters(){
+    buildProvKotaMap();
+    buildJobParentTypeMap();
+
+    const provVals      = uniqueSorted(Array.from(provKotaMap.keys()));
+    const cycleVals     = uniqueSorted(rawRows.map(r => r[COL_CYCLE]));
+    const periodeVals   = uniqueSorted(rawRows.map(r => r[COL_PERIODE]));
+    const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
+
+    msProv = createMultiSelect("ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
+      updateKotaOptionsByProv(sel);
+      updateAllTables();
+    });
+    msKota = createMultiSelect("ms-kota",[], "Semua kota di provinsi ini",true,()=>{
+      updateAllTables();
+    });
+    msCycle = createMultiSelect("ms-cycle",cycleVals,"Semua Cycle",false,()=>{
+      updateAllTables();
+    });
+    msPeriode = createMultiSelect("ms-periode",periodeVals,"Semua Periode",false,()=>{
+      updateAllTables();
+    });
+
+    msJobParent = createMultiSelect("ms-job-parent",jobParentVals,"Semua Job Parent",false,(sel)=>{
+      updateJobTypeOptionsByParent(sel);
+      updateAllTables();
+    });
+    msJobType = createMultiSelect("ms-job-type",[], "Semua Job Type",true,()=>{
+      updateAllTables();
+    });
+  }
+
+  function initSourcingAnalystFilters(){
+    buildSaProvKotaMap();
+    const provVals = uniqueSorted(Array.from(saProvKotaMap.keys()));
+
+    msSaProv = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
+      updateSaKotaOptions(sel);
+      updateSourcingAnalystTable();
+    });
+    msSaKota = createMultiSelect("sa-ms-kota",[], "Semua kota di provinsi ini",true,()=>{
+      updateSourcingAnalystTable();
+    });
+  }
+
+  function clearFilters(){
+    if(msProv)      msProv.clear();
+    if(msCycle)     msCycle.clear();
+    if(msPeriode)   msPeriode.clear();
+    if(msKota){
+      msKota.setOptions([]);
+      msKota.setDisabled(true);
+    }
+    if(msJobParent) msJobParent.clear();
+    if(msJobType){
+      msJobType.setOptions([]);
+      msJobType.setDisabled(true);
+    }
+    updateAllTables();
+  }
+
+  function clearSaFilters(){
+    if(msSaProv) msSaProv.clear();
+    if(msSaKota){
+      msSaKota.setOptions([]);
+      msSaKota.setDisabled(true);
+    }
+    updateSourcingAnalystTable();
+  }
+
+  function getFilteredRows(){
+    const provSel      = new Set(msProv ? msProv.getSelected()      : []);
+    const kotaSel      = new Set(msKota ? msKota.getSelected()      : []);
+    const cycleSel     = new Set(msCycle ? msCycle.getSelected()    : []);
+    const periodeSel   = new Set(msPeriode ? msPeriode.getSelected():[]);
+    const jobParentSel = new Set(msJobParent ? msJobParent.getSelected():[]);
+    const jobTypeSel   = new Set(msJobType ? msJobType.getSelected():[]);
+
+    return rawRows.filter(row=>{
+      const rowProv      = String(row[COL_PROV] ?? "");
+      const rowKota      = String(row[COL_KOTA] ?? "");
+      const rowCycle     = String(row[COL_CYCLE] ?? "");
+      const rowPeriode   = String(row[COL_PERIODE] ?? "");
+      const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
+      const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
+
+      if(provSel.size      && !provSel.has(rowProv)) return false;
+      if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
+      if(cycleSel.size     && !cycleSel.has(rowCycle)) return false;
+      if(periodeSel.size   && !periodeSel.has(rowPeriode)) return false;
+      if(jobParentSel.size && !jobParentSel.has(rowJobParent)) return false;
+      if(jobTypeSel.size   && !jobTypeSel.has(rowJobType)) return false;
+
+      return true;
+    });
+  }
+
+  // Filter khusus Sourcing Analyst (Provinsi/Kota kolom V & W)
+  function getSourcingAnalystFilteredRows(){
+    const provSel = new Set(msSaProv ? msSaProv.getSelected() : []);
+    const kotaSel = new Set(msSaKota ? msSaKota.getSelected() : []);
+
+    return rawRows.filter(row=>{
+      const rowProv = String(row[COL_SA_PROV] ?? "");
+      const rowKota = String(row[COL_SA_KOTA] ?? "");
+      if(provSel.size && !provSel.has(rowProv)) return false;
+      if(kotaSel.size && !kotaSel.has(rowKota)) return false;
+      return true;
+    });
+  }
+
+  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali (dashboard utama)
+  function isNoFilterActive(){
+    const provSel      = msProv      ? msProv.getSelected()      : [];
+    const kotaSel      = msKota      ? msKota.getSelected()      : [];
+    const cycleSel     = msCycle     ? msCycle.getSelected()     : [];
+    const periodeSel   = msPeriode   ? msPeriode.getSelected()   : [];
+    const jobParentSel = msJobParent ? msJobParent.getSelected() : [];
+    const jobTypeSel   = msJobType   ? msJobType.getSelected()   : [];
+
+    return (
+      provSel.length      === 0 &&
+      kotaSel.length      === 0 &&
+      cycleSel.length     === 0 &&
+      periodeSel.length   === 0 &&
+      jobParentSel.length === 0 &&
+      jobTypeSel.length   === 0
+    );
+  }
+
+  function aggregateByFixedList(rows,dimCol,fixedList,withLainnya){
+    const result = fixedList.map(name=>({name,valid:0,buffer:0}));
+    const idxMap = new Map();
+    fixedList.forEach((name,i)=>{
+      idxMap.set(name,i);
+      idxMap.set(norm(name),i);
+    });
+
+    let lainnya = {name:LABEL_LAINNYA,valid:0,buffer:0};
+
+    rows.forEach(row=>{
+      const keyRaw = row[dimCol];
+      if(!keyRaw) return;
+      const keyStr = String(keyRaw);
+      const keyNorm = norm(keyStr);
+      let idx = idxMap.get(keyStr);
+      if(idx === undefined) idx = idxMap.get(keyNorm);
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      if(idx === undefined){
+        if(withLainnya){
+          lainnya.valid  += valid;
+          lainnya.buffer += buffer;
+        }
+        return;
+      }
+
+      result[idx].valid  += valid;
+      result[idx].buffer += buffer;
+    });
+
+    if(withLainnya){
+      result.push(lainnya);
+    }
+
+    return result;
+  }
+
+  // AGREGASI PROVINSI DINAMIS: hanya tampilkan provinsi yang punya Applicant Valid atau Buffer (>0)
+  function aggregateProvDynamic(rows){
+    const map = new Map();
+
+    rows.forEach(row=>{
+      const prov = row[COL_PROV];
+      if(!prov) return;
+      const key = String(prov);
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      if(!map.has(key)){
+        map.set(key,{name:key,valid:0,buffer:0});
+      }
+      const obj = map.get(key);
+      obj.valid  += valid;
+      obj.buffer += buffer;
+    });
+
+    const res = Array.from(map.values()).filter(r => (r.valid || r.buffer));
+    res.sort((a,b)=>String(a.name).localeCompare(String(b.name),"id"));
+    return res;
+  }
+
+  /********** LOGIKA KATEGORI METODE (OFFLINE / ONLINE PORTAL / ONLINE MEDSOS / LAINNYA) **********/
+  function getMethodCategory(row){
+    const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+    const metodeText = norm(row[COL_METODE] ?? "");
+    const combined   = (mediaText + " " + metodeText).trim();
+
+    // 1) Langsung dari kolom "MEDIA SOURCING" (AG)
+    if(mediaText.includes("OFFLINE")) return "OFFLINE";
+    if(mediaText.includes("ONLINE - JOB PORTAL")) return "ONLINE - JOB PORTAL";
+    if(mediaText.includes("ONLINE - MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
+    if(mediaText.includes("ONLINE JOB PORTAL")) return "ONLINE - JOB PORTAL";
+    if(mediaText.includes("ONLINE MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
+
+    // 2) Fallback dari teks gabungan (AG + AF)
+    const text = combined;
+
+    const offlineTokens = [
+      "OFFLINE","WALK IN","WALKIN","JOB FAIR","CAMPUS HIRING","CAMPUS",
+      "BALAI LATIHAN KERJA","BALAI LATIAN"," BLK","BROSUR","BANNER","SPANDUK","FLYER",
+      "DISNAKER","DROP CV","FREELANCE RECRUITER","FREELANCE REC",
+      "KOMUNITAS INFORMAL","REFERENSI CLIENT","REF CLIENT",
+      "REFERENSI TEMAN","REF TEMAN","REFERENSI KELUARGA","REFERENSI KOMUNITAS",
+      "SCHOOL HIRING","SCHOOL"
+    ];
+
+    const portalTokens = [
+      "GLINTS","HIRED TODAY","INDEED","JOBSTREET EXPRESS","JOB STREET EXPRESS",
+      "JOBSTREET","JOB STREET","KARIRHUB","KARIR HUB","KITA LULUS","KITALULUS",
+      "LUMINA","PINTARNYA","PORTAL"
+    ];
+
+    const mediaTokens = [
+      "FACEBOOK"," FB","FLK","INSTAGRAM"," IG","IG ","LINKEDIN","TIKTOK"," TT",
+      "WHATSAPP"," WA ","WA.","WA/","MEDIA CHAT","CHAT WA","TELEGRAM","TWITTER",
+      "MEDSOS","MEDIA SOSIAL","SIM TALENT SEARCH","SIM TALENT","SIMTALENT"
+    ];
+
+    if(offlineTokens.some(t=>text.includes(t))) return "OFFLINE";
+    if(portalTokens.some(t=>text.includes(t)))  return "ONLINE - JOB PORTAL";
+    if(mediaTokens.some(t=>text.includes(t)))   return "ONLINE - MEDIA SOSIAL";
+
+    if(text.includes("ONLINE")) return "ONLINE - MEDIA SOSIAL";
+
+    return "LAINNYA";
+  }
+
+  function aggregateMetodeSmart(rows){
+    const buckets = {
+      "OFFLINE": {name:"OFFLINE",valid:0,buffer:0},
+      "ONLINE - MEDIA SOSIAL": {name:"ONLINE - MEDIA SOSIAL",valid:0,buffer:0},
+      "ONLINE - JOB PORTAL": {name:"ONLINE - JOB PORTAL",valid:0,buffer:0},
+      "LAINNYA": {name:LABEL_LAINNYA,valid:0,buffer:0}
+    };
+
+    rows.forEach(row=>{
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const cat = getMethodCategory(row);
+      const bucket = buckets[cat] || buckets["LAINNYA"];
+      bucket.valid  += valid;
+      bucket.buffer += buffer;
+    });
+
+    return [
+      buckets["OFFLINE"],
+      buckets["ONLINE - MEDIA SOSIAL"],
+      buckets["ONLINE - JOB PORTAL"],
+      buckets["LAINNYA"]
+    ];
+  }
+
+  /********** TABEL MEDIA SOSIAL (hanya ONLINE - MEDIA SOSIAL, TANPA LAINNYA) **********/
+  function aggregateMediaSocial(rows){
+    const map = new Map();
+    FIXED_MEDIA_LIST.forEach(name=>{
+      map.set(name,{name,valid:0,buffer:0});
+    });
+
+    const tokenMap = [
+      {token:"FACEBOOK",label:"Facebook"},
+      {token:" FLK",label:"FLK"},
+      {token:"FLK ",label:"FLK"},
+      {token:"INSTAGRAM",label:"Instagram"},
+      {token:" IG",label:"Instagram"},
+      {token:"IG ",label:"Instagram"},
+      {token:"LINKEDIN",label:"Linkedin"},
+      {token:"SIM TALENT SEARCH",label:"SIM Talent Search"},
+      {token:"SIM TALENT",label:"SIM Talent Search"},
+      {token:"SIMTALENT",label:"SIM Talent Search"},
+      {token:"TELEGRAM",label:"Telegram"},
+      {token:"TIKTOK",label:"Tiktok"},
+      {token:" TT",label:"Tiktok"},
+      {token:"TWITTER",label:"Twitter"},
+      // WA / chat
+      {token:"WHATSAPP",label:"Whatsapp / Media Chat"},
+      {token:" WA ",label:"Whatsapp / Media Chat"},
+      {token:"WA.",label:"Whatsapp / Media Chat"},
+      {token:"WA/",label:"Whatsapp / Media Chat"},
+      {token:"MEDIA CHAT",label:"Whatsapp / Media Chat"},
+      {token:"CHAT WA",label:"Whatsapp / Media Chat"}
+    ];
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== "ONLINE - MEDIA SOSIAL") return;
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+      const metodeText = norm(row[COL_METODE] ?? "");
+      const text = (mediaText + " " + metodeText).trim();
+      if(!text) return;
+
+      let label = null;
+      for(const m of tokenMap){
+        if(text.includes(m.token)){
+          label = m.label;
+          break;
+        }
+      }
+      if(!label) return; // tidak match media apa pun → skip
+
+      const item = map.get(label);
+      if(!item) return;
+      item.valid  += valid;
+      item.buffer += buffer;
+    });
+
+    return FIXED_MEDIA_LIST.map(name=>map.get(name));
+  }
+
+  /********** TABEL JOB PORTAL (hanya ONLINE - JOB PORTAL, TANPA LAINNYA) **********/
+  function aggregateJobPortal(rows){
+    const map = new Map();
+    FIXED_PORTAL_LIST.forEach(name=>{
+      map.set(name,{name,valid:0,buffer:0});
+    });
+
+    const tokenMap = [
+      {token:"GLINTS",label:"Glints"},
+      {token:"HIRED TODAY",label:"Hired Today"},
+      {token:"INDEED",label:"Indeed"},
+      {token:"JOBSTREET EXPRESS",label:"Jobstreet Express"},
+      {token:"JOB STREET EXPRESS",label:"Jobstreet Express"},
+      {token:"JOBSTREET",label:"JobStreet"},
+      {token:"JOB STREET",label:"JobStreet"},
+      {token:"KARIRHUB",label:"KarirHub"},
+      {token:"KARIR HUB",label:"KarirHub"},
+      {token:"KITA LULUS",label:"KitaLulus"},
+      {token:"KITALULUS",label:"KitaLulus"},
+      {token:"LUMINA",label:"Lumina"},
+      {token:"PINTARNYA",label:"Pintarnya"}
+    ];
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== "ONLINE - JOB PORTAL") return;
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+      const metodeText = norm(row[COL_METODE] ?? "");
+      const text = (mediaText + " " + metodeText).trim();
+      if(!text) return;
+
+      let label = null;
+      for(const m of tokenMap){
+        if(text.includes(m.token)){
+          label = m.label;
+          break;
+        }
+      }
+      if(!label) return; // tidak match portal apa pun → skip
+
+      const item = map.get(label);
+      if(!item) return;
+      item.valid  += valid;
+      item.buffer += buffer;
+    });
+
+    return FIXED_PORTAL_LIST.map(name=>map.get(name));
+  }
+
+  /********** TABEL OFFLINE (hanya OFFLINE, TANPA LAINNYA) **********/
+  function aggregateOffline(rows){
+    const map = new Map();
+    FIXED_OFFLINE_LIST.forEach(name=>{
+      map.set(name,{name,valid:0,buffer:0});
+    });
+
+    const tokenMap = [
+      // Academy/Training/Seminar
+      {token:"ACADEMY",label:"Academy/Training/Seminar"},
+      {token:"TRAINING",label:"Academy/Training/Seminar"},
+      {token:"SEMINAR",label:"Academy/Training/Seminar"},
+
+      // BLK
+      {token:"BALAI LATIHAN KERJA",label:"Balai Latian Kerja (BLK)"},
+      {token:"BALAI LATIAN",label:"Balai Latian Kerja (BLK)"},
+      {token:" BLK",label:"Balai Latian Kerja (BLK)"},
+
+      // Brosur/Banner/Spanduk/Flyer
+      {token:"BROSUR",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"BANNER",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"SPANDUK",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"FLYER",label:"Brosur/Banner/Spanduk/Flyer"},
+
+      // Campus Hiring
+      {token:"CAMPUS HIRING",label:"Campus Hiring"},
+      {token:"CAMPUS",label:"Campus Hiring"},
+
+      // Disnaker
+      {token:"DISNAKER",label:"Disnaker"},
+
+      // Drop CV
+      {token:"DROP CV",label:"Drop CV"},
+
+      // Freelance Recruiter
+      {token:"FREELANCE RECRUITER",label:"Freelance Recruiter"},
+      {token:"FREELANCE REC",label:"Freelance Recruiter"},
+
+      // Job Fair
+      {token:"JOB FAIR",label:"Job Fair"},
+
+      // Komunitas Informal
+      {token:"KOMUNITAS INFORMAL",label:"Komunitas Informal"},
+
+      // Referensi Client
+      {token:"REFERENSI CLIENT",label:"Referensi Client"},
+      {token:"REF CLIENT",label:"Referensi Client"},
+
+      // Referensi Teman/Keluarga/Komunitas
+      {token:"REFERENSI TEMAN",label:"Referensi Teman/Keluarga/Komunitas"},
+      {token:"REF TEMAN",label:"Referensi Teman/Keluarga/Komunitas"},
+      {token:"REFERENSI KELUARGA",label:"Referensi Teman/Keluarga/Komunitas"},
+      {token:"REFERENSI KOMUNITAS",label:"Referensi Teman/Keluarga/Komunitas"},
+
+      // School Hiring
+      {token:"SCHOOL HIRING",label:"School Hiring"},
+      {token:"SCHOOL",label:"School Hiring"},
+
+      // Walk In Interview (WI)
+      {token:"WALK IN",label:"Walk In Interview (WI)"},
+      {token:"WALKIN",label:"Walk In Interview (WI)"},
+      {token:" WI",label:"Walk In Interview (WI)"}
+    ];
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== "OFFLINE") return;
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+      const metodeText = norm(row[COL_METODE] ?? "");
+      const text = (mediaText + " " + metodeText).trim();
+      if(!text) return;
+
+      let label = null;
+      for(const m of tokenMap){
+        if(text.includes(m.token)){
+          label = m.label;
+          break;
+        }
+      }
+      if(!label) return; // tidak match aktivitas offline → skip
+
+      const item = map.get(label);
+      if(!item) return;
+      item.valid  += valid;
+      item.buffer += buffer;
+    });
+
+    return FIXED_OFFLINE_LIST.map(name=>map.get(name));
+  }
+
+  function parseMonthIndex(str){
+    if(!str) return null;
+    const s = String(str).toLowerCase();
+
+    const monthNames = [
+      {idx:1,keys:["jan","januari"]},
+      {idx:2,keys:["feb","peb","febuari","februari"]},
+      {idx:3,keys:["mar","maret"]},
+      {idx:4,keys:["apr","april"]},
+      {idx:5,keys:["mei","may"]},
+      {idx:6,keys:["jun","juni","june"]},
+      {idx:7,keys:["jul","juli","july"]},
+      {idx:8,keys:["agu","agust","aug","agustus","august"]},
+      {idx:9,keys:["sep","sept","september"]},
+      {idx:10,keys:["okt","oct","oktober","october"]},
+      {idx:11,keys:["nov","november"]},
+      {idx:12,keys:["des","dec","desember","december"]}
+    ];
+
+    for(const m of monthNames){
+      if(m.keys.some(k=>s.includes(k))) return m.idx;
+    }
+
+    let m = s.match(/(\d{4})[-/](\d{1,2})(?:[-/]\d{1,2})?/);
+    if(m){
+      const month = Number(m[2]);
+      if(month>=1 && month<=12) return month;
+    }
+
+    m = s.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+    if(m){
+      const a = Number(m[1]);
+      const b = Number(m[2]);
+      let month = null;
+      if(a>12 && b>=1 && b<=12) month = b;
+      else if(b>12 && a>=1 && a<=12) month = a;
+      else if(a>=1 && a<=12) month = a;
+      else if(b>=1 && b<=12) month = b;
+      if(month && month>=1 && month<=12) return month;
+    }
+
+    return null;
+  }
+
+  function aggregateMonthly(rows){
+    const arr = MONTHS.map(m=>({idx:m.idx,name:m.label,valid:0,buffer:0}));
+    const idxMap = new Map();
+    arr.forEach((m,i)=>idxMap.set(m.idx,i));
+
+    rows.forEach(row=>{
+      const idx = parseMonthIndex(row[COL_PERIODE]);
+      if(!idx) return;
+      const i = idxMap.get(idx);
+      if(i === undefined) return;
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+      arr[i].valid  += valid;
+      arr[i].buffer += buffer;
+    });
+
+    return arr;
+  }
+
+  function updateChart(rows){
+    const container = $("chart-body");
+    if(!container) return;
+    container.innerHTML = "";
+
+    const monthly = aggregateMonthly(rows);
+    let maxVal = 0;
+    monthly.forEach(m=>{
+      maxVal = Math.max(maxVal,m.valid,m.buffer);
+    });
+    if(maxVal === 0) maxVal = 1;
+
+    monthly.forEach(m=>{
+      const col = document.createElement("div");
+      col.className = "chart-col";
+
+      const barsBox = document.createElement("div");
+      barsBox.className = "chart-col-bars";
+
+      const barValid = document.createElement("div");
+      barValid.className = "chart-bar-vert bar-valid";
+      barValid.style.height = (m.valid / maxVal * 100) + "%";
+
+      const barBuffer = document.createElement("div");
+      barBuffer.className = "chart-bar-vert bar-buffer";
+      barBuffer.style.height = (m.buffer / maxVal * 100) + "%";
+
+      barsBox.appendChild(barValid);
+      barsBox.appendChild(barBuffer);
+
+      const valuesBox = document.createElement("div");
+      valuesBox.className = "chart-col-values";
+      valuesBox.innerHTML =
+        `<div>${numberFmt.format(m.valid)}</div><div>${numberFmt.format(m.buffer)}</div>`;
+
+      const label = document.createElement("div");
+      label.className = "chart-col-label";
+      label.textContent = m.name;
+
+      col.appendChild(barsBox);
+      col.appendChild(valuesBox);
+      col.appendChild(label);
+      container.appendChild(col);
+    });
+
+    const totalValid = monthly.reduce((s,m)=>s+m.valid,0);
+    const totalBuffer = monthly.reduce((s,m)=>s+m.buffer,0);
+    $("chart-summary-text").textContent =
+      `Total Valid: ${numberFmt.format(totalValid)} · Total Buffer: ${numberFmt.format(totalBuffer)} (berdasarkan PERIODE PELAMAR & filter aktif)`;
+  }
+
+  function renderTable(tbodyId,rows,totalLabel){
+    const tbody = $(tbodyId);
+    tbody.innerHTML = "";
+
+    let grandValid = 0;
+    let grandBuffer = 0;
+
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      if(r.valid === 0 && r.buffer === 0){
+        tr.classList.add("muted-row");
+      }
+
+      const tdLabel = document.createElement("td");
+      tdLabel.textContent = r.name;
+      tdLabel.className = "col-label";
+
+      const tdValid = document.createElement("td");
+      tdValid.textContent = numberFmt.format(r.valid || 0);
+      tdValid.className = "col-number";
+
+      const tdBuffer = document.createElement("td");
+      tdBuffer.textContent = numberFmt.format(r.buffer || 0);
+      tdBuffer.className = "col-number";
+
+      tr.appendChild(tdLabel);
+      tr.appendChild(tdValid);
+      tr.appendChild(tdBuffer);
+      tbody.appendChild(tr);
+
+      grandValid += (r.valid || 0);
+      grandBuffer += (r.buffer || 0);
+    });
+
+    const trTotal = document.createElement("tr");
+    trTotal.className = "total-row";
+
+    const tdLabelTotal = document.createElement("td");
+    tdLabelTotal.textContent = totalLabel;
+    tdLabelTotal.className = "col-label";
+
+    const tdValidTotal = document.createElement("td");
+    tdValidTotal.textContent = numberFmt.format(grandValid);
+    tdValidTotal.className = "col-number";
+
+    const tdBufferTotal = document.createElement("td");
+    tdBufferTotal.textContent = numberFmt.format(grandBuffer);
+    tdBufferTotal.className = "col-number";
+
+    trTotal.appendChild(tdLabelTotal);
+    trTotal.appendChild(tdValidTotal);
+    trTotal.appendChild(tdBufferTotal);
+    tbody.appendChild(trTotal);
+
+    return {grandValid,grandBuffer};
+  }
+
+  function updateSummary(filtered){
+    let totalValid = 0;
+    let totalBuffer = 0;
+    let maleValid = 0, maleBuffer = 0;
+    let femaleValid = 0, femaleBuffer = 0;
+
+    filtered.forEach(row=>{
+      const valid = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(valid) totalValid += valid;
+      if(buffer) totalBuffer += buffer;
+
+      const g = norm(row[COL_GENDER]);
+      if(g.includes("LAKI") || g === "L" || g === "LAKI-LAKI"){
+        maleValid  += valid;
+        maleBuffer += buffer;
+      }else if(g.includes("PEREMPUAN") || g === "P" || g === "PEREMPUAN"){
+        femaleValid  += valid;
+        femaleBuffer += buffer;
+      }
+    });
+
+    $("sum-male-valid").textContent    = numberFmt.format(maleValid);
+    $("sum-male-buffer").textContent   = numberFmt.format(maleBuffer);
+    $("sum-female-valid").textContent  = numberFmt.format(femaleValid);
+    $("sum-female-buffer").textContent = numberFmt.format(femaleBuffer);
+    $("sum-total-valid").textContent   = numberFmt.format(totalValid);
+    $("sum-total-buffer").textContent  = numberFmt.format(totalBuffer);
+  }
+
+  function updateAllTables(){
+    const filtered = getFilteredRows();
+    const totalRows = filtered.length;
+    const noFilter = isNoFilterActive();
+
+    updateSummary(filtered);
+    updateChart(filtered);
+
+    // PROVINSI
+    const provAgg = noFilter
+      ? aggregateByFixedList(filtered,COL_PROV,FIXED_PROV_LIST,false)
+      : aggregateProvDynamic(filtered);
+
+    const totalProv = renderTable("tbl-prov-body",provAgg,"GRAND TOTAL PROVINSI");
+    $("status-prov").textContent =
+      `Ditampilkan ${provAgg.length} provinsi · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalProv.grandValid)}, Buffer: ${numberFmt.format(totalProv.grandBuffer)}`;
+
+    // METODE SOURCING (MEDIA SOURCING)
+    const metodeAgg = aggregateMetodeSmart(filtered);
+    const totalMetode = renderTable("tbl-metode-body",metodeAgg,"GRAND TOTAL METODE");
+    $("status-metode").textContent =
+      `Ditampilkan ${metodeAgg.length} metode · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalMetode.grandValid)}, Buffer: ${numberFmt.format(totalMetode.grandBuffer)}`;
+
+    // MEDIA SOSIAL (ONLINE - MEDIA SOSIAL) — TANPA LAINNYA
+    const mediaAgg = aggregateMediaSocial(filtered);
+    const totalMedia = renderTable("tbl-media-body",mediaAgg,"GRAND TOTAL MEDIA SOSIAL");
+    $("status-media").textContent =
+      `Ditampilkan ${mediaAgg.length} media · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalMedia.grandValid)}, Buffer: ${numberFmt.format(totalMedia.grandBuffer)}`;
+
+    // PENDIDIKAN — TANPA LAINNYA
+    const eduAgg = aggregateByFixedList(filtered,COL_EDU,FIXED_EDU_LIST,false);
+    const totalEdu = renderTable("tbl-edu-body",eduAgg,"GRAND TOTAL PENDIDIKAN");
+    $("status-edu").textContent =
+      `Ditampilkan ${eduAgg.length} level pendidikan · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalEdu.grandValid)}, Buffer: ${numberFmt.format(totalEdu.grandBuffer)}`;
+
+    // JOB PORTAL (ONLINE - JOB PORTAL) — TANPA LAINNYA
+    const portalAgg = aggregateJobPortal(filtered);
+    const totalPortal = renderTable("tbl-portal-body",portalAgg,"GRAND TOTAL JOB PORTAL");
+    $("status-portal").textContent =
+      `Ditampilkan ${portalAgg.length} portal · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalPortal.grandValid)}, Buffer: ${numberFmt.format(totalPortal.grandBuffer)}`;
+
+    // OFFLINE — TANPA LAINNYA
+    const offlineAgg = aggregateOffline(filtered);
+    const totalOffline = renderTable("tbl-offline-body",offlineAgg,"GRAND TOTAL OFFLINE");
+    $("status-offline").textContent =
+      `Ditampilkan ${offlineAgg.length} aktivitas · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalOffline.grandValid)}, Buffer: ${numberFmt.format(totalOffline.grandBuffer)}`;
+  }
+
+  /********** LOGIKA COST PER APPLICANT + JOB PARENT TERBANYAK (SOURCING ANALYST) **********/
+  function parseCostValue(raw){
+    if(raw == null) return 0;
+    const str = String(raw).trim();
+    if(!str) return 0;
+    // Hilangkan karakter non-angka kecuali . , -
+    let cleaned = str.replace(/[^\d,.-]/g,"");
+    // Asumsi format Indonesia: titik = ribuan, koma = desimal
+    cleaned = cleaned.replace(/\./g,"").replace(/,/g,".");
+    const num = Number(cleaned);
+    return isNaN(num) ? 0 : num;
+  }
+
+  function aggregateCostByMethodAndTopJobParent(rows){
+    const buckets = {
+      "OFFLINE": {
+        name:"Offline",
+        totalCost:0,
+        count:0,
+        jobParentCounts:new Map()
+      },
+      "ONLINE - JOB PORTAL": {
+        name:"Online - Job Portal",
+        totalCost:0,
+        count:0,
+        jobParentCounts:new Map()
+      },
+      "ONLINE - MEDIA SOSIAL": {
+        name:"Online - Media Sosial",
+        totalCost:0,
+        count:0,
+        jobParentCounts:new Map()
+      }
+    };
+
+    rows.forEach(row=>{
+      const cat = getMethodCategory(row);
+      const bucket = buckets[cat];
+      if(!bucket) return; // hanya 3 kategori utama yang dianalisa
+
+      const cost = parseCostValue(row[COL_COST_PER_APP]);
+      if(cost <= 0) return; // skip jika tidak ada cost
+
+      bucket.totalCost += cost;
+      bucket.count += 1;
+
+      const jpRaw = row[COL_JOB_PARENT];
+      const jp = jpRaw && String(jpRaw).trim()
+        ? String(jpRaw).trim()
+        : "(Tanpa Job Parent)";
+      const current = bucket.jobParentCounts.get(jp) || 0;
+      bucket.jobParentCounts.set(jp,current+1);
+    });
+
+    function getTopJobParent(map){
+      let bestName = "-";
+      let bestCount = 0;
+      for(const [name,count] of map.entries()){
+        if(count > bestCount){
+          bestCount = count;
+          bestName = name;
+        }
+      }
+      return {name:bestName,count:bestCount};
+    }
+
+    const result = [];
+    ["OFFLINE","ONLINE - JOB PORTAL","ONLINE - MEDIA SOSIAL"].forEach(key=>{
+      const b = buckets[key];
+      const top = getTopJobParent(b.jobParentCounts);
+      result.push({
+        metode: b.name,
+        totalCost: b.totalCost,
+        applicantCount: b.count,
+        avgCost: b.count ? b.totalCost / b.count : 0,
+        topJobParent: top.name,
+        topJobParentCount: top.count
+      });
+    });
+
+    return result;
+  }
+
+  function updateSourcingAnalystTable(){
+    const tbody = $("sa-cost-body");
+    const status = $("sa-status-cost");
+    if(!tbody || !status) return;
+
+    const rows = getSourcingAnalystFilteredRows();
+    const buckets = aggregateCostByMethodAndTopJobParent(rows);
+
+    tbody.innerHTML = "";
+
+    let totalAllCost = 0;
+    let totalAllApplicants = 0;
+
+    buckets.forEach(b=>{
+      const tr = document.createElement("tr");
+      if(b.applicantCount === 0) tr.classList.add("muted-row");
+
+      function addTd(text,cls){
+        const td = document.createElement("td");
+        td.textContent = text;
+        if(cls) td.className = cls;
+        tr.appendChild(td);
+      }
+
+      addTd(b.metode,"col-label");
+      addTd(numberFmt.format(b.applicantCount || 0),"col-number");
+      addTd(b.totalCost ? currencyFmt.format(b.totalCost) : "-","col-number");
+      addTd(b.avgCost ? currencyFmt.format(b.avgCost) : "-","col-number");
+      addTd(b.topJobParent,"col-label");
+      addTd(b.topJobParentCount ? numberFmt.format(b.topJobParentCount) : "0","col-number");
+
+      totalAllCost += b.totalCost || 0;
+      totalAllApplicants += b.applicantCount || 0;
+
+      tbody.appendChild(tr);
+    });
+
+    // GRAND TOTAL row
+    const trTotal = document.createElement("tr");
+    trTotal.className = "total-row";
+
+    const tdLabel = document.createElement("td");
+    tdLabel.textContent = "GRAND TOTAL";
+    tdLabel.className = "col-label";
+    trTotal.appendChild(tdLabel);
+
+    const tdTotalApp = document.createElement("td");
+    tdTotalApp.textContent = numberFmt.format(totalAllApplicants);
+    tdTotalApp.className = "col-number";
+    trTotal.appendChild(tdTotalApp);
+
+    const tdTotalCost = document.createElement("td");
+    tdTotalCost.textContent = totalAllCost ? currencyFmt.format(totalAllCost) : "-";
+    tdTotalCost.className = "col-number";
+    trTotal.appendChild(tdTotalCost);
+
+    const avgAllCost = totalAllApplicants ? totalAllCost / totalAllApplicants : 0;
+    const tdAvgAll = document.createElement("td");
+    tdAvgAll.textContent = avgAllCost ? currencyFmt.format(avgAllCost) : "-";
+    tdAvgAll.className = "col-number";
+    trTotal.appendChild(tdAvgAll);
+
+    const tdEmpty1 = document.createElement("td");
+    tdEmpty1.textContent = "";
+    trTotal.appendChild(tdEmpty1);
+    const tdEmpty2 = document.createElement("td");
+    tdEmpty2.textContent = "";
+    trTotal.appendChild(tdEmpty2);
+
+    tbody.appendChild(trTotal);
+
+    status.textContent =
+      `Ditampilkan 3 metode · ${numberFmt.format(rows.length)} baris terfilter · ` +
+      `Total Applicant: ${numberFmt.format(totalAllApplicants)} · Total Cost: ${totalAllCost ? currencyFmt.format(totalAllCost) : "-"}`;
+  }
+
+  async function loadCsv(){
+    const errBox = $("error-state");
+    errBox.style.display = "none";
+    $("load-state").style.display = "flex";
+
+    try{
+      const res = await fetch(CSV_URL);
+      if(!res.ok){
+        throw new Error("HTTP " + res.status + " " + res.statusText);
+      }
+      const text = await res.text();
+
+      const parsed = Papa.parse(text,{header:true,skipEmptyLines:true});
+      rawRows = parsed.data || [];
+      const fields = parsed.meta && parsed.meta.fields ? parsed.meta.fields : [];
+
+      DETECTED_COL_MEDIA = detectMediaColumn(fields);
+      const jobCols = detectJobColumns(fields);
+      COL_JOB_PARENT = jobCols.parent;
+      COL_JOB_TYPE   = jobCols.type;
+
+      // Kolom V & W untuk Sourcing Analyst (index 21 & 22 jika ada)
+      COL_SA_PROV = fields[21] || COL_PROV;
+      COL_SA_KOTA = fields[22] || COL_KOTA;
+
+      // Cost Per Applicant
+      COL_COST_PER_APP = detectCostColumn(fields);
+
+      $("load-state").style.display = "none";
+
+      if(!rawRows.length){
+        errBox.textContent = "Data kosong atau header kolom belum sesuai dengan konfigurasi.";
+        errBox.style.display = "block";
+        return;
+      }
+
+      // Inisialisasi filter & tabel untuk kedua halaman
+      initFilters();
+      initSourcingAnalystFilters();
+
+      updateAllTables();
+      updateSourcingAnalystTable();
+
+    }catch(e){
+      console.error(e);
+      $("load-state").style.display = "none";
+      errBox.textContent =
+        "Terjadi kesalahan saat memuat data: " + e.message +
+        ". Pastikan link ini bisa dibuka di tab incognito tanpa login.";
+      errBox.style.display = "block";
+    }
+  }
+
+  function switchPage(page){
+    const mainPage = $("page-main");
+    const saPage = $("page-sa");
+    if(!mainPage || !saPage) return;
+
+    if(page === "sa"){
+      mainPage.classList.remove("page-active");
+      saPage.classList.add("page-active");
+    }else{
+      mainPage.classList.add("page-active");
+      saPage.classList.remove("page-active");
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn=>{
+      btn.classList.toggle("active",btn.dataset.page === page);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    const clearBtn = $("clear-filters-btn");
+    if(clearBtn) clearBtn.addEventListener("click",clearFilters);
+
+    const saClearBtn = $("sa-clear-filters-btn");
+    if(saClearBtn) saClearBtn.addEventListener("click",clearSaFilters);
+
+    document.querySelectorAll(".tab-btn").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const page = btn.dataset.page;
+        switchPage(page);
+      });
+    });
+
+    loadCsv();
+  });
+</script>
+</body>
+</html>
