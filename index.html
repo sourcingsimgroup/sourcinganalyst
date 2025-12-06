@@ -1092,7 +1092,7 @@
     </section>
   </div>
 </div>
-
+  
 <script>
   /********** KONFIGURASI URL CSV **********/
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
@@ -1239,7 +1239,6 @@
     // buang simbol selain angka, titik, koma
     s = s.replace(/[^0-9.,]/g,"");
     // asumsikan format Indonesia -> titik pemisah ribuan, koma desimal
-    // hapus semua titik, ganti koma dengan titik
     s = s.replace(/\./g,"").replace(",",".");
     const n = Number(s);
     return isNaN(n) ? 0 : n;
@@ -2212,12 +2211,13 @@
   }
 
   /********** SOURCING ANALYST: AGREGASI PER JOB PARENT × METODE **********/
+  // Rata-rata cost per applicant = NILAI COST TERTINGGI di kombinasi itu (bukan avg matematis)
   function aggregateSaJobParentCost(rows){
     const result = SA_JOB_PARENT_LIST.map(name => ({
       jobParent: name,
-      offline: { count: 0, totalCost: 0, avgCost: 0 },
-      media:   { count: 0, totalCost: 0, avgCost: 0 }, // ONLINE - MEDIA SOSIAL
-      portal:  { count: 0, totalCost: 0, avgCost: 0 }  // ONLINE - JOB PORTAL
+      offline: { count: 0, totalCost: 0, avgCost: 0, maxCost: 0 },
+      media:   { count: 0, totalCost: 0, avgCost: 0, maxCost: 0 }, // ONLINE - MEDIA SOSIAL
+      portal:  { count: 0, totalCost: 0, avgCost: 0, maxCost: 0 }  // ONLINE - JOB PORTAL
     }));
 
     const idxMap = new Map();
@@ -2246,13 +2246,14 @@
       const bucket = result[idx][bucketKey];
       bucket.count += 1;
       bucket.totalCost += cost;
+      if (cost > bucket.maxCost) bucket.maxCost = cost;
     });
 
-    // hitung rata-rata
+    // "Rata-rata" = max cost per kombinasi
     result.forEach(r => {
       ["offline","media","portal"].forEach(k => {
         const b = r[k];
-        b.avgCost = b.count ? (b.totalCost / b.count) : 0;
+        b.avgCost = b.maxCost || 0;
       });
     });
 
@@ -2270,9 +2271,9 @@
     tbody.innerHTML = "";
 
     let grand = {
-      offline: { count:0, totalCost:0 },
-      media:   { count:0, totalCost:0 },
-      portal:  { count:0, totalCost:0 }
+      offline: { count:0, totalCost:0, maxCost:0 },
+      media:   { count:0, totalCost:0, maxCost:0 },
+      portal:  { count:0, totalCost:0, maxCost:0 }
     };
 
     jobRows.forEach(r => {
@@ -2309,13 +2310,18 @@
       addTd(r.portal.avgCost ? currencyFmt.format(r.portal.avgCost) : "-","col-number");
       addTd(r.portal.totalCost ? currencyFmt.format(r.portal.totalCost) : "-","col-number");
 
-      // akumulasi grand total
-      grand.offline.count += r.offline.count || 0;
-      grand.offline.totalCost += r.offline.totalCost || 0;
-      grand.media.count += r.media.count || 0;
-      grand.media.totalCost += r.media.totalCost || 0;
-      grand.portal.count += r.portal.count || 0;
+      // Akumulasi grand total + max cost global per metode
+      grand.offline.count    += r.offline.count || 0;
+      grand.offline.totalCost+= r.offline.totalCost || 0;
+      grand.offline.maxCost   = Math.max(grand.offline.maxCost, r.offline.maxCost || 0);
+
+      grand.media.count      += r.media.count || 0;
+      grand.media.totalCost  += r.media.totalCost || 0;
+      grand.media.maxCost     = Math.max(grand.media.maxCost, r.media.maxCost || 0);
+
+      grand.portal.count     += r.portal.count || 0;
       grand.portal.totalCost += r.portal.totalCost || 0;
+      grand.portal.maxCost    = Math.max(grand.portal.maxCost, r.portal.maxCost || 0);
 
       tbody.appendChild(tr);
     });
@@ -2334,19 +2340,19 @@
     addTdTotal("GRAND TOTAL","col-label");
 
     // OFFLINE
-    const offAvg = grand.offline.count ? grand.offline.totalCost / grand.offline.count : 0;
+    const offAvg = grand.offline.maxCost || 0;
     addTdTotal(numberFmt.format(grand.offline.count),"col-number");
     addTdTotal(offAvg ? currencyFmt.format(offAvg) : "-","col-number");
     addTdTotal(grand.offline.totalCost ? currencyFmt.format(grand.offline.totalCost) : "-","col-number");
 
     // MEDIA
-    const medAvg = grand.media.count ? grand.media.totalCost / grand.media.count : 0;
+    const medAvg = grand.media.maxCost || 0;
     addTdTotal(numberFmt.format(grand.media.count),"col-number");
     addTdTotal(medAvg ? currencyFmt.format(medAvg) : "-","col-number");
     addTdTotal(grand.media.totalCost ? currencyFmt.format(grand.media.totalCost) : "-","col-number");
 
     // PORTAL
-    const porAvg = grand.portal.count ? grand.portal.totalCost / grand.portal.count : 0;
+    const porAvg = grand.portal.maxCost || 0;
     addTdTotal(numberFmt.format(grand.portal.count),"col-number");
     addTdTotal(porAvg ? currencyFmt.format(porAvg) : "-","col-number");
     addTdTotal(grand.portal.totalCost ? currencyFmt.format(grand.portal.totalCost) : "-","col-number");
