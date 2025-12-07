@@ -299,6 +299,8 @@
       display:flex;
       align-items:center;
       gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
     .clear-btn{
@@ -314,6 +316,49 @@
       background:#eef2ff;
       border-color:var(--brand);
       color:var(--brand);
+    }
+
+    /* HAMBURGER FILTER BUTTON (MOBILE/TABLET) */
+    .filter-toggle-btn{
+      display:none;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      font-size:0.75rem;
+      padding:5px 10px;
+      cursor:pointer;
+      color:var(--muted);
+      align-items:center;
+      gap:6px;
+      box-shadow:0 6px 16px rgba(15,23,42,0.06);
+    }
+    .filter-toggle-btn .hamburger-icon{
+      font-size:0.9rem;
+      line-height:1;
+    }
+
+    .filter-body,
+    .sa-filter-body{
+      margin-top:6px;
+    }
+
+    @media (max-width:1024px){
+      .filter-toggle-btn{
+        display:inline-flex;
+      }
+      .filter-body,
+      .sa-filter-body{
+        display:none;
+      }
+      .filter-card.open .filter-body,
+      .sa-filter-card.open .sa-filter-body{
+        display:block;
+      }
+      .filter-card,
+      .sa-filter-card{
+        box-shadow:0 18px 40px rgba(15,23,42,0.12);
+        border-color:rgba(148,163,184,0.4);
+      }
     }
 
     /* Grafik bulanan – VERTIKAL */
@@ -684,6 +729,10 @@
         <div class="card-title-row">
           <div class="card-title">Filter Data Applicant</div>
           <div class="header-right-flex">
+            <button id="filter-toggle-btn" class="filter-toggle-btn" type="button">
+              <span class="hamburger-icon">☰</span>
+              <span>Filter</span>
+            </button>
             <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
           </div>
         </div>
@@ -691,108 +740,111 @@
           Sesuaikan filter di bawah untuk melihat preview analisa. Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
         </div>
 
-        <div class="filters">
-          <div class="filter-group">
-            <label class="filter-label">Provinsi</label>
-            <div class="ms" id="ms-prov">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Semua Provinsi</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada provinsi</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Kota</label>
-            <div class="ms ms-disabled" id="ms-kota">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari kota..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada kota</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Cycle Hired</label>
-            <div class="ms" id="ms-cycle">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Semua Cycle</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari cycle..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada cycle</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Periode Pelamar</label>
-            <div class="ms" id="ms-periode">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Semua Periode</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari periode..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada periode</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Kolom ke-5: Job Parent + Job Type -->
-          <div class="filter-group filter-group-double">
-            <div>
-              <label class="filter-label">Job Parent</label>
-              <div class="ms" id="ms-job-parent">
+        <!-- BODY FILTER (BISA DITUTUP DI MOBILE/TABLET) -->
+        <div class="filter-body">
+          <div class="filters">
+            <div class="filter-group">
+              <label class="filter-label">Provinsi</label>
+              <div class="ms" id="ms-prov">
                 <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Job Parent</span>
+                  <span class="ms-placeholder">Semua Provinsi</span>
                   <span class="ms-counter"></span>
                   <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                  <input class="ms-search" type="text" placeholder="Cari provinsi..." />
                   <div class="ms-options"></div>
-                  <div class="ms-empty">Tidak ada job parent</div>
+                  <div class="ms-empty">Tidak ada provinsi</div>
                 </div>
               </div>
             </div>
-            <div>
-              <label class="filter-label">Job Type</label>
-              <div class="ms ms-disabled" id="ms-job-type">
+
+            <div class="filter-group">
+              <label class="filter-label">Kota</label>
+              <div class="ms ms-disabled" id="ms-kota">
                 <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                  <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
                   <span class="ms-counter"></span>
                   <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari job type..." />
+                  <input class="ms-search" type="text" placeholder="Cari kota..." />
                   <div class="ms-options"></div>
-                  <div class="ms-empty">Tidak ada job type</div>
+                  <div class="ms-empty">Tidak ada kota</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Cycle Hired</label>
+              <div class="ms" id="ms-cycle">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Cycle</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari cycle..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada cycle</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Periode Pelamar</label>
+              <div class="ms" id="ms-periode">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Periode</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari periode..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada periode</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kolom ke-5: Job Parent + Job Type -->
+            <div class="filter-group filter-group-double">
+              <div>
+                <label class="filter-label">Job Parent</label>
+                <div class="ms" id="ms-job-parent">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Semua Job Parent</span>
+                    <span class="ms-counter"></span>
+                    <span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                    <div class="ms-options"></div>
+                    <div class="ms-empty">Tidak ada job parent</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="filter-label">Job Type</label>
+                <div class="ms ms-disabled" id="ms-job-type">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                    <span class="ms-counter"></span>
+                    <span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari job type..." />
+                    <div class="ms-options"></div>
+                    <div class="ms-empty">Tidak ada job type</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="filter-hint">
-          * Klik filter untuk membuka daftar + kolom search. Bisa memilih lebih dari satu nilai di setiap filter. Job Type baru muncul setelah Job Parent dipilih.
+          <div class="filter-hint">
+            * Klik filter untuk membuka daftar + kolom search. Bisa memilih lebih dari satu nilai di setiap filter. Job Type baru muncul setelah Job Parent dipilih.
+          </div>
         </div>
 
         <div id="load-state" class="loading">
@@ -1054,6 +1106,10 @@
         <div class="card-title-row">
           <div class="card-title">Filter Sourcing Analyst</div>
           <div class="header-right-flex">
+            <button id="sa-filter-toggle-btn" class="filter-toggle-btn" type="button">
+              <span class="hamburger-icon">☰</span>
+              <span>Filter</span>
+            </button>
             <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter Sourcing Analyst</button>
             <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
           </div>
@@ -1062,74 +1118,77 @@
           Semua filter mengikuti Provinsi terlebih dahulu. Kota, Job Parent, dan Job Type hanya menampilkan pilihan yang benar-benar ada di kombinasi area tersebut.
         </div>
 
-        <div class="sa-filters">
-          <div class="filter-group">
-            <label class="filter-label">Provinsi</label>
-            <div class="ms" id="sa-ms-prov">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Semua Provinsi</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada provinsi</div>
+        <!-- BODY FILTER SA (BISA DITUTUP DI MOBILE/TABLET) -->
+        <div class="sa-filter-body">
+          <div class="sa-filters">
+            <div class="filter-group">
+              <label class="filter-label">Provinsi</label>
+              <div class="ms" id="sa-ms-prov">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Provinsi</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada provinsi</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Kota</label>
+              <div class="ms ms-disabled" id="sa-ms-kota">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari kota..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada kota</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Job Parent</label>
+              <div class="ms" id="sa-ms-job-parent">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Job Parent</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada job parent</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Job Type</label>
+              <div class="ms ms-disabled" id="sa-ms-job-type">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari job type..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada job type</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="filter-group">
-            <label class="filter-label">Kota</label>
-            <div class="ms ms-disabled" id="sa-ms-kota">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari kota..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada kota</div>
-              </div>
-            </div>
+          <div class="filter-hint">
+            * Semua filter multiple choice. Kota muncul sesuai Provinsi yang dipilih. Job Parent hanya muncul jika tersedia di area (Provinsi + Kota) tersebut. Job Type muncul sesuai Job Parent yang dipilih.
           </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Job Parent</label>
-            <div class="ms" id="sa-ms-job-parent">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Semua Job Parent</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada job parent</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Job Type</label>
-            <div class="ms ms-disabled" id="sa-ms-job-type">
-              <button type="button" class="ms-toggle">
-                <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                <span class="ms-counter"></span>
-                <span class="ms-arrow">▾</span>
-              </button>
-              <div class="ms-panel">
-                <input class="ms-search" type="text" placeholder="Cari job type..." />
-                <div class="ms-options"></div>
-                <div class="ms-empty">Tidak ada job type</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="filter-hint">
-          * Semua filter multiple choice. Kota muncul sesuai Provinsi yang dipilih. Job Parent hanya muncul jika tersedia di area (Provinsi + Kota) tersebut. Job Type muncul sesuai Job Parent yang dipilih.
         </div>
       </section>
 
@@ -1140,7 +1199,6 @@
           <div class="card-tag">Auto generated insight</div>
         </div>
         <p class="card-subtext">
-          Analisa menggunakan data Applicant Valid dan Buffer berdasarkan kombinasi filter di atas. Jika data tidak tersedia, akan muncul informasi bahwa analisa belum bisa dibentuk.
         </p>
         <div id="sa-analysis-text" class="analysis-text">
           Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.
@@ -2549,6 +2607,24 @@
 
     const saClearBtn = $("sa-clear-filters-btn");
     if(saClearBtn) saClearBtn.addEventListener("click",clearSaFilters);
+
+    // Toggle hamburger filter ACM
+    const filterCard = document.querySelector(".filter-card");
+    const filterToggleBtn = $("filter-toggle-btn");
+    if(filterCard && filterToggleBtn){
+      filterToggleBtn.addEventListener("click",()=>{
+        filterCard.classList.toggle("open");
+      });
+    }
+
+    // Toggle hamburger filter SA
+    const saFilterCard = document.querySelector(".sa-filter-card");
+    const saFilterToggleBtn = $("sa-filter-toggle-btn");
+    if(saFilterCard && saFilterToggleBtn){
+      saFilterToggleBtn.addEventListener("click",()=>{
+        saFilterCard.classList.toggle("open");
+      });
+    }
 
     const tabACM = $("tab-ACM");
     const tabSa = $("tab-sa");
