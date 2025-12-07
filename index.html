@@ -98,38 +98,41 @@
       border:1px solid rgba(148,163,184,0.18);
     }
 
-    /* PAGE TABS */
-    .page-tabs{
+    /* TAB / HALAMAN */
+    .tab-row{
       display:flex;
-      flex-wrap:wrap;
       gap:8px;
-      margin-bottom:14px;
+      margin-bottom:12px;
     }
     .tab-btn{
       border-radius:999px;
       border:1px solid var(--line);
       background:#f9fafb;
       font-size:0.8rem;
-      padding:6px 12px;
+      padding:6px 14px;
       cursor:pointer;
       color:var(--muted);
+      font-weight:500;
     }
     .tab-btn.active{
-      background:var(--brand-soft);
-      color:var(--brand);
+      background:var(--brand);
+      color:#ffffff;
       border-color:var(--brand);
-      font-weight:600;
     }
 
-    .page{
-      display:none;
-    }
-    .page.active{
-      display:block;
-    }
+    .page{display:none;}
+    .page.active{display:block;}
 
-    /* FILTER – STICKY (FREEZE) */
+    /* FILTER – STICKY (Dashboard) */
     .filter-card{
+      margin-bottom:14px;
+      position:sticky;
+      top:0;
+      z-index:30;
+    }
+
+    /* FILTER – STICKY (Sourcing Analyst) */
+    .sa-filter-card{
       margin-bottom:14px;
       position:sticky;
       top:0;
@@ -143,11 +146,20 @@
       margin-top:10px;
     }
 
+    .sa-filters{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+
     @media (max-width:1024px){
       .filters{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .sa-filters{grid-template-columns:repeat(2,minmax(0,1fr));}
     }
     @media (max-width:640px){
       .filters{grid-template-columns:1fr;}
+      .sa-filters{grid-template-columns:1fr;}
       header{gap:8px;}
       .title-block h1{font-size:1.3rem;}
     }
@@ -566,7 +578,6 @@
 
     .status-right{
       font-style:italic;
-      text-align:right;
     }
 
     .loading{
@@ -596,6 +607,17 @@
       font-size:0.8rem;
       color:#b91c1c;
     }
+
+    /* ANALISA TEXT (Sourcing Analyst) */
+    .analysis-text{
+      font-size:0.8rem;
+      color:var(--ink);
+      line-height:1.6;
+      margin-top:4px;
+    }
+    .analysis-text p + p{
+      margin-top:6px;
+    }
   </style>
 </head>
 <body>
@@ -603,7 +625,7 @@
   <header>
     <div class="title-block">
       <h1>Applicant Cycle Management</h1>
-      <p>Preview analisa Applicant Valid &amp; Buffer + biaya per metode sourcing (Sourcing Analyst).</p>
+      <p>Preview analisa Applicant Valid &amp; Buffer berdasarkan provinsi, metode sourcing, media sosial, pendidikan, dan job type.</p>
     </div>
     <div class="title-right">
       <span class="pill">
@@ -613,96 +635,435 @@
     </div>
   </header>
 
-  <!-- TABS -->
-  <div class="page-tabs">
-    <button type="button" id="tab-dashboard" class="tab-btn active">Dashboard Applicant</button>
-    <button type="button" id="tab-sa" class="tab-btn">Sourcing Analyst</button>
+  <!-- TAB -->
+  <div class="tab-row">
+    <button id="tab-dashboard" class="tab-btn active" type="button">Dashboard</button>
+    <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
   </div>
 
-  <!-- PAGE 1: DASHBOARD APPLICANT -->
-  <div id="page-dashboard" class="page active">
-    <!-- FILTER -->
-    <section class="card filter-card">
-      <div class="card-title-row">
-        <div class="card-title">Filter Data Applicant</div>
-        <div class="header-right-flex">
-          <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
+  <main>
+    <!-- PAGE: DASHBOARD -->
+    <section id="page-dashboard" class="page active">
+      <!-- FILTER -->
+      <section class="card filter-card">
+        <div class="card-title-row">
+          <div class="card-title">Filter Data Applicant</div>
+          <div class="header-right-flex">
+            <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
+            <div class="card-tag">Sheet: Responses</div>
+          </div>
         </div>
-      </div>
-      <div class="card-subtext">
-        Sesuaikan filter di bawah untuk melihat preview analisa. Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
-      </div>
+        <div class="card-subtext">
+          Sesuaikan filter di bawah untuk melihat preview analisa. Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
+        </div>
 
-      <div class="filters">
-        <div class="filter-group">
-          <label class="filter-label">Provinsi Minat Penempatan</label>
-          <div class="ms" id="ms-prov">
-            <button type="button" class="ms-toggle">
-              <span class="ms-placeholder">Semua Provinsi</span>
-              <span class="ms-counter"></span>
-              <span class="ms-arrow">▾</span>
-            </button>
-            <div class="ms-panel">
-              <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-              <div class="ms-options"></div>
-              <div class="ms-empty">Tidak ada provinsi</div>
+        <div class="filters">
+          <div class="filter-group">
+            <label class="filter-label">Provinsi Minat Penempatan</label>
+            <div class="ms" id="ms-prov">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Semua Provinsi</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada provinsi</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Kota Minat Penempatan</label>
+            <div class="ms ms-disabled" id="ms-kota">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari kota..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada kota</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Cycle Hired</label>
+            <div class="ms" id="ms-cycle">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Semua Cycle</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari cycle..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada cycle</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Periode Pelamar</label>
+            <div class="ms" id="ms-periode">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Semua Periode</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari periode..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada periode</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kolom ke-5: Job Parent + Job Type -->
+          <div class="filter-group filter-group-double">
+            <div>
+              <label class="filter-label">Job Parent</label>
+              <div class="ms" id="ms-job-parent">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Job Parent</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada job parent</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="filter-label">Job Type</label>
+              <div class="ms ms-disabled" id="ms-job-type">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari job type..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada job type</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Kota Minat Penempatan</label>
-          <div class="ms ms-disabled" id="ms-kota">
-            <button type="button" class="ms-toggle">
-              <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-              <span class="ms-counter"></span>
-              <span class="ms-arrow">▾</span>
-            </button>
-            <div class="ms-panel">
-              <input class="ms-search" type="text" placeholder="Cari kota..." />
-              <div class="ms-options"></div>
-              <div class="ms-empty">Tidak ada kota</div>
+        <div class="filter-hint">
+          * Klik filter untuk membuka daftar + kolom search. Bisa memilih lebih dari satu nilai di setiap filter. Job Type baru muncul setelah Job Parent dipilih.
+        </div>
+
+        <div id="load-state" class="loading">
+          <div class="spinner"></div>
+          <span>Memuat data dari Google Sheets...</span>
+        </div>
+        <div id="error-state" class="error" style="display:none;"></div>
+      </section>
+
+      <!-- GRAFIK BULANAN -->
+      <section class="card chart-card">
+        <div class="card-title-row">
+          <div class="card-title">Trend Applicant Valid &amp; Buffer per Bulan</div>
+          <div class="card-tag">Vertical bar · Jan–Des</div>
+        </div>
+        <p class="card-subtext">
+          Pertumbuhan Applicant Valid (APLIKAN VALID - CTC 1) dan Buffer berdasarkan <strong>PERIODE PELAMAR</strong>. Mengikuti filter di atas.
+        </p>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-valid"></span>
+            <span>Applicant Valid</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-buffer"></span>
+            <span>Buffer</span>
+          </div>
+        </div>
+        <div id="chart-body" class="chart-body"></div>
+        <div id="chart-summary-text" class="chart-footer">
+          Menunggu data...
+        </div>
+      </section>
+
+      <!-- SUMMARY BOXES -->
+      <section class="summary-row">
+        <div class="summary-card male">
+          <div class="summary-header">
+            <div class="summary-title">Summary Laki-Laki</div>
+            <div class="summary-tag">Jenis Kelamin: L</div>
+          </div>
+          <div class="summary-body">
+            <div class="summary-metric">
+              <div class="summary-label">Applicant Valid</div>
+              <div id="sum-male-valid" class="summary-value">0</div>
+            </div>
+            <div class="summary-metric">
+              <div class="summary-label">Buffer</div>
+              <div id="sum-male-buffer" class="summary-value">0</div>
             </div>
           </div>
         </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Cycle Hired</label>
-          <div class="ms" id="ms-cycle">
-            <button type="button" class="ms-toggle">
-              <span class="ms-placeholder">Semua Cycle</span>
-              <span class="ms-counter"></span>
-              <span class="ms-arrow">▾</span>
-            </button>
-            <div class="ms-panel">
-              <input class="ms-search" type="text" placeholder="Cari cycle..." />
-              <div class="ms-options"></div>
-              <div class="ms-empty">Tidak ada cycle</div>
+        <div class="summary-card female">
+          <div class="summary-header">
+            <div class="summary-title">Summary Perempuan</div>
+            <div class="summary-tag">Jenis Kelamin: P</div>
+          </div>
+          <div class="summary-body">
+            <div class="summary-metric">
+              <div class="summary-label">Applicant Valid</div>
+              <div id="sum-female-valid" class="summary-value">0</div>
+            </div>
+            <div class="summary-metric">
+              <div class="summary-label">Buffer</div>
+              <div id="sum-female-buffer" class="summary-value">0</div>
             </div>
           </div>
         </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Periode Pelamar</label>
-          <div class="ms" id="ms-periode">
-            <button type="button" class="ms-toggle">
-              <span class="ms-placeholder">Semua Periode</span>
-              <span class="ms-counter"></span>
-              <span class="ms-arrow">▾</span>
-            </button>
-            <div class="ms-panel">
-              <input class="ms-search" type="text" placeholder="Cari periode..." />
-              <div class="ms-options"></div>
-              <div class="ms-empty">Tidak ada periode</div>
+        <div class="summary-card total">
+          <div class="summary-header">
+            <div class="summary-title">Total Nasional</div>
+            <div class="summary-tag">Semua gender</div>
+          </div>
+          <div class="summary-body">
+            <div class="summary-metric">
+              <div class="summary-label">Applicant Valid</div>
+              <div id="sum-total-valid" class="summary-value">0</div>
+            </div>
+            <div class="summary-metric">
+              <div class="summary-label">Buffer</div>
+              <div id="sum-total-buffer" class="summary-value">0</div>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- Kolom ke-5: Job Parent + Job Type -->
-        <div class="filter-group filter-group-double">
-          <div>
+      <!-- TABEL 1 & 2 -->
+      <section class="grid">
+        <article class="card">
+          <div class="card-title-row">
+            <div class="card-title">Preview Applicant Valid X Buffer</div>
+            <div class="card-tag">By Provinsi Minat Penempatan</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+              <tr>
+                <th>Provinsi</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
+              <tbody id="tbl-prov-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-prov">Menunggu data...</span>
+            </div>
+            <div class="status-right">KATEGORI APP = "APLIKAN VALID - CTC 1" · QUALIFIED = "YES"</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-title-row">
+            <div class="card-title">Preview Metode Sourcing</div>
+            <div class="card-tag">Offline vs Online</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+              <tr>
+                <th>Metode Sourcing (MEDIA SOURCING)</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
+              <tbody id="tbl-metode-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-metode">Menunggu data...</span>
+            </div>
+            <div class="status-right">Sumber kategori: kolom "MEDIA SOURCING" + fallback METODE SOURCING</div>
+          </div>
+        </article>
+      </section>
+
+      <!-- TABEL 3 & 4 -->
+      <section class="grid">
+        <article class="card">
+          <div class="card-title-row">
+            <div class="card-title">Preview Sourcing Media Sosial</div>
+            <div class="card-tag">Per Platform</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+              <tr>
+                <th>Media Sosial</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
+              <tbody id="tbl-media-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-media">Menunggu data...</span>
+            </div>
+            <div class="status-right">Baris: kategori ONLINE - MEDIA SOSIAL</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-title-row">
+            <div class="card-title">Preview Profiling Applicant</div>
+            <div class="card-tag">Tingkat Pendidikan</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+              <tr>
+                <th>Pendidikan Terakhir</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
+              <tbody id="tbl-edu-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-edu">Menunggu data...</span>
+            </div>
+            <div class="status-right">Sumber: kolom PENDIDIKAN TERAKHIR</div>
+          </div>
+        </article>
+      </section>
+
+      <!-- TABEL 5 & 6 -->
+      <section class="grid">
+        <article class="card">
+          <div class="card-title-row">
+            <div class="card-title">Preview Sourcing Job Portal</div>
+            <div class="card-tag">Per Portal</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+              <tr>
+                <th>Job Portal</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
+              <tbody id="tbl-portal-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-portal">Menunggu data...</span>
+            </div>
+            <div class="status-right">Baris: kategori ONLINE - JOB PORTAL</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-title-row">
+            <div class="card-title">Preview Sourcing Offline</div>
+            <div class="card-tag">Aktivitas Offline</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+              <tr>
+                <th>Aktivitas Offline</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
+              <tbody id="tbl-offline-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-offline">Menunggu data...</span>
+            </div>
+            <div class="status-right">Baris: kategori OFFLINE</div>
+          </div>
+        </article>
+      </section>
+    </section>
+
+    <!-- PAGE: SOURCING ANALYST -->
+    <section id="page-sa" class="page">
+      <!-- FILTER SA -->
+      <section class="card sa-filter-card">
+        <div class="card-title-row">
+          <div class="card-title">Filter Sourcing Analyst</div>
+          <div class="header-right-flex">
+            <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter Sourcing Analyst</button>
+            <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
+          </div>
+        </div>
+        <div class="card-subtext">
+          Pilih area (Provinsi &amp; Kota) serta kombinasi Job Parent &amp; Job Type untuk melihat analisa best practice sourcing.
+        </div>
+
+        <div class="sa-filters">
+          <div class="filter-group">
+            <label class="filter-label">Provinsi Minat Penempatan</label>
+            <div class="ms" id="sa-ms-prov">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Semua Provinsi</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada provinsi</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Kota Minat Penempatan</label>
+            <div class="ms ms-disabled" id="sa-ms-kota">
+              <button type="button" class="ms-toggle">
+                <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+                <span class="ms-counter"></span>
+                <span class="ms-arrow">▾</span>
+              </button>
+              <div class="ms-panel">
+                <input class="ms-search" type="text" placeholder="Cari kota..." />
+                <div class="ms-options"></div>
+                <div class="ms-empty">Tidak ada kota</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
             <label class="filter-label">Job Parent</label>
-            <div class="ms" id="ms-job-parent">
+            <div class="ms" id="sa-ms-job-parent">
               <button type="button" class="ms-toggle">
                 <span class="ms-placeholder">Semua Job Parent</span>
                 <span class="ms-counter"></span>
@@ -715,9 +1076,10 @@
               </div>
             </div>
           </div>
-          <div>
+
+          <div class="filter-group">
             <label class="filter-label">Job Type</label>
-            <div class="ms ms-disabled" id="ms-job-type">
+            <div class="ms ms-disabled" id="sa-ms-job-type">
               <button type="button" class="ms-toggle">
                 <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
                 <span class="ms-counter"></span>
@@ -731,368 +1093,29 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="filter-hint">
-        * Klik filter untuk membuka daftar + kolom search. Bisa memilih lebih dari satu nilai di setiap filter. Job Type baru muncul setelah Job Parent dipilih.
-      </div>
+        <div class="filter-hint">
+          * Semua filter bersifat multiple choice. Kota baru muncul setelah Provinsi dipilih. Job Type baru muncul setelah Job Parent dipilih.
+        </div>
+      </section>
 
-      <div id="load-state" class="loading">
-        <div class="spinner"></div>
-        <span>Memuat data dari Google Sheets...</span>
-      </div>
-      <div id="error-state" class="error" style="display:none;"></div>
-    </section>
-
-    <!-- GRAFIK BULANAN -->
-    <section class="card chart-card">
-      <div class="card-title-row">
-        <div class="card-title">Trend Applicant Valid &amp; Buffer per Bulan</div>
-        <div class="card-tag">Vertical bar · Jan–Des</div>
-      </div>
-      <p class="card-subtext">
-        Pertumbuhan Applicant Valid (APLIKAN VALID - CTC 1) dan Buffer berdasarkan <strong>PERIODE PELAMAR</strong>. Mengikuti filter di atas.
-      </p>
-      <div class="chart-legend">
-        <div class="legend-item">
-          <span class="legend-dot legend-valid"></span>
-          <span>Applicant Valid</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot legend-buffer"></span>
-          <span>Buffer</span>
-        </div>
-      </div>
-      <div id="chart-body" class="chart-body"></div>
-      <div id="chart-summary-text" class="chart-footer">
-        Menunggu data...
-      </div>
-    </section>
-
-    <!-- SUMMARY BOXES -->
-    <section class="summary-row">
-      <div class="summary-card male">
-        <div class="summary-header">
-          <div class="summary-title">Summary Laki-Laki</div>
-          <div class="summary-tag">Jenis Kelamin: L</div>
-        </div>
-        <div class="summary-body">
-          <div class="summary-metric">
-            <div class="summary-label">Applicant Valid</div>
-            <div id="sum-male-valid" class="summary-value">0</div>
-          </div>
-          <div class="summary-metric">
-            <div class="summary-label">Buffer</div>
-            <div id="sum-male-buffer" class="summary-value">0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="summary-card female">
-        <div class="summary-header">
-          <div class="summary-title">Summary Perempuan</div>
-          <div class="summary-tag">Jenis Kelamin: P</div>
-        </div>
-        <div class="summary-body">
-          <div class="summary-metric">
-            <div class="summary-label">Applicant Valid</div>
-            <div id="sum-female-valid" class="summary-value">0</div>
-          </div>
-          <div class="summary-metric">
-            <div class="summary-label">Buffer</div>
-            <div id="sum-female-buffer" class="summary-value">0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="summary-card total">
-        <div class="summary-header">
-          <div class="summary-title">Total Nasional</div>
-          <div class="summary-tag">Semua gender</div>
-        </div>
-        <div class="summary-body">
-          <div class="summary-metric">
-            <div class="summary-label">Applicant Valid</div>
-            <div id="sum-total-valid" class="summary-value">0</div>
-          </div>
-          <div class="summary-metric">
-            <div class="summary-label">Buffer</div>
-            <div id="sum-total-buffer" class="summary-value">0</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TABEL 1 & 2 -->
-    <section class="grid">
-      <article class="card">
+      <!-- ANALISA SA -->
+      <section class="card">
         <div class="card-title-row">
-          <div class="card-title">Preview Applicant Valid X Buffer</div>
-          <div class="card-tag">By Provinsi Minat Penempatan</div>
+          <div class="card-title">Analisa Best Practice Sourcing</div>
+          <div class="card-tag">Auto generated insight</div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th>Provinsi</th>
-              <th>Applicant Valid</th>
-              <th>Buffer</th>
-            </tr>
-            </thead>
-            <tbody id="tbl-prov-body"></tbody>
-          </table>
+        <p class="card-subtext">
+          Analisa ini menggunakan data Applicant Valid dan Buffer berdasarkan kombinasi filter di atas. Jika data tidak tersedia, akan muncul informasi bahwa analisa belum bisa dibentuk.
+        </p>
+        <div id="sa-analysis-text" class="analysis-text">
+          Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.
         </div>
-        <div class="status-bar">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="status-prov">Menunggu data...</span>
-          </div>
-          <div class="status-right">KATEGORI APP = "APLIKAN VALID - CTC 1" · QUALIFIED = "YES"</div>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="card-title-row">
-          <div class="card-title">Preview Metode Sourcing</div>
-          <div class="card-tag">Offline vs Online</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th>Metode Sourcing (MEDIA SOURCING)</th>
-              <th>Applicant Valid</th>
-              <th>Buffer</th>
-            </tr>
-            </thead>
-            <tbody id="tbl-metode-body"></tbody>
-          </table>
-        </div>
-        <div class="status-bar">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="status-metode">Menunggu data...</span>
-          </div>
-          <div class="status-right">Sumber kategori: kolom "MEDIA SOURCING" + fallback METODE SOURCING</div>
-        </div>
-      </article>
+      </section>
     </section>
-
-    <!-- TABEL 3 & 4 -->
-    <section class="grid">
-      <article class="card">
-        <div class="card-title-row">
-          <div class="card-title">Preview Sourcing Media Sosial</div>
-          <div class="card-tag">Per Platform</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th>Media Sosial</th>
-              <th>Applicant Valid</th>
-              <th>Buffer</th>
-            </tr>
-            </thead>
-            <tbody id="tbl-media-body"></tbody>
-          </table>
-        </div>
-        <div class="status-bar">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="status-media">Menunggu data...</span>
-          </div>
-          <div class="status-right">Baris: kategori ONLINE - MEDIA SOSIAL</div>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="card-title-row">
-          <div class="card-title">Preview Profiling Applicant</div>
-          <div class="card-tag">Tingkat Pendidikan</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th>Pendidikan Terakhir</th>
-              <th>Applicant Valid</th>
-              <th>Buffer</th>
-            </tr>
-            </thead>
-            <tbody id="tbl-edu-body"></tbody>
-          </table>
-        </div>
-        <div class="status-bar">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="status-edu">Menunggu data...</span>
-          </div>
-          <div class="status-right">Sumber: kolom PENDIDIKAN TERAKHIR</div>
-        </div>
-      </article>
-    </section>
-
-    <!-- TABEL 5 & 6 -->
-    <section class="grid">
-      <article class="card">
-        <div class="card-title-row">
-          <div class="card-title">Preview Sourcing Job Portal</div>
-          <div class="card-tag">Per Portal</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th>Job Portal</th>
-              <th>Applicant Valid</th>
-              <th>Buffer</th>
-            </tr>
-            </thead>
-            <tbody id="tbl-portal-body"></tbody>
-          </table>
-        </div>
-        <div class="status-bar">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="status-portal">Menunggu data...</span>
-          </div>
-          <div class="status-right">Baris: kategori ONLINE - JOB PORTAL</div>
-        </div>
-      </article>
-
-      <article class="card">
-        <div class="card-title-row">
-          <div class="card-title">Preview Sourcing Offline</div>
-          <div class="card-tag">Aktivitas Offline</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th>Aktivitas Offline</th>
-              <th>Applicant Valid</th>
-              <th>Buffer</th>
-            </tr>
-            </thead>
-            <tbody id="tbl-offline-body"></tbody>
-          </table>
-        </div>
-        <div class="status-bar">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="status-offline">Menunggu data...</span>
-          </div>
-          <div class="status-right">Baris: kategori OFFLINE</div>
-        </div>
-      </article>
-    </section>
-  </div>
-
-  <!-- PAGE 2: SOURCING ANALYST -->
-  <div id="page-sa" class="page">
-    <!-- FILTER SA (STICKY) -->
-    <section class="card filter-card">
-      <div class="card-title-row">
-        <div class="card-title">Filter Sourcing Analyst</div>
-        <div class="header-right-flex">
-          <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter SA</button>
-        </div>
-      </div>
-      <div class="card-subtext">
-        Analisa biaya per metode sourcing berdasarkan <strong>Provinsi</strong> dan <strong>Kota</strong>. Angka cost diambil dari kolom <strong>Cost Per Applicant (AJ)</strong>.
-      </div>
-
-      <div class="filters" style="grid-template-columns:repeat(2,minmax(0,1fr));">
-        <div class="filter-group">
-          <label class="filter-label">Provinsi</label>
-          <div class="ms" id="sa-ms-prov">
-            <button type="button" class="ms-toggle">
-              <span class="ms-placeholder">Semua Provinsi</span>
-              <span class="ms-counter"></span>
-              <span class="ms-arrow">▾</span>
-            </button>
-            <div class="ms-panel">
-              <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-              <div class="ms-options"></div>
-              <div class="ms-empty">Tidak ada provinsi</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <label class="filter-label">Kota</label>
-          <div class="ms ms-disabled" id="sa-ms-kota">
-            <button type="button" class="ms-toggle">
-              <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-              <span class="ms-counter"></span>
-              <span class="ms-arrow">▾</span>
-            </button>
-            <div class="ms-panel">
-              <input class="ms-search" type="text" placeholder="Cari kota..." />
-              <div class="ms-options"></div>
-              <div class="ms-empty">Tidak ada kota</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-hint">
-        * Halaman ini fokus untuk menganalisa <strong>Job Parent</strong> vs metode sourcing (Offline, Online - Media Sosial, Online Job Portal) dan biaya per applicant.
-      </div>
-    </section>
-
-    <!-- TABEL SA JOB PARENT x METODE -->
-    <section class="card">
-      <div class="card-title-row">
-        <div class="card-title">Analisa Biaya per Metode Sourcing</div>
-        <div class="card-tag">Job Parent × Metode</div>
-      </div>
-      <p class="card-subtext">
-        Baris = <strong>Job Parent</strong> (fixed list). Kolom = <strong>OFFLINE</strong>, <strong>ONLINE - MEDIA SOSIAL</strong>, <strong>ONLINE JOB PORTAL</strong>.<br/>
-        Setiap metode berisi: Jumlah Applicant, Rata-rata Cost / Applicant, dan Total Cost.
-      </p>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-          <tr>
-            <th rowspan="2">Job Parent</th>
-            <th colspan="3">OFFLINE</th>
-            <th colspan="3">ONLINE - MEDIA SOSIAL</th>
-            <th colspan="3">ONLINE JOB PORTAL</th>
-          </tr>
-          <tr>
-            <th>Jumlah Applicant</th>
-            <th>Rata-rata Cost / Applicant</th>
-            <th>Total Cost</th>
-
-            <th>Jumlah Applicant</th>
-            <th>Rata-rata Cost / Applicant</th>
-            <th>Total Cost</th>
-
-            <th>Jumlah Applicant</th>
-            <th>Rata-rata Cost / Applicant</th>
-            <th>Total Cost</th>
-          </tr>
-          </thead>
-          <tbody id="sa-cost-body"></tbody>
-        </table>
-      </div>
-
-      <div class="status-bar">
-        <div class="status-left">
-          <span class="status-dot"></span>
-          <span id="sa-status-cost">Menunggu data...</span>
-        </div>
-        <div class="status-right">
-          Cost diambil dari kolom <strong>"Cost Per Applicant" (AJ)</strong>, hanya untuk baris yang memiliki nilai cost &amp; Job Parent sesuai list.
-        </div>
-      </div>
-    </section>
-  </div>
+  </main>
 </div>
-  
+
 <script>
   /********** KONFIGURASI URL CSV **********/
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
@@ -1173,36 +1196,6 @@
 
   const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
 
-  // Job Parent untuk halaman Sourcing Analyst
-  const SA_JOB_PARENT_LIST = [
-    "ADMINISTRATION",
-    "BACK OFFICE",
-    "BEAUTICIAN",
-    "CLEANING",
-    "COLLECTION",
-    "CONTACT CENTER",
-    "CUSTOMER SERVICE",
-    "DRIVER",
-    "IT",
-    "KITCHEN",
-    "LABORAN",
-    "LEGAL",
-    "MANUFACTURE",
-    "MARKETING",
-    "MARKETING CREDIT",
-    "MEDICAL",
-    "MESSENGER",
-    "PHARMACIST",
-    "PROJECT MANAGEMENT",
-    "PUBLIC RELATION",
-    "SALES",
-    "SECURITY",
-    "SPV",
-    "TECHNICIAN",
-    "VERIFIER",
-    "WAREHOUSE"
-  ];
-
   const MONTHS = [
     {idx:1,label:"Januari"},
     {idx:2,label:"Februari"},
@@ -1225,7 +1218,7 @@
   const jobParentTypeMap = new Map();
 
   let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
-  let saProvMS, saKotaMS;
+  let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
 
   const $ = id => document.getElementById(id);
   const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
@@ -1236,9 +1229,7 @@
     if(v == null) return 0;
     let s = String(v).trim();
     if(!s) return 0;
-    // buang simbol selain angka, titik, koma
     s = s.replace(/[^0-9.,]/g,"");
-    // asumsikan format Indonesia -> titik pemisah ribuan, koma desimal
     s = s.replace(/\./g,"").replace(",",".");
     const n = Number(s);
     return isNaN(n) ? 0 : n;
@@ -1440,7 +1431,24 @@
     msKota.setDisabled(false);
   }
 
-  // SA: update kota berdasarkan provinsi (filter khusus SA)
+  function updateJobTypeOptionsByParent(selectedParents){
+    if(!msJobType) return;
+    if(!selectedParents || !selectedParents.length){
+      msJobType.setOptions([]);
+      msJobType.setDisabled(true);
+      return;
+    }
+    const typeSet = new Set();
+    selectedParents.forEach(p=>{
+      const s = jobParentTypeMap.get(p);
+      if(s) s.forEach(t=>typeSet.add(t));
+    });
+    const typeList = uniqueSorted(Array.from(typeSet));
+    msJobType.setOptions(typeList);
+    msJobType.setDisabled(false);
+  }
+
+  // SA: update kota & job type berdasarkan prov & job parent
   function updateSaKotaOptions(selectedProv){
     if(!saKotaMS) return;
     if(!selectedProv || !selectedProv.length){
@@ -1458,11 +1466,11 @@
     saKotaMS.setDisabled(false);
   }
 
-  function updateJobTypeOptionsByParent(selectedParents){
-    if(!msJobType) return;
+  function updateSaJobTypeOptions(selectedParents){
+    if(!saJobTypeMS) return;
     if(!selectedParents || !selectedParents.length){
-      msJobType.setOptions([]);
-      msJobType.setDisabled(true);
+      saJobTypeMS.setOptions([]);
+      saJobTypeMS.setDisabled(true);
       return;
     }
     const typeSet = new Set();
@@ -1471,8 +1479,8 @@
       if(s) s.forEach(t=>typeSet.add(t));
     });
     const typeList = uniqueSorted(Array.from(typeSet));
-    msJobType.setOptions(typeList);
-    msJobType.setDisabled(false);
+    saJobTypeMS.setOptions(typeList);
+    saJobTypeMS.setDisabled(false);
   }
 
   function initFilters(){
@@ -1509,15 +1517,25 @@
 
   // Inisialisasi filter untuk halaman Sourcing Analyst
   function initSourcingAnalystFilters(){
-    const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
+    const provVals      = uniqueSorted(Array.from(provKotaMap.keys()));
+    const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
 
     saProvMS = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
       updateSaKotaOptions(sel);
-      updateSourcingAnalystTable();
+      updateSourcingAnalystAnalysis();
     });
 
     saKotaMS = createMultiSelect("sa-ms-kota",[], "Semua Kota",true,()=>{
-      updateSourcingAnalystTable();
+      updateSourcingAnalystAnalysis();
+    });
+
+    saJobParentMS = createMultiSelect("sa-ms-job-parent",jobParentVals,"Semua Job Parent",false,(sel)=>{
+      updateSaJobTypeOptions(sel);
+      updateSourcingAnalystAnalysis();
+    });
+
+    saJobTypeMS = createMultiSelect("sa-ms-job-type",[], "Semua Job Type",true,()=>{
+      updateSourcingAnalystAnalysis();
     });
   }
 
@@ -1543,7 +1561,12 @@
       saKotaMS.setOptions([]);
       saKotaMS.setDisabled(true);
     }
-    updateSourcingAnalystTable();
+    if(saJobParentMS) saJobParentMS.clear();
+    if(saJobTypeMS){
+      saJobTypeMS.setOptions([]);
+      saJobTypeMS.setDisabled(true);
+    }
+    updateSourcingAnalystAnalysis();
   }
 
   function getFilteredRows(){
@@ -1573,22 +1596,29 @@
     });
   }
 
-  // Filter khusus untuk halaman Sourcing Analyst (hanya Prov & Kota)
+  // Filter khusus SA: Prov + Kota + Job Parent + Job Type
   function getSourcingAnalystFilteredRows(){
-    const provSel = new Set(saProvMS ? saProvMS.getSelected() : []);
-    const kotaSel = new Set(saKotaMS ? saKotaMS.getSelected() : []);
+    const provSel      = new Set(saProvMS ? saProvMS.getSelected()      : []);
+    const kotaSel      = new Set(saKotaMS ? saKotaMS.getSelected()      : []);
+    const jobParentSel = new Set(saJobParentMS ? saJobParentMS.getSelected() : []);
+    const jobTypeSel   = new Set(saJobTypeMS ? saJobTypeMS.getSelected()   : []);
 
     return rawRows.filter(row=>{
-      const rowProv = String(row[COL_PROV] ?? "");
-      const rowKota = String(row[COL_KOTA] ?? "");
+      const rowProv      = String(row[COL_PROV] ?? "");
+      const rowKota      = String(row[COL_KOTA] ?? "");
+      const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
+      const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
 
-      if(provSel.size && !provSel.has(rowProv)) return false;
-      if(kotaSel.size && !kotaSel.has(rowKota)) return false;
+      if(provSel.size      && !provSel.has(rowProv)) return false;
+      if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
+      if(jobParentSel.size && !jobParentSel.has(rowJobParent)) return false;
+      if(jobTypeSel.size   && !jobTypeSel.has(rowJobType)) return false;
+
       return true;
     });
   }
 
-  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali
+  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali (Dashboard)
   function isNoFilterActive(){
     const provSel      = msProv      ? msProv.getSelected()      : [];
     const kotaSel      = msKota      ? msKota.getSelected()      : [];
@@ -1750,7 +1780,7 @@
   function aggregateMediaSocial(rows){
     const map = new Map();
     FIXED_MEDIA_LIST.forEach(name=>{
-      map.set(name,{name,valid:0,buffer:0});
+      map.set(name,{name,valid:0,buffer:0,totalCost:0});
     });
 
     const tokenMap = [
@@ -1802,6 +1832,7 @@
       if(!item) return;
       item.valid  += valid;
       item.buffer += buffer;
+      item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
     });
 
     return FIXED_MEDIA_LIST.map(name=>map.get(name));
@@ -1811,7 +1842,7 @@
   function aggregateJobPortal(rows){
     const map = new Map();
     FIXED_PORTAL_LIST.forEach(name=>{
-      map.set(name,{name,valid:0,buffer:0});
+      map.set(name,{name,valid:0,buffer:0,totalCost:0});
     });
 
     const tokenMap = [
@@ -1855,6 +1886,7 @@
       if(!item) return;
       item.valid  += valid;
       item.buffer += buffer;
+      item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
     });
 
     return FIXED_PORTAL_LIST.map(name=>map.get(name));
@@ -1864,7 +1896,7 @@
   function aggregateOffline(rows){
     const map = new Map();
     FIXED_OFFLINE_LIST.forEach(name=>{
-      map.set(name,{name,valid:0,buffer:0});
+      map.set(name,{name,valid:0,buffer:0,totalCost:0});
     });
 
     const tokenMap = [
@@ -1949,6 +1981,7 @@
       if(!item) return;
       item.valid  += valid;
       item.buffer += buffer;
+      item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
     });
 
     return FIXED_OFFLINE_LIST.map(name=>map.get(name));
@@ -2210,157 +2243,159 @@
       `Grand Total Valid: ${numberFmt.format(totalOffline.grandValid)}, Buffer: ${numberFmt.format(totalOffline.grandBuffer)}`;
   }
 
-  /********** SOURCING ANALYST: AGREGASI PER JOB PARENT × METODE **********/
-  // Rata-rata cost per applicant = NILAI COST TERTINGGI di kombinasi itu (bukan avg matematis)
-  function aggregateSaJobParentCost(rows){
-    const result = SA_JOB_PARENT_LIST.map(name => ({
-      jobParent: name,
-      offline: { count: 0, totalCost: 0, avgCost: 0, maxCost: 0 },
-      media:   { count: 0, totalCost: 0, avgCost: 0, maxCost: 0 }, // ONLINE - MEDIA SOSIAL
-      portal:  { count: 0, totalCost: 0, avgCost: 0, maxCost: 0 }  // ONLINE - JOB PORTAL
-    }));
+  /********** SA: ANALISA BEST PRACTICE **********/
+  function computeSaMethod3MonthSummary(rows, methodCategory){
+    let valid = 0;
+    let buffer = 0;
+    const monthSet = new Set();
 
-    const idxMap = new Map();
-    SA_JOB_PARENT_LIST.forEach((name, i) => {
-      idxMap.set(name.toUpperCase(), i);
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== methodCategory) return;
+      const v = getApplicantValidValue(row[COL_KATEGORI]);
+      const b = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!v && !b) return;
+      valid += v;
+      buffer += b;
+      const mIdx = parseMonthIndex(row[COL_PERIODE]);
+      if(mIdx) monthSet.add(mIdx);
     });
 
-    rows.forEach(row => {
-      const jpRaw = row[COL_JOB_PARENT];
-      if (!jpRaw) return;
-
-      const jpNorm = String(jpRaw).trim().toUpperCase();
-      const idx = idxMap.get(jpNorm);
-      if (idx === undefined) return; // hanya job parent di list
-
-      const cat = getMethodCategory(row);
-      let bucketKey = null;
-      if (cat === "OFFLINE") bucketKey = "offline";
-      else if (cat === "ONLINE - MEDIA SOSIAL") bucketKey = "media";
-      else if (cat === "ONLINE - JOB PORTAL") bucketKey = "portal";
-      else return; // LAINNYA / kategori lain di-skip
-
-      const cost = parseCostValue(row[COL_COST_PER_APP]);
-      if (cost <= 0) return; // hanya yang punya cost
-
-      const bucket = result[idx][bucketKey];
-      bucket.count += 1;
-      bucket.totalCost += cost;
-      if (cost > bucket.maxCost) bucket.maxCost = cost;
-    });
-
-    // "Rata-rata" = max cost per kombinasi
-    result.forEach(r => {
-      ["offline","media","portal"].forEach(k => {
-        const b = r[k];
-        b.avgCost = b.maxCost || 0;
-      });
-    });
-
-    return result;
-  }
-
-  function updateSourcingAnalystTable(){
-    const tbody = $("sa-cost-body");
-    const status = $("sa-status-cost");
-    if(!tbody || !status) return;
-
-    const rows = getSourcingAnalystFilteredRows();
-    const jobRows = aggregateSaJobParentCost(rows);
-
-    tbody.innerHTML = "";
-
-    let grand = {
-      offline: { count:0, totalCost:0, maxCost:0 },
-      media:   { count:0, totalCost:0, maxCost:0 },
-      portal:  { count:0, totalCost:0, maxCost:0 }
-    };
-
-    jobRows.forEach(r => {
-      const tr = document.createElement("tr");
-
-      // Jika semua nol, buat row agak abu-abu
-      if(
-        r.offline.count === 0 && r.media.count === 0 && r.portal.count === 0
-      ){
-        tr.classList.add("muted-row");
-      }
-
-      function addTd(text, cls){
-        const td = document.createElement("td");
-        td.textContent = text;
-        if(cls) td.className = cls;
-        tr.appendChild(td);
-      }
-
-      addTd(r.jobParent,"col-label");
-
-      // OFFLINE
-      addTd(numberFmt.format(r.offline.count || 0),"col-number");
-      addTd(r.offline.avgCost ? currencyFmt.format(r.offline.avgCost) : "-","col-number");
-      addTd(r.offline.totalCost ? currencyFmt.format(r.offline.totalCost) : "-","col-number");
-
-      // ONLINE - MEDIA SOSIAL
-      addTd(numberFmt.format(r.media.count || 0),"col-number");
-      addTd(r.media.avgCost ? currencyFmt.format(r.media.avgCost) : "-","col-number");
-      addTd(r.media.totalCost ? currencyFmt.format(r.media.totalCost) : "-","col-number");
-
-      // ONLINE JOB PORTAL
-      addTd(numberFmt.format(r.portal.count || 0),"col-number");
-      addTd(r.portal.avgCost ? currencyFmt.format(r.portal.avgCost) : "-","col-number");
-      addTd(r.portal.totalCost ? currencyFmt.format(r.portal.totalCost) : "-","col-number");
-
-      // Akumulasi grand total + max cost global per metode
-      grand.offline.count    += r.offline.count || 0;
-      grand.offline.totalCost+= r.offline.totalCost || 0;
-      grand.offline.maxCost   = Math.max(grand.offline.maxCost, r.offline.maxCost || 0);
-
-      grand.media.count      += r.media.count || 0;
-      grand.media.totalCost  += r.media.totalCost || 0;
-      grand.media.maxCost     = Math.max(grand.media.maxCost, r.media.maxCost || 0);
-
-      grand.portal.count     += r.portal.count || 0;
-      grand.portal.totalCost += r.portal.totalCost || 0;
-      grand.portal.maxCost    = Math.max(grand.portal.maxCost, r.portal.maxCost || 0);
-
-      tbody.appendChild(tr);
-    });
-
-    // GRAND TOTAL baris paling bawah
-    const trTotal = document.createElement("tr");
-    trTotal.className = "total-row";
-
-    function addTdTotal(text, cls){
-      const td = document.createElement("td");
-      td.textContent = text;
-      if(cls) td.className = cls;
-      trTotal.appendChild(td);
+    if(valid === 0 && buffer === 0){
+      return {totalValid:0,totalBuffer:0,estValid3:0,estBuffer3:0};
     }
 
-    addTdTotal("GRAND TOTAL","col-label");
+    const monthCount = monthSet.size || 1;
+    const avgValidPerMonth = valid / monthCount;
+    const avgBufferPerMonth = buffer / monthCount;
 
-    // OFFLINE
-    const offAvg = grand.offline.maxCost || 0;
-    addTdTotal(numberFmt.format(grand.offline.count),"col-number");
-    addTdTotal(offAvg ? currencyFmt.format(offAvg) : "-","col-number");
-    addTdTotal(grand.offline.totalCost ? currencyFmt.format(grand.offline.totalCost) : "-","col-number");
+    const estValid3 = Math.round(avgValidPerMonth * 3);
+    const estBuffer3 = Math.round(avgBufferPerMonth * 3);
 
-    // MEDIA
-    const medAvg = grand.media.maxCost || 0;
-    addTdTotal(numberFmt.format(grand.media.count),"col-number");
-    addTdTotal(medAvg ? currencyFmt.format(medAvg) : "-","col-number");
-    addTdTotal(grand.media.totalCost ? currencyFmt.format(grand.media.totalCost) : "-","col-number");
+    return {totalValid:valid,totalBuffer:buffer,estValid3,estBuffer3};
+  }
 
-    // PORTAL
-    const porAvg = grand.portal.maxCost || 0;
-    addTdTotal(numberFmt.format(grand.portal.count),"col-number");
-    addTdTotal(porAvg ? currencyFmt.format(porAvg) : "-","col-number");
-    addTdTotal(grand.portal.totalCost ? currencyFmt.format(grand.portal.totalCost) : "-","col-number");
+  function pickTop(list,n){
+    return [...list]
+      .filter(r => (r && (r.valid || r.buffer)))
+      .sort((a,b)=> (b.valid + b.buffer) - (a.valid + a.buffer))
+      .slice(0,n);
+  }
 
-    tbody.appendChild(trTotal);
+  function formatChannelList(channels){
+    return channels.map(ch=>{
+      const totalApp = (ch.valid || 0) + (ch.buffer || 0);
+      const avgCost = (ch.totalCost && totalApp)
+        ? ch.totalCost / totalApp
+        : 0;
+      const costText = avgCost ? currencyFmt.format(avgCost) : "N/A";
+      return `${ch.name} (±${costText}/applicant, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
+    }).join("; ");
+  }
 
-    status.textContent =
-      `Ditampilkan ${jobRows.length} Job Parent · ${numberFmt.format(rows.length)} baris data (sesuai filter Provinsi & Kota).`;
+  function updateSourcingAnalystAnalysis(){
+    const container = $("sa-analysis-text");
+    if(!container) return;
+
+    const provSel      = saProvMS ? saProvMS.getSelected()      : [];
+    const kotaSel      = saKotaMS ? saKotaMS.getSelected()      : [];
+    const jobParentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
+    const jobTypeSel   = saJobTypeMS ? saJobTypeMS.getSelected()   : [];
+
+    if(
+      provSel.length === 0 &&
+      kotaSel.length === 0 &&
+      jobParentSel.length === 0 &&
+      jobTypeSel.length === 0
+    ){
+      container.innerHTML = "Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.";
+      return;
+    }
+
+    const rows = getSourcingAnalystFilteredRows();
+    if(!rows.length){
+      container.innerHTML = "Belum ada analisa untuk area dan job parent ini (data tidak ditemukan untuk kombinasi filter saat ini).";
+      return;
+    }
+
+    const provName = provSel[0] || "semua provinsi";
+    const kotaName = kotaSel[0] || "";
+    const jpName   = jobParentSel[0] || "";
+    const jtName   = jobTypeSel[0] || "";
+
+    let headerLine = "Untuk ";
+    if(jtName){
+      headerLine += `Job <strong>${jtName}</strong>`;
+      if(jpName && jpName !== jtName){
+        headerLine += ` (Job Parent <strong>${jpName}</strong>)`;
+      }
+    }else if(jpName){
+      headerLine += `Job Parent <strong>${jpName}</strong>`;
+    }else{
+      headerLine += "kombinasi job";
+    }
+
+    if(kotaName){
+      headerLine += ` di <strong>${kotaName}</strong>, <strong>${provName}</strong>,`;
+    }else{
+      headerLine += ` di <strong>${provName}</strong>,`;
+    }
+    headerLine += " pola sourcing yang terlihat paling efektif berdasarkan data Applicant Valid &amp; Buffer adalah:";
+
+    // Agregasi per metode & kanal
+    const portalAgg  = aggregateJobPortal(rows);
+    const mediaAgg   = aggregateMediaSocial(rows);
+    const offlineAgg = aggregateOffline(rows);
+
+    const topPortal  = pickTop(portalAgg,5);
+    const topMedia   = pickTop(mediaAgg,3);
+    const topOffline = pickTop(offlineAgg,2);
+
+    const portalSummary = computeSaMethod3MonthSummary(rows,"ONLINE - JOB PORTAL");
+    const mediaSummary  = computeSaMethod3MonthSummary(rows,"ONLINE - MEDIA SOSIAL");
+    const offSummary    = computeSaMethod3MonthSummary(rows,"OFFLINE");
+
+    const parts = [];
+    parts.push(`<p>${headerLine}</p>`);
+
+    // Job Portal
+    if(topPortal.length && (portalSummary.totalValid || portalSummary.totalBuffer)){
+      const chText = formatChannelList(topPortal);
+      parts.push(
+        `<p><strong>1. Job Portal.</strong> Sourcing melalui Job Portal didominasi oleh: ${chText}. ` +
+        `Dalam estimasi <strong>3 bulan</strong>, kombinasi Job Portal ini berpotensi menghasilkan sekitar ` +
+        `<strong>${numberFmt.format(portalSummary.estValid3)}</strong> applicant valid dan ` +
+        `<strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</p>`
+      );
+    }
+
+    // Media Sosial
+    if(topMedia.length && (mediaSummary.totalValid || mediaSummary.totalBuffer)){
+      const chText = formatChannelList(topMedia);
+      parts.push(
+        `<p><strong>2. Online - Media Sosial.</strong> Untuk metode online media sosial, platform yang paling efektif adalah: ${chText}. ` +
+        `Secara estimasi <strong>3 bulan</strong>, channel media sosial ini dapat menghasilkan sekitar ` +
+        `<strong>${numberFmt.format(mediaSummary.estValid3)}</strong> applicant valid dan ` +
+        `<strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</p>`
+      );
+    }
+
+    // Offline
+    if(topOffline.length && (offSummary.totalValid || offSummary.totalBuffer)){
+      const chText = formatChannelList(topOffline);
+      parts.push(
+        `<p><strong>3. Sourcing Offline.</strong> Aktivitas offline yang paling sering membuahkan applicant adalah: ${chText}. ` +
+        `Dalam horizon <strong>3 bulan</strong>, aktivitas offline tersebut berpotensi menghasilkan sekitar ` +
+        `<strong>${numberFmt.format(offSummary.estValid3)}</strong> applicant valid dan ` +
+        `<strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</p>`
+      );
+    }
+
+    if(parts.length === 1){
+      // Hanya header, tidak ada metode yang punya data
+      parts.push(`<p>Belum ada analisa yang cukup untuk area dan job parent ini.</p>`);
+    }
+
+    container.innerHTML = parts.join("");
   }
 
   async function loadCsv(){
@@ -2395,9 +2430,9 @@
       initFilters();
       updateAllTables();
 
-      // Inisialisasi filter & tabel untuk Sourcing Analyst
+      // Sourcing Analyst
       initSourcingAnalystFilters();
-      updateSourcingAnalystTable();
+      updateSourcingAnalystAnalysis();
 
     }catch(e){
       console.error(e);
