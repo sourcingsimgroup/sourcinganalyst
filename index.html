@@ -659,13 +659,12 @@
 <div class="app-shell">
   <header>
     <div class="title-block">
-      <h1>Applicant Cycle Management</h1>
-      <p>Preview analisa Applicant Valid &amp; Buffer berdasarkan provinsi, metode sourcing, media sosial, pendidikan, dan job type.</p>
+      <h1>Sourcing Intelligence Market</h1>
+      <p>Preview Applicant Valid &amp; Buffer berdasarkan provinsi, metode sourcing, media sosial, pendidikan, dan job type.</p>
     </div>
     <div class="title-right">
       <span class="pill">
         <span class="pill-dot"></span>
-        Live from Google Sheets CSV
       </span>
     </div>
   </header>
@@ -2361,15 +2360,16 @@
       .slice(0,n);
   }
 
-  function formatChannelList(channels){
-    return channels.map(ch=>{
-      const totalApp = (ch.valid || 0) + (ch.buffer || 0);
-      const avgCost = (ch.totalCost && totalApp)
-        ? ch.totalCost / totalApp
-        : 0;
-      const costText = avgCost ? currencyFmt.format(avgCost) : "N/A";
-      return `${ch.name} (±${costText}/applicant, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
-    }).join("; ");
+    function formatChannelList(channels){
+      return channels.map(ch=>{
+        const totalApp = (ch.valid || 0) + (ch.buffer || 0);
+        const totalCost = ch.totalCost ? ch.totalCost : 0;
+    
+        // sum of cost per applicant (akumulasi)
+        const costText = currencyFmt.format(totalCost); // kalau 0 → Rp 0
+    
+        return `${ch.name} (total cost ±${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
+      }).join("; ");
   }
 
   function updateSourcingAnalystAnalysis(){
