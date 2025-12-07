@@ -615,8 +615,43 @@
       line-height:1.6;
       margin-top:4px;
     }
-    .analysis-text p + p{
-      margin-top:6px;
+    .analysis-intro{
+      margin-bottom:6px;
+      font-weight:500;
+    }
+    .analysis-section{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:linear-gradient(to bottom right,#f9fafb,#ffffff);
+      border:1px solid rgba(148,163,184,0.35);
+      box-shadow:0 10px 20px rgba(15,23,42,0.04);
+      margin-top:8px;
+    }
+    .analysis-icon{
+      font-size:1.5rem;
+      line-height:1;
+      margin-top:2px;
+    }
+    .analysis-body{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .analysis-title{
+      font-weight:600;
+      font-size:0.85rem;
+    }
+    .analysis-summary{
+      font-size:0.8rem;
+      color:var(--ink);
+    }
+    .analysis-detail{
+      font-size:0.75rem;
+      color:var(--muted);
     }
   </style>
 </head>
@@ -1025,7 +1060,7 @@
           </div>
         </div>
         <div class="card-subtext">
-          Pilih area (Provinsi &amp; Kota) serta kombinasi Job Parent &amp; Job Type untuk melihat analisa best practice sourcing.
+          Semua filter mengikuti Provinsi terlebih dahulu. Kota, Job Parent, dan Job Type hanya menampilkan pilihan yang benar-benar ada di kombinasi area tersebut.
         </div>
 
         <div class="sa-filters">
@@ -1095,7 +1130,7 @@
         </div>
 
         <div class="filter-hint">
-          * Semua filter bersifat multiple choice. Kota baru muncul setelah Provinsi dipilih. Job Type baru muncul setelah Job Parent dipilih.
+          * Semua filter multiple choice. Kota muncul sesuai Provinsi yang dipilih. Job Parent hanya muncul jika tersedia di area (Provinsi + Kota) tersebut. Job Type muncul sesuai Job Parent yang dipilih.
         </div>
       </section>
 
@@ -1106,7 +1141,7 @@
           <div class="card-tag">Auto generated insight</div>
         </div>
         <p class="card-subtext">
-          Analisa ini menggunakan data Applicant Valid dan Buffer berdasarkan kombinasi filter di atas. Jika data tidak tersedia, akan muncul informasi bahwa analisa belum bisa dibentuk.
+          Analisa menggunakan data Applicant Valid dan Buffer berdasarkan kombinasi filter di atas. Jika data tidak tersedia, akan muncul informasi bahwa analisa belum bisa dibentuk.
         </p>
         <div id="sa-analysis-text" class="analysis-text">
           Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.
@@ -1172,6 +1207,7 @@
     "JobStreet",
     "Jobstreet Express",
     "KarirHub",
+    "KitaLutus",
     "KitaLulus",
     "Lumina",
     "Pintarnya"
@@ -1448,7 +1484,7 @@
     msJobType.setDisabled(false);
   }
 
-  // SA: update kota & job type berdasarkan prov & job parent
+  // SA: update kota & job parent & job type berdasarkan Provinsi
   function updateSaKotaOptions(selectedProv){
     if(!saKotaMS) return;
     if(!selectedProv || !selectedProv.length){
@@ -1466,21 +1502,59 @@
     saKotaMS.setDisabled(false);
   }
 
-  function updateSaJobTypeOptions(selectedParents){
+  function updateSaJobParentOptions(){
+    if(!saJobParentMS) return;
+    const provSel = saProvMS ? saProvMS.getSelected() : [];
+    const kotaSel = saKotaMS ? saKotaMS.getSelected() : [];
+
+    const parentsSet = new Set();
+    rawRows.forEach(row=>{
+      const rp = String(row[COL_PROV] ?? "");
+      const rk = String(row[COL_KOTA] ?? "");
+      if(provSel.length && !provSel.includes(rp)) return;
+      if(kotaSel.length && !kotaSel.includes(rk)) return;
+      const jp = row[COL_JOB_PARENT];
+      if(jp) parentsSet.add(String(jp));
+    });
+
+    const parentList = uniqueSorted(Array.from(parentsSet));
+    saJobParentMS.setOptions(parentList);
+    saJobParentMS.setDisabled(parentList.length === 0);
+
+    if(saJobTypeMS){
+      saJobTypeMS.setOptions([]);
+      saJobTypeMS.setDisabled(true);
+    }
+  }
+
+  function updateSaJobTypeOptions(){
     if(!saJobTypeMS) return;
-    if(!selectedParents || !selectedParents.length){
+    const provSel   = saProvMS ? saProvMS.getSelected()      : [];
+    const kotaSel   = saKotaMS ? saKotaMS.getSelected()      : [];
+    const parentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
+
+    if(!parentSel.length){
       saJobTypeMS.setOptions([]);
       saJobTypeMS.setDisabled(true);
       return;
     }
+
     const typeSet = new Set();
-    selectedParents.forEach(p=>{
-      const s = jobParentTypeMap.get(p);
-      if(s) s.forEach(t=>typeSet.add(t));
+    rawRows.forEach(row=>{
+      const rp = String(row[COL_PROV] ?? "");
+      const rk = String(row[COL_KOTA] ?? "");
+      const jp = String(row[COL_JOB_PARENT] ?? "");
+      const jt = row[COL_JOB_TYPE];
+
+      if(provSel.length && !provSel.includes(rp)) return;
+      if(kotaSel.length && !kotaSel.includes(rk)) return;
+      if(parentSel.length && !parentSel.includes(jp)) return;
+      if(jt) typeSet.add(String(jt));
     });
+
     const typeList = uniqueSorted(Array.from(typeSet));
     saJobTypeMS.setOptions(typeList);
-    saJobTypeMS.setDisabled(false);
+    saJobTypeMS.setDisabled(typeList.length === 0);
   }
 
   function initFilters(){
@@ -1515,28 +1589,33 @@
     });
   }
 
-  // Inisialisasi filter untuk halaman Sourcing Analyst
+  // Inisialisasi filter untuk halaman Sourcing Analyst (cascading: Prov -> Kota -> Job Parent -> Job Type)
   function initSourcingAnalystFilters(){
-    const provVals      = uniqueSorted(Array.from(provKotaMap.keys()));
-    const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
+    const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
+    const allJobParents = uniqueSorted(rawRows.map(r => r[COL_JOB_PARENT]).filter(Boolean));
 
     saProvMS = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
       updateSaKotaOptions(sel);
+      updateSaJobParentOptions();
       updateSourcingAnalystAnalysis();
     });
 
     saKotaMS = createMultiSelect("sa-ms-kota",[], "Semua Kota",true,()=>{
+      updateSaJobParentOptions();
       updateSourcingAnalystAnalysis();
     });
 
-    saJobParentMS = createMultiSelect("sa-ms-job-parent",jobParentVals,"Semua Job Parent",false,(sel)=>{
-      updateSaJobTypeOptions(sel);
+    saJobParentMS = createMultiSelect("sa-ms-job-parent",allJobParents,"Semua Job Parent",false,()=>{
+      updateSaJobTypeOptions();
       updateSourcingAnalystAnalysis();
     });
 
     saJobTypeMS = createMultiSelect("sa-ms-job-type",[], "Semua Job Type",true,()=>{
       updateSourcingAnalystAnalysis();
     });
+
+    // inisialisasi awal job parent (tanpa filter prov/kota → semua job parent)
+    updateSaJobParentOptions();
   }
 
   function clearFilters(){
@@ -1566,6 +1645,7 @@
       saJobTypeMS.setOptions([]);
       saJobTypeMS.setDisabled(true);
     }
+    updateSaJobParentOptions(); // reset job parent ke semua
     updateSourcingAnalystAnalysis();
   }
 
@@ -1730,7 +1810,7 @@
 
     const portalTokens = [
       "GLINTS","HIRED TODAY","INDEED","JOBSTREET EXPRESS","JOB STREET EXPRESS",
-      "JOBSTREET","JOB STREET","KARIRHUB","KARIR HUB","KITA LULUS","KITALULUS",
+      "JOBSTREET","JOB STREET","KARIRHUB","KARIR HUB","KITA LULUS","KITALUTUS","KITALULUS",
       "LUMINA","PINTARNYA","PORTAL"
     ];
 
@@ -2355,38 +2435,68 @@
     const offSummary    = computeSaMethod3MonthSummary(rows,"OFFLINE");
 
     const parts = [];
-    parts.push(`<p>${headerLine}</p>`);
+    parts.push(`<p class="analysis-intro">${headerLine}</p>`);
 
-    // Job Portal
+    // Job Portal (🌐)
     if(topPortal.length && (portalSummary.totalValid || portalSummary.totalBuffer)){
       const chText = formatChannelList(topPortal);
       parts.push(
-        `<p><strong>1. Job Portal.</strong> Sourcing melalui Job Portal didominasi oleh: ${chText}. ` +
-        `Dalam estimasi <strong>3 bulan</strong>, kombinasi Job Portal ini berpotensi menghasilkan sekitar ` +
-        `<strong>${numberFmt.format(portalSummary.estValid3)}</strong> applicant valid dan ` +
-        `<strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</p>`
+        `<div class="analysis-section">
+          <div class="analysis-icon">🌐</div>
+          <div class="analysis-body">
+            <div class="analysis-title">Job Portal</div>
+            <div class="analysis-summary">
+              Sourcing menggunakan Job Portal didominasi oleh: ${chText}.
+            </div>
+            <div class="analysis-detail">
+              Dalam estimasi <strong>3 bulan</strong>, kombinasi Job Portal tersebut berpotensi menghasilkan sekitar
+              <strong>${numberFmt.format(portalSummary.estValid3)}</strong> applicant valid dan
+              <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.
+            </div>
+          </div>
+        </div>`
       );
     }
 
-    // Media Sosial
+    // Media Sosial (📱)
     if(topMedia.length && (mediaSummary.totalValid || mediaSummary.totalBuffer)){
       const chText = formatChannelList(topMedia);
       parts.push(
-        `<p><strong>2. Online - Media Sosial.</strong> Untuk metode online media sosial, platform yang paling efektif adalah: ${chText}. ` +
-        `Secara estimasi <strong>3 bulan</strong>, channel media sosial ini dapat menghasilkan sekitar ` +
-        `<strong>${numberFmt.format(mediaSummary.estValid3)}</strong> applicant valid dan ` +
-        `<strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</p>`
+        `<div class="analysis-section">
+          <div class="analysis-icon">📱</div>
+          <div class="analysis-body">
+            <div class="analysis-title">Online - Media Sosial</div>
+            <div class="analysis-summary">
+              Untuk kanal online media sosial, platform yang paling efektif adalah: ${chText}.
+            </div>
+            <div class="analysis-detail">
+              Secara estimasi <strong>3 bulan</strong>, kombinasi media sosial ini dapat menghasilkan sekitar
+              <strong>${numberFmt.format(mediaSummary.estValid3)}</strong> applicant valid dan
+              <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.
+            </div>
+          </div>
+        </div>`
       );
     }
 
-    // Offline
+    // Offline (👣)
     if(topOffline.length && (offSummary.totalValid || offSummary.totalBuffer)){
       const chText = formatChannelList(topOffline);
       parts.push(
-        `<p><strong>3. Sourcing Offline.</strong> Aktivitas offline yang paling sering membuahkan applicant adalah: ${chText}. ` +
-        `Dalam horizon <strong>3 bulan</strong>, aktivitas offline tersebut berpotensi menghasilkan sekitar ` +
-        `<strong>${numberFmt.format(offSummary.estValid3)}</strong> applicant valid dan ` +
-        `<strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</p>`
+        `<div class="analysis-section">
+          <div class="analysis-icon">👣</div>
+          <div class="analysis-body">
+            <div class="analysis-title">Sourcing Offline</div>
+            <div class="analysis-summary">
+              Aktivitas offline yang paling sering membuahkan applicant adalah: ${chText}.
+            </div>
+            <div class="analysis-detail">
+              Dalam horizon <strong>3 bulan</strong>, aktivitas offline tersebut berpotensi menghasilkan sekitar
+              <strong>${numberFmt.format(offSummary.estValid3)}</strong> applicant valid dan
+              <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.
+            </div>
+          </div>
+        </div>`
       );
     }
 
