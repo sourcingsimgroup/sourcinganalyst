@@ -649,9 +649,11 @@
       font-size:0.8rem;
       color:var(--ink);
     }
+    /* garis estimasi 3 bulan → merah */
     .analysis-detail{
       font-size:0.75rem;
-      color:var(--muted);
+      color:#dc2626;
+      font-weight:500;
     }
   </style>
 </head>
@@ -1259,14 +1261,12 @@
   const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
   const norm = v => String(v ?? "").trim().toUpperCase();
 
+  // PARSING COST – hanya ambil digit, tanpa desimal
   function parseCostValue(v){
     if(v == null) return 0;
-    let s = String(v).trim();
-    if(!s) return 0;
-    s = s.replace(/[^0-9.,]/g,"");
-    s = s.replace(/\./g,"").replace(",",".");
-    const n = Number(s);
-    return isNaN(n) ? 0 : n;
+    const digits = String(v).replace(/[^\d]/g,"");
+    if(!digits) return 0;
+    return parseInt(digits,10);
   }
 
   function getApplicantValidValue(raw){
@@ -1685,7 +1685,7 @@
       const rowProv      = String(row[COL_PROV] ?? "");
       const rowKota      = String(row[COL_KOTA] ?? "");
       const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
-      const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
+      const rowJobType   = String(row[COL_JOB_TYPE] ?? "";
 
       if(provSel.size      && !provSel.has(rowProv)) return false;
       if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
@@ -2322,10 +2322,10 @@
   }
 
   /********** SA: ANALISA BEST PRACTICE **********/
+  // Sekarang tidak ada lagi proyeksi ×3 bulan, hanya pakai total data yang ada
   function computeSaMethod3MonthSummary(rows, methodCategory){
     let valid = 0;
     let buffer = 0;
-    const monthSet = new Set();
 
     rows.forEach(row=>{
       if(getMethodCategory(row) !== methodCategory) return;
@@ -2334,22 +2334,14 @@
       if(!v && !b) return;
       valid += v;
       buffer += b;
-      const mIdx = parseMonthIndex(row[COL_PERIODE]);
-      if(mIdx) monthSet.add(mIdx);
     });
 
-    if(valid === 0 && buffer === 0){
-      return {totalValid:0,totalBuffer:0,estValid3:0,estBuffer3:0};
-    }
-
-    const monthCount = monthSet.size || 1;
-    const avgValidPerMonth = valid / monthCount;
-    const avgBufferPerMonth = buffer / monthCount;
-
-    const estValid3 = Math.round(avgValidPerMonth * 3);
-    const estBuffer3 = Math.round(avgBufferPerMonth * 3);
-
-    return {totalValid:valid,totalBuffer:buffer,estValid3,estBuffer3};
+    return {
+      totalValid: valid,
+      totalBuffer: buffer,
+      estValid3: valid,     // pakai total asli
+      estBuffer3: buffer    // pakai total asli
+    };
   }
 
   function pickTop(list,n){
@@ -2359,16 +2351,13 @@
       .slice(0,n);
   }
 
-    function formatChannelList(channels){
-      return channels.map(ch=>{
-        const totalApp = (ch.valid || 0) + (ch.buffer || 0);
-        const totalCost = ch.totalCost ? ch.totalCost : 0;
-    
-        // sum of cost per applicant (akumulasi)
-        const costText = currencyFmt.format(totalCost); // kalau 0 → Rp 0
-    
-        return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
-      }).join("; ");
+  function formatChannelList(channels){
+    return channels.map(ch=>{
+      const totalCost = ch.totalCost ? ch.totalCost : 0;
+      // sum of cost per applicant (akumulasi)
+      const costText = currencyFmt.format(totalCost); // kalau 0 → Rp 0
+      return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
+    }).join("; ");
   }
 
   function updateSourcingAnalystAnalysis(){
