@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Applicant Cycle Management</title>
+  <title>Sourcing Intelligence Market</title>
 
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +123,7 @@
     .page{display:none;}
     .page.active{display:block;}
 
-    /* FILTER – STICKY (Dashboard) */
+    /* FILTER – STICKY (ACM) */
     .filter-card{
       margin-bottom:14px;
       position:sticky;
@@ -672,13 +672,13 @@
 
   <!-- TAB -->
   <div class="tab-row">
-    <button id="tab-dashboard" class="tab-btn active" type="button">Dashboard</button>
+    <button id="tab-ACM" class="tab-btn active" type="button">ACM</button>
     <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
   </div>
 
   <main>
-    <!-- PAGE: DASHBOARD -->
-    <section id="page-dashboard" class="page active">
+    <!-- PAGE: ACM -->
+    <section id="page-ACM" class="page active">
       <!-- FILTER -->
       <section class="card filter-card">
         <div class="card-title-row">
@@ -1698,7 +1698,7 @@
     });
   }
 
-  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali (Dashboard)
+  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali (ACM)
   function isNoFilterActive(){
     const provSel      = msProv      ? msProv.getSelected()      : [];
     const kotaSel      = msKota      ? msKota.getSelected()      : [];
@@ -2561,29 +2561,29 @@
     const saClearBtn = $("sa-clear-filters-btn");
     if(saClearBtn) saClearBtn.addEventListener("click",clearSaFilters);
 
-    const tabDashboard = $("tab-dashboard");
+    const tabACM = $("tab-ACM");
     const tabSa = $("tab-sa");
-    const pageDashboard = $("page-dashboard");
+    const pageACM = $("page-ACM");
     const pageSa = $("page-sa");
 
     function setPage(name){
       if(name === "sa"){
-        pageDashboard.classList.remove("active");
+        pageACM.classList.remove("active");
         pageSa.classList.add("active");
-        tabDashboard.classList.remove("active");
+        tabACM.classList.remove("active");
         tabSa.classList.add("active");
       }else{
-        pageDashboard.classList.add("active");
+        pageACM.classList.add("active");
         pageSa.classList.remove("active");
-        tabDashboard.classList.add("active");
+        tabACM.classList.add("active");
         tabSa.classList.remove("active");
       }
     }
 
-    if(tabDashboard) tabDashboard.addEventListener("click",()=>setPage("dashboard"));
+    if(tabACM) tabACM.addEventListener("click",()=>setPage("ACM"));
     if(tabSa) tabSa.addEventListener("click",()=>setPage("sa"));
 
-    setPage("dashboard");
+    setPage("ACM");
     loadCsv();
   });
 </script>
