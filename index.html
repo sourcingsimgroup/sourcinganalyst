@@ -2368,7 +2368,7 @@
         // sum of cost per applicant (akumulasi)
         const costText = currencyFmt.format(totalCost); // kalau 0 → Rp 0
     
-        return `${ch.name} (total cost ±${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
+        return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
       }).join("; ");
   }
 
