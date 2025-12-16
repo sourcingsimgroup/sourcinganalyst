@@ -759,21 +759,20 @@
           <div class="card-title">Filter Performance Sourcing Area</div>
           <div class="header-right-flex">
             <button id="psa-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
-            <div class="card-tag">Group Client (A) · Area (B)</div>
           </div>
         </div>
 
         <div class="card-subtext">
-          Pilih <b>Group Client</b> dan/atau <b>Area</b>. Tabel menampilkan <b>Area (row)</b> dan <b>Bulan (kolom)</b>. Nilai tampil format <b>xx.xx%</b>.
+          Pilih <b>Group Client</b> dan/atau <b>Area</b>. Tabel menampilkan <b>Area</b> dan <b>Bulan</b>.
         </div>
 
         <div class="perf-filters">
           <div class="filter-group">
-            <label class="filter-label">Group Client (Kolom A)</label>
+            <label class="filter-label">Group Client</label>
             <select id="psa-group" class="select-pill"></select>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Area (Kolom B)</label>
+            <label class="filter-label">Area</label>
             <select id="psa-area" class="select-pill"></select>
           </div>
         </div>
@@ -790,7 +789,6 @@
       <section class="card" style="margin-top:14px;">
         <div class="card-title-row">
           <div class="card-title">Achievement Rasio Submit</div>
-          <div class="card-tag">Area (row) × Bulan (kolom)</div>
         </div>
         <p class="card-subtext">Achievement Submit per area untuk Jan–Des (berdasarkan filter).</p>
 
@@ -811,7 +809,6 @@
       <section class="card" style="margin-top:14px;">
         <div class="card-title-row">
           <div class="card-title">Achievement Qualified</div>
-          <div class="card-tag">Area (row) × Bulan (kolom)</div>
         </div>
         <p class="card-subtext">Achievement Qualified per area untuk Jan–Des (berdasarkan filter).</p>
 
@@ -2071,9 +2068,6 @@ function loadPerformanceClient(){
       psc.submitFields = pscBuildMonthFields(psc.fields, PSC_SUBMIT_COLS);
       psc.qualFields   = pscBuildMonthFields(psc.fields, PSC_QUAL_COLS);
 
-      $("psc-colhint").textContent =
-        `Client=${psc.colClient||"(missing A)"} · Industry=${psc.colIndustry||"(missing B)"} · SubmitCols=${PSC_SUBMIT_COLS.join(",")} · QualCols=${PSC_QUAL_COLS.join(",")}`;
-
       const industries = uniqueSortedText(psc.rows.map(r=>r[psc.colIndustry]));
       setSelectOptions($("psc-industry"), industries, "Pilih Industry");
 
@@ -2144,16 +2138,13 @@ function loadPerformanceArea(){
         return;
       }
 
-      // Group Client=kolom A, Area=kolom B
+      // Group Client
       psa.colGroup = getFieldByLetter(psa.fields,"A");
       psa.colArea  = getFieldByLetter(psa.fields,"B");
 
       // Bulan: pakai mapping kolom yang sama (aman, karena report biasanya konsisten)
       psa.submitFields = psaBuildMonthFields(psa.fields, PSC_SUBMIT_COLS);
       psa.qualFields   = psaBuildMonthFields(psa.fields, PSC_QUAL_COLS);
-
-      $("psa-colhint").textContent =
-        `Group=${psa.colGroup||"(missing A)"} · Area=${psa.colArea||"(missing B)"} · SubmitCols=${PSC_SUBMIT_COLS.join(",")} · QualCols=${PSC_QUAL_COLS.join(",")}`;
 
       const groups = uniqueSortedText(psa.rows.map(r=>r[psa.colGroup]));
       setSelectOptions($("psa-group"), groups, "Semua Group");
