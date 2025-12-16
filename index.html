@@ -2765,8 +2765,6 @@ function updateSourcingAnalystAnalysis(){
 
 /* ==========================
    PERFORMANCE: column-letter mapping (Submit / Qualified)
-   Submit: E,H,K,N,Q,T,W,Z,AC,AE,AI,AL
-   Qualified: F,I,L,O,R,U,X,AA,AD,AF,AJ,AM
 ========================== */
 const SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AE","AI","AL"];
 const QUAL_COLS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
@@ -2779,7 +2777,7 @@ let perfClientFields = [];
 
 function initPerfClient(){
   const industrySelect = $("pc-industry");
-  industrySelect.innerHTML = `<option value="">Pilih Industry...</option>`;
+  industrySelect.innerHTML = `<option value="">Pilih Industry</option>`;
 
   const inds = uniqueSorted(perfClientRows.map(r => r[perfClientFields[1]])); // column B
   inds.forEach(v=>{
@@ -2886,8 +2884,8 @@ function initPerfArea(){
   const groupSelect = $("pa-group");
   const areaSelect = $("pa-area");
 
-  groupSelect.innerHTML = `<option value="">Pilih Group Client...</option>`;
-  areaSelect.innerHTML = `<option value="">Pilih Area...</option>`;
+  groupSelect.innerHTML = `<option value="">Pilih Group Client</option>`;
+  areaSelect.innerHTML = `<option value="">Pilih Area</option>`;
   areaSelect.disabled = true;
 
   const colGroup = perfAreaFields[0]; // A
@@ -2929,7 +2927,7 @@ function initPerfArea(){
 
   $("pa-clear-btn").addEventListener("click", ()=>{
     groupSelect.value = "";
-    areaSelect.innerHTML = `<option value="">Pilih Area...</option>`;
+    areaSelect.innerHTML = `<option value="">Pilih Area</option>`;
     areaSelect.disabled = true;
     updatePerfAreaTables();
   });
@@ -3039,8 +3037,8 @@ function initPerfJobtype(){
   const colParent = perfJobFields[0];
   const colType   = perfJobFields[1];
 
-  parentSel.innerHTML = `<option value="">Pilih Job Parent...</option>`;
-  typeSel.innerHTML = `<option value="">Pilih Job Type...</option>`;
+  parentSel.innerHTML = `<option value="">Pilih Job Parent</option>`;
+  typeSel.innerHTML = `<option value="">Pilih Job Type</option>`;
   typeSel.disabled = true;
 
   const parents = uniqueSorted(perfJobRows.map(r=>r[colParent]));
@@ -3082,7 +3080,7 @@ function initPerfJobtype(){
   $("pj-clear-btn").addEventListener("click", ()=>{
     $("pj-area").value = "";
     parentSel.value = "";
-    typeSel.innerHTML = `<option value="">Pilih Job Type...</option>`;
+    typeSel.innerHTML = `<option value="">Pilih Job Type</option>`;
     typeSel.disabled = true;
     updatePerfJobtypeTables();
   });
