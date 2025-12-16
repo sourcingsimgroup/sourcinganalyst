@@ -2828,8 +2828,8 @@
     tbody.innerHTML = "";
     const fmt = (v)=>{
       if(v == null) return "-";
-      // tampil seperti screenshot: 10.000%
-      return `${Number(v).toFixed(3)}%`;
+      // tampil seperti screenshot: 10.00%
+      return `${Number(v).toFixed(2)}%`;
     };
 
     if(!matrix.length){
