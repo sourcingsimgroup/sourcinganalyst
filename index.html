@@ -103,6 +103,7 @@
       display:flex;
       gap:8px;
       margin-bottom:12px;
+      flex-wrap:wrap;
     }
     .tab-btn{
       border-radius:999px;
@@ -113,6 +114,7 @@
       cursor:pointer;
       color:var(--muted);
       font-weight:500;
+      white-space:nowrap;
     }
     .tab-btn.active{
       background:var(--brand);
@@ -123,16 +125,10 @@
     .page{display:none;}
     .page.active{display:block;}
 
-    /* FILTER – STICKY (ACM) */
-    .filter-card{
-      margin-bottom:14px;
-      position:sticky;
-      top:0;
-      z-index:30;
-    }
-
-    /* FILTER – STICKY (Sourcing Analyst) */
-    .sa-filter-card{
+    /* FILTER – STICKY */
+    .filter-card,
+    .sa-filter-card,
+    .psc-filter-card{
       margin-bottom:14px;
       position:sticky;
       top:0;
@@ -153,13 +149,22 @@
       margin-top:10px;
     }
 
+    .psc-filters{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+
     @media (max-width:1024px){
       .filters{grid-template-columns:repeat(2,minmax(0,1fr));}
       .sa-filters{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .psc-filters{grid-template-columns:repeat(2,minmax(0,1fr));}
     }
     @media (max-width:640px){
       .filters{grid-template-columns:1fr;}
       .sa-filters{grid-template-columns:1fr;}
+      .psc-filters{grid-template-columns:1fr;}
       header{gap:8px;}
       .title-block h1{font-size:1.3rem;}
     }
@@ -278,6 +283,7 @@
       align-items:center;
       margin-bottom:8px;
       gap:8px;
+      flex-wrap:wrap;
     }
 
     .card-title{
@@ -338,7 +344,8 @@
     }
 
     .filter-body,
-    .sa-filter-body{
+    .sa-filter-body,
+    .psc-filter-body{
       margin-top:6px;
     }
 
@@ -347,15 +354,18 @@
         display:inline-flex;
       }
       .filter-body,
-      .sa-filter-body{
+      .sa-filter-body,
+      .psc-filter-body{
         display:none;
       }
       .filter-card.open .filter-body,
-      .sa-filter-card.open .sa-filter-body{
+      .sa-filter-card.open .sa-filter-body,
+      .psc-filter-card.open .psc-filter-body{
         display:block;
       }
       .filter-card,
-      .sa-filter-card{
+      .sa-filter-card,
+      .psc-filter-card{
         box-shadow:0 18px 40px rgba(15,23,42,0.12);
         border-color:rgba(148,163,184,0.4);
       }
@@ -605,6 +615,8 @@
       margin:4px 2px 0;
       font-size:0.72rem;
       color:var(--muted);
+      gap:10px;
+      flex-wrap:wrap;
     }
 
     .status-left{
@@ -696,8 +708,26 @@
     }
     .analysis-detail{
       font-size:0.75rem;
-      color:#b91c1c;      /* estimasi 3 bulan → merah */
+      color:#b91c1c;
       font-weight:500;
+    }
+
+    /* PSC pivot table */
+    .psc-table-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .percent-cell{
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+    }
+    .psc-hint{
+      font-size:0.78rem;
+      color:var(--muted);
+      margin-top:6px;
     }
   </style>
 </head>
@@ -719,6 +749,7 @@
   <div class="tab-row">
     <button id="tab-ACM" class="tab-btn active" type="button">ACM</button>
     <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
+    <button id="tab-psc" class="tab-btn" type="button">Performance Sourcing Client</button>
   </div>
 
   <main>
@@ -1113,10 +1144,9 @@
             <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
           </div>
         </div>
-        <div class="card-subtext">
-        </div>
+        <div class="card-subtext"></div>
 
-        <!-- BODY FILTER SA (BISA DITUTUP DI MOBILE/TABLET) -->
+        <!-- BODY FILTER SA -->
         <div class="sa-filter-body">
           <div class="sa-filters">
             <div class="filter-group">
@@ -1196,12 +1226,128 @@
           <div class="card-title">Analisa Best Practice Sourcing</div>
           <div class="card-tag">Auto generated insight</div>
         </div>
-        <p class="card-subtext">
-        </p>
+        <p class="card-subtext"></p>
         <div id="sa-analysis-text" class="analysis-text">
           Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.
         </div>
       </section>
+    </section>
+
+    <!-- PAGE: PERFORMANCE SOURCING CLIENT -->
+    <section id="page-psc" class="page">
+      <!-- FILTER PSC -->
+      <section class="card psc-filter-card">
+        <div class="card-title-row">
+          <div class="card-title">Filter Performance Sourcing Client</div>
+          <div class="header-right-flex">
+            <button id="psc-filter-toggle-btn" class="filter-toggle-btn" type="button">
+              <span class="hamburger-icon">☰</span>
+              <span>Filter</span>
+            </button>
+            <button id="psc-clear-filters-btn" class="clear-btn" type="button">Hapus filter</button>
+            <div class="card-tag">Tahun · Industry</div>
+          </div>
+        </div>
+        <div class="card-subtext">
+          Pilih <strong>Tahun</strong> dan <strong>Industry</strong> untuk menampilkan pivot performa per klien (kolom) vs bulan (baris).
+        </div>
+
+        <div class="psc-filter-body">
+          <div class="psc-filters">
+            <div class="filter-group">
+              <label class="filter-label">Tahun</label>
+              <div class="ms" id="psc-ms-year">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Tahun</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari tahun..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada tahun</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Industry</label>
+              <div class="ms" id="psc-ms-industry">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Industry</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari industry..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada industry</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-hint">
+            * Setelah memilih Tahun/Industry, tabel akan menampilkan bulan Jan–Des sebagai baris dan nama klien sebagai kolom.
+          </div>
+        </div>
+
+        <div id="psc-load-state" class="loading">
+          <div class="spinner"></div>
+          <span>Memuat data Query Report Client...</span>
+        </div>
+        <div id="psc-error-state" class="error" style="display:none;"></div>
+      </section>
+
+      <!-- TABLE 1 -->
+      <section class="card" style="margin-bottom:14px;">
+        <div class="psc-table-title">
+          <div class="card-title">Achievement Rasio Submit</div>
+          <div class="card-tag">% per bulan</div>
+        </div>
+        <p class="card-subtext">
+          Baris = Bulan, Kolom = Client, Isi = % (diambil dari data Query Report Client sesuai filter).
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead id="psc-submit-head"></thead>
+            <tbody id="psc-submit-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="psc-submit-status">Menunggu filter...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TABLE 2 -->
+      <section class="card">
+        <div class="psc-table-title">
+          <div class="card-title">Achievement Applicant Qualified</div>
+          <div class="card-tag">% per bulan</div>
+        </div>
+        <p class="card-subtext">
+          Baris = Bulan, Kolom = Client, Isi = % (diambil dari data Query Report Client sesuai filter).
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead id="psc-qual-head"></thead>
+            <tbody id="psc-qual-body"></tbody>
+          </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="psc-qual-status">Menunggu filter...</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="psc-hint">
+        Jika kolom CSV Anda punya nama yang berbeda (misalnya “Client Name” atau “Industry Name”), tinggal saya sesuaikan di fungsi deteksi kolom.
+      </div>
     </section>
   </main>
 </div>
@@ -1209,6 +1355,9 @@
 <script>
   /********** KONFIGURASI URL CSV **********/
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
+
+  // CSV kedua: Query Report Client
+  const CSV_URL_CLIENT = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
 
   const COL_PROV      = "PROVINSI MINAT PENEMPATAN";
   const COL_KOTA      = "KOTA MINAT PENEMPATAN";
@@ -1241,48 +1390,18 @@
     "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
   ];
 
-  // Tabel media sosial – hanya ini yang tampil
   const FIXED_MEDIA_LIST = [
-    "Facebook",
-    "FLK",
-    "Instagram",
-    "Linkedin",
-    "SIM Talent Search",
-    "Telegram",
-    "Tiktok",
-    "Twitter",
-    "Whatsapp / Media Chat"
+    "Facebook","FLK","Instagram","Linkedin","SIM Talent Search","Telegram","Tiktok","Twitter","Whatsapp / Media Chat"
   ];
 
-  // Tabel job portal
   const FIXED_PORTAL_LIST = [
-    "Glints",
-    "Hired Today",
-    "Indeed",
-    "JobStreet",
-    "Jobstreet Express",
-    "KarirHub",
-    "KitaLutus",
-    "KitaLulus",
-    "Lumina",
-    "Pintarnya"
+    "Glints","Hired Today","Indeed","JobStreet","Jobstreet Express","KarirHub","KitaLutus","KitaLulus","Lumina","Pintarnya"
   ];
 
-  // Tabel offline
   const FIXED_OFFLINE_LIST = [
-    "Academy/Training/Seminar",
-    "Balai Latian Kerja (BLK)",
-    "Brosur/Banner/Spanduk/Flyer",
-    "Campus Hiring",
-    "Disnaker",
-    "Drop CV",
-    "Freelance Recruiter",
-    "Job Fair",
-    "Komunitas Informal",
-    "Referensi Client",
-    "Referensi Teman/Keluarga/Komunitas",
-    "School Hiring",
-    "Walk In Interview (WI)"
+    "Academy/Training/Seminar","Balai Latian Kerja (BLK)","Brosur/Banner/Spanduk/Flyer","Campus Hiring","Disnaker",
+    "Drop CV","Freelance Recruiter","Job Fair","Komunitas Informal","Referensi Client",
+    "Referensi Teman/Keluarga/Komunitas","School Hiring","Walk In Interview (WI)"
   ];
 
   const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
@@ -1311,9 +1430,24 @@
   let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
   let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
 
+  // PSC state
+  let clientReportRows = [];
+  let pscYearMS, pscIndustryMS;
+  let clientCols = {
+    year: null,
+    industry: null,
+    client: null,
+    month: null,
+    metric: null,        // optional: jika ada kolom “Metric”
+    submit: null,        // optional: jika format long punya kolom submit
+    qualified: null      // optional: jika format long punya kolom qualified
+  };
+
   const $ = id => document.getElementById(id);
   const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
   const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
+  const percentFmt0 = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
+  const percentFmt1 = new Intl.NumberFormat('id-ID',{maximumFractionDigits:1});
   const norm = v => String(v ?? "").trim().toUpperCase();
 
   function parseCostValue(v){
@@ -1326,6 +1460,40 @@
     return isNaN(n) ? 0 : n;
   }
 
+  function parsePercentValue(v){
+    if(v == null) return null;
+    let s = String(v).trim();
+    if(!s) return null;
+
+    // jika ada "%" → ambil angka
+    const hasPct = s.includes("%");
+    s = s.replace(/[^0-9.,-]/g,"");
+    if(!s) return null;
+
+    // normalisasi decimal
+    // contoh: "12,5" -> 12.5 | "1.234,5" -> 1234.5
+    s = s.replace(/\./g,"").replace(",",".");
+    const n = Number(s);
+    if(isNaN(n)) return null;
+
+    // jika sudah ada "%" → anggap 0-100
+    if(hasPct) return n;
+
+    // heuristik: jika 0..1 → anggap fraction (0.32 = 32%)
+    if(n >= 0 && n <= 1) return n * 100;
+
+    return n; // anggap sudah persen
+  }
+
+  function formatPercent(p){
+    if(p == null) return "-";
+    if(isNaN(p)) return "-";
+    const abs = Math.abs(p);
+    // 0 decimal jika angka bulat; else 1 decimal
+    const isInt = Math.abs(p - Math.round(p)) < 1e-9;
+    return (isInt ? percentFmt0.format(p) : percentFmt1.format(p)) + "%";
+  }
+
   function getApplicantValidValue(raw){
     return norm(raw) === norm(KATEGORI_VALID_TARGET) ? 1 : 0;
   }
@@ -1335,14 +1503,13 @@
   }
 
   function uniqueSorted(list){
-    return Array.from(new Set(list.filter(Boolean)))
+    return Array.from(new Set(list.filter(v=>v!==null && v!==undefined && String(v).trim()!=="" )))
       .sort((a,b)=>String(a).localeCompare(String(b),"id"));
   }
 
   function createMultiSelect(rootId, options, placeholder, disabled, onChange){
     const root = $(rootId);
     const toggle = root.querySelector(".ms-toggle");
-    const panel = root.querySelector(".ms-panel");
     const searchInput = root.querySelector(".ms-search");
     const optsContainer = root.querySelector(".ms-options");
     const emptyEl = root.querySelector(".ms-empty");
@@ -1539,7 +1706,6 @@
     msJobType.setDisabled(false);
   }
 
-  // SA: update kota & job parent & job type berdasarkan Provinsi
   function updateSaKotaOptions(selectedProv){
     if(!saKotaMS) return;
     if(!selectedProv || !selectedProv.length){
@@ -1644,7 +1810,6 @@
     });
   }
 
-  // Inisialisasi filter untuk halaman Sourcing Analyst (cascading: Prov -> Kota -> Job Parent -> Job Type)
   function initSourcingAnalystFilters(){
     const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
     const allJobParents = uniqueSorted(rawRows.map(r => r[COL_JOB_PARENT]).filter(Boolean));
@@ -1669,7 +1834,6 @@
       updateSourcingAnalystAnalysis();
     });
 
-    // inisialisasi awal job parent (tanpa filter prov/kota → semua job parent)
     updateSaJobParentOptions();
   }
 
@@ -1700,7 +1864,7 @@
       saJobTypeMS.setOptions([]);
       saJobTypeMS.setDisabled(true);
     }
-    updateSaJobParentOptions(); // reset job parent ke semua
+    updateSaJobParentOptions();
     updateSourcingAnalystAnalysis();
   }
 
@@ -1731,7 +1895,6 @@
     });
   }
 
-  // Filter khusus SA: Prov + Kota + Job Parent + Job Type
   function getSourcingAnalystFilteredRows(){
     const provSel      = new Set(saProvMS ? saProvMS.getSelected()      : []);
     const kotaSel      = new Set(saKotaMS ? saKotaMS.getSelected()      : []);
@@ -1753,7 +1916,6 @@
     });
   }
 
-  // Mengecek apakah benar-benar tidak ada filter aktif sama sekali (ACM)
   function isNoFilterActive(){
     const provSel      = msProv      ? msProv.getSelected()      : [];
     const kotaSel      = msKota      ? msKota.getSelected()      : [];
@@ -1813,7 +1975,6 @@
     return result;
   }
 
-  // AGREGASI PROVINSI DINAMIS: hanya tampilkan provinsi yang punya Applicant Valid atau Buffer (>0)
   function aggregateProvDynamic(rows){
     const map = new Map();
 
@@ -1838,20 +1999,17 @@
     return res;
   }
 
-  /********** LOGIKA KATEGORI METODE (OFFLINE / ONLINE PORTAL / ONLINE MEDSOS / LAINNYA) **********/
   function getMethodCategory(row){
     const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
     const metodeText = norm(row[COL_METODE] ?? "");
     const combined   = (mediaText + " " + metodeText).trim();
 
-    // 1) Langsung dari kolom "MEDIA SOURCING" (AG)
     if(mediaText.includes("OFFLINE")) return "OFFLINE";
     if(mediaText.includes("ONLINE - JOB PORTAL")) return "ONLINE - JOB PORTAL";
     if(mediaText.includes("ONLINE - MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
     if(mediaText.includes("ONLINE JOB PORTAL")) return "ONLINE - JOB PORTAL";
     if(mediaText.includes("ONLINE MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
 
-    // 2) Fallback dari teks gabungan (AG + AF)
     const text = combined;
 
     const offlineTokens = [
@@ -1911,7 +2069,6 @@
     ];
   }
 
-  /********** TABEL MEDIA SOSIAL (hanya ONLINE - MEDIA SOSIAL, TANPA LAINNYA) **********/
   function aggregateMediaSocial(rows){
     const map = new Map();
     FIXED_MEDIA_LIST.forEach(name=>{
@@ -1933,7 +2090,6 @@
       {token:"TIKTOK",label:"Tiktok"},
       {token:" TT",label:"Tiktok"},
       {token:"TWITTER",label:"Twitter"},
-      // WA / chat
       {token:"WHATSAPP",label:"Whatsapp / Media Chat"},
       {token:" WA ",label:"Whatsapp / Media Chat"},
       {token:"WA.",label:"Whatsapp / Media Chat"},
@@ -1973,7 +2129,6 @@
     return FIXED_MEDIA_LIST.map(name=>map.get(name));
   }
 
-  /********** TABEL JOB PORTAL (hanya ONLINE - JOB PORTAL, TANPA LAINNYA) **********/
   function aggregateJobPortal(rows){
     const map = new Map();
     FIXED_PORTAL_LIST.forEach(name=>{
@@ -2027,7 +2182,6 @@
     return FIXED_PORTAL_LIST.map(name=>map.get(name));
   }
 
-  /********** TABEL OFFLINE (hanya OFFLINE, TANPA LAINNYA) **********/
   function aggregateOffline(rows){
     const map = new Map();
     FIXED_OFFLINE_LIST.forEach(name=>{
@@ -2038,41 +2192,29 @@
       {token:"ACADEMY",label:"Academy/Training/Seminar"},
       {token:"TRAINING",label:"Academy/Training/Seminar"},
       {token:"SEMINAR",label:"Academy/Training/Seminar"},
-
       {token:"BALAI LATIHAN KERJA",label:"Balai Latian Kerja (BLK)"},
       {token:"BALAI LATIAN",label:"Balai Latian Kerja (BLK)"},
       {token:" BLK",label:"Balai Latian Kerja (BLK)"},
-
       {token:"BROSUR",label:"Brosur/Banner/Spanduk/Flyer"},
       {token:"BANNER",label:"Brosur/Banner/Spanduk/Flyer"},
       {token:"SPANDUK",label:"Brosur/Banner/Spanduk/Flyer"},
       {token:"FLYER",label:"Brosur/Banner/Spanduk/Flyer"},
-
       {token:"CAMPUS HIRING",label:"Campus Hiring"},
       {token:"CAMPUS",label:"Campus Hiring"},
-
       {token:"DISNAKER",label:"Disnaker"},
-
       {token:"DROP CV",label:"Drop CV"},
-
       {token:"FREELANCE RECRUITER",label:"Freelance Recruiter"},
       {token:"FREELANCE REC",label:"Freelance Recruiter"},
-
       {token:"JOB FAIR",label:"Job Fair"},
-
       {token:"KOMUNITAS INFORMAL",label:"Komunitas Informal"},
-
       {token:"REFERENSI CLIENT",label:"Referensi Client"},
       {token:"REF CLIENT",label:"Referensi Client"},
-
       {token:"REFERENSI TEMAN",label:"Referensi Teman/Keluarga/Komunitas"},
       {token:"REF TEMAN",label:"Referensi Teman/Keluarga/Komunitas"},
       {token:"REFERENSI KELUARGA",label:"Referensi Teman/Keluarga/Komunitas"},
       {token:"REFERENSI KOMUNITAS",label:"Referensi Teman/Keluarga/Komunitas"},
-
       {token:"SCHOOL HIRING",label:"School Hiring"},
       {token:"SCHOOL",label:"School Hiring"},
-
       {token:"WALK IN",label:"Walk In Interview (WI)"},
       {token:"WALKIN",label:"Walk In Interview (WI)"},
       {token:" WI",label:"Walk In Interview (WI)"}
@@ -2319,7 +2461,6 @@
     updateSummary(filtered);
     updateChart(filtered);
 
-    // PROVINSI
     const provAgg = noFilter
       ? aggregateByFixedList(filtered,COL_PROV,FIXED_PROV_LIST,false)
       : aggregateProvDynamic(filtered);
@@ -2329,35 +2470,30 @@
       `Ditampilkan ${provAgg.length} provinsi · ${numberFmt.format(totalRows)} baris terfilter · ` +
       `Grand Total Valid: ${numberFmt.format(totalProv.grandValid)}, Buffer: ${numberFmt.format(totalProv.grandBuffer)}`;
 
-    // METODE SOURCING (MEDIA SOURCING)
     const metodeAgg = aggregateMetodeSmart(filtered);
     const totalMetode = renderTable("tbl-metode-body",metodeAgg,"GRAND TOTAL METODE");
     $("status-metode").textContent =
       `Ditampilkan ${metodeAgg.length} metode · ${numberFmt.format(totalRows)} baris terfilter · ` +
       `Grand Total Valid: ${numberFmt.format(totalMetode.grandValid)}, Buffer: ${numberFmt.format(totalMetode.grandBuffer)}`;
 
-    // MEDIA SOSIAL (ONLINE - MEDIA SOSIAL) — TANPA LAINNYA
     const mediaAgg = aggregateMediaSocial(filtered);
     const totalMedia = renderTable("tbl-media-body",mediaAgg,"GRAND TOTAL MEDIA SOSIAL");
     $("status-media").textContent =
       `Ditampilkan ${mediaAgg.length} media · ${numberFmt.format(totalRows)} baris terfilter · ` +
       `Grand Total Valid: ${numberFmt.format(totalMedia.grandValid)}, Buffer: ${numberFmt.format(totalMedia.grandBuffer)}`;
 
-    // PENDIDIKAN — TANPA LAINNYA
     const eduAgg = aggregateByFixedList(filtered,COL_EDU,FIXED_EDU_LIST,false);
     const totalEdu = renderTable("tbl-edu-body",eduAgg,"GRAND TOTAL PENDIDIKAN");
     $("status-edu").textContent =
       `Ditampilkan ${eduAgg.length} level pendidikan · ${numberFmt.format(totalRows)} baris terfilter · ` +
       `Grand Total Valid: ${numberFmt.format(totalEdu.grandValid)}, Buffer: ${numberFmt.format(totalEdu.grandBuffer)}`;
 
-    // JOB PORTAL (ONLINE - JOB PORTAL) — TANPA LAINNYA
     const portalAgg = aggregateJobPortal(filtered);
     const totalPortal = renderTable("tbl-portal-body",portalAgg,"GRAND TOTAL JOB PORTAL");
     $("status-portal").textContent =
       `Ditampilkan ${portalAgg.length} portal · ${numberFmt.format(totalRows)} baris terfilter · ` +
       `Grand Total Valid: ${numberFmt.format(totalPortal.grandValid)}, Buffer: ${numberFmt.format(totalPortal.grandBuffer)}`;
 
-    // OFFLINE — TANPA LAINNYA
     const offlineAgg = aggregateOffline(filtered);
     const totalOffline = renderTable("tbl-offline-body",offlineAgg,"GRAND TOTAL OFFLINE");
     $("status-offline").textContent =
@@ -2403,11 +2539,10 @@
       .slice(0,n);
   }
 
-  // cost per applicant = SUM cost per applicant (akumulasi)
   function formatChannelList(channels){
     return channels.map(ch=>{
       const totalCost = ch.totalCost ? ch.totalCost : 0;
-      const costText = currencyFmt.format(totalCost); // kalau 0 → Rp 0
+      const costText = currencyFmt.format(totalCost);
       return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
     }).join("; ");
   }
@@ -2421,12 +2556,7 @@
     const jobParentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
     const jobTypeSel   = saJobTypeMS ? saJobTypeMS.getSelected()   : [];
 
-    if(
-      provSel.length === 0 &&
-      kotaSel.length === 0 &&
-      jobParentSel.length === 0 &&
-      jobTypeSel.length === 0
-    ){
+    if(provSel.length === 0 && kotaSel.length === 0 && jobParentSel.length === 0 && jobTypeSel.length === 0){
       container.innerHTML = "Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.";
       return;
     }
@@ -2461,7 +2591,6 @@
     }
     headerLine += " pola sourcing yang terlihat paling efektif berdasarkan data Applicant Valid &amp; Buffer adalah:";
 
-    // Agregasi per metode & kanal
     const portalAgg  = aggregateJobPortal(rows);
     const mediaAgg   = aggregateMediaSocial(rows);
     const offlineAgg = aggregateOffline(rows);
@@ -2477,7 +2606,6 @@
     const parts = [];
     parts.push(`<p class="analysis-intro">${headerLine}</p>`);
 
-    // Job Portal (🌐)
     if(topPortal.length && (portalSummary.totalValid || portalSummary.totalBuffer)){
       const chText = formatChannelList(topPortal);
       parts.push(
@@ -2485,20 +2613,13 @@
           <div class="analysis-icon">🌐</div>
           <div class="analysis-body">
             <div class="analysis-title">Job Portal</div>
-            <div class="analysis-summary">
-              Sourcing menggunakan Job Portal didominasi oleh: ${chText}.
-            </div>
-            <div class="analysis-detail">
-              Dalam estimasi <strong>3 bulan</strong>, kombinasi Job Portal tersebut berpotensi menghasilkan sekitar
-              <strong>${numberFmt.format(portalSummary.estValid3)}</strong> applicant valid dan
-              <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.
-            </div>
+            <div class="analysis-summary">Sourcing menggunakan Job Portal didominasi oleh: ${chText}.</div>
+            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~ <strong>${numberFmt.format(portalSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</div>
           </div>
         </div>`
       );
     }
 
-    // Media Sosial (📱)
     if(topMedia.length && (mediaSummary.totalValid || mediaSummary.totalBuffer)){
       const chText = formatChannelList(topMedia);
       parts.push(
@@ -2506,20 +2627,13 @@
           <div class="analysis-icon">📱</div>
           <div class="analysis-body">
             <div class="analysis-title">Online - Media Sosial</div>
-            <div class="analysis-summary">
-              Untuk kanal online media sosial, platform yang paling efektif adalah: ${chText}.
-            </div>
-            <div class="analysis-detail">
-              Secara estimasi <strong>3 bulan</strong>, kombinasi media sosial ini dapat menghasilkan sekitar
-              <strong>${numberFmt.format(mediaSummary.estValid3)}</strong> applicant valid dan
-              <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.
-            </div>
+            <div class="analysis-summary">Platform paling efektif: ${chText}.</div>
+            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~ <strong>${numberFmt.format(mediaSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</div>
           </div>
         </div>`
       );
     }
 
-    // Offline (👣)
     if(topOffline.length && (offSummary.totalValid || offSummary.totalBuffer)){
       const chText = formatChannelList(topOffline);
       parts.push(
@@ -2527,14 +2641,8 @@
           <div class="analysis-icon">👣</div>
           <div class="analysis-body">
             <div class="analysis-title">Sourcing Offline</div>
-            <div class="analysis-summary">
-              Aktivitas offline yang paling sering membuahkan applicant adalah: ${chText}.
-            </div>
-            <div class="analysis-detail">
-              Dalam horizon <strong>3 bulan</strong>, aktivitas offline tersebut berpotensi menghasilkan sekitar
-              <strong>${numberFmt.format(offSummary.estValid3)}</strong> applicant valid dan
-              <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.
-            </div>
+            <div class="analysis-summary">Aktivitas offline yang paling membuahkan applicant: ${chText}.</div>
+            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~ <strong>${numberFmt.format(offSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</div>
           </div>
         </div>`
       );
@@ -2547,7 +2655,286 @@
     container.innerHTML = parts.join("");
   }
 
-  /********** LOAD CSV MENGGUNAKAN PAPAPARSE (DOWNLOAD: TRUE) **********/
+  /********** PSC (Performance Sourcing Client) **********/
+  function detectClientReportColumns(fields){
+    const res = {year:null,industry:null,client:null,month:null,metric:null,submit:null,qualified:null};
+    if(!fields || !fields.length) return res;
+
+    const findBy = (predList) => {
+      for(const p of predList){
+        const f = fields.find(x=>p(norm(x)));
+        if(f) return f;
+      }
+      return null;
+    };
+
+    res.year = findBy([
+      s=> s==="TAHUN" || s==="YEAR",
+      s=> s.includes("TAHUN"),
+      s=> s.includes("YEAR")
+    ]);
+
+    res.industry = findBy([
+      s=> s==="INDUSTRY" || s.includes("INDUSTRI"),
+      s=> s.includes("INDUSTRY")
+    ]);
+
+    res.client = findBy([
+      s=> s==="CLIENT" || s==="NAMA CLIENT" || s==="CLIENT NAME",
+      s=> s.includes("CLIENT"),
+      s=> s.includes("KLIEN")
+    ]);
+
+    res.month = findBy([
+      s=> s==="BULAN" || s==="MONTH" || s==="PERIODE" || s.includes("BULAN"),
+      s=> s.includes("MONTH"),
+      s=> s.includes("PERIODE")
+    ]);
+
+    res.metric = findBy([
+      s=> s==="METRIC" || s.includes("METRIC") || s.includes("INDIKATOR")
+    ]);
+
+    // format long (punya kolom nilai submit/qualified)
+    res.submit = findBy([
+      s=> s.includes("SUBMIT") && (s.includes("RASIO") || s.includes("RATIO") || s.includes("ACHIEV") || s.includes("ACHIEVEMENT")),
+      s=> s.includes("ACHIEV") && s.includes("SUBMIT"),
+      s=> s.includes("RATIO") && s.includes("SUBMIT"),
+      s=> s.includes("RASIO") && s.includes("SUBMIT")
+    ]);
+
+    res.qualified = findBy([
+      s=> s.includes("QUALIFIED") && (s.includes("ACHIEV") || s.includes("ACHIEVEMENT") || s.includes("APPLICANT")),
+      s=> s.includes("ACHIEV") && s.includes("QUALIFIED"),
+      s=> s.includes("APPLICANT") && s.includes("QUALIFIED")
+    ]);
+
+    return res;
+  }
+
+  function initPscFilters(){
+    // build options Year & Industry dari data
+    const years = uniqueSorted(clientReportRows.map(r=>r[clientCols.year]).filter(Boolean));
+    const industries = uniqueSorted(clientReportRows.map(r=>r[clientCols.industry]).filter(Boolean));
+
+    pscYearMS = createMultiSelect("psc-ms-year", years, "Semua Tahun", false, ()=>{
+      updatePscTables();
+    });
+    pscIndustryMS = createMultiSelect("psc-ms-industry", industries, "Semua Industry", false, ()=>{
+      updatePscTables();
+    });
+
+    $("psc-load-state").style.display = "none";
+    updatePscTables();
+  }
+
+  function clearPscFilters(){
+    if(pscYearMS) pscYearMS.clear();
+    if(pscIndustryMS) pscIndustryMS.clear();
+    updatePscTables();
+  }
+
+  function getPscFilteredRows(){
+    const yearSel = new Set(pscYearMS ? pscYearMS.getSelected() : []);
+    const indSel  = new Set(pscIndustryMS ? pscIndustryMS.getSelected() : []);
+
+    return clientReportRows.filter(r=>{
+      const y = String(r[clientCols.year] ?? "");
+      const i = String(r[clientCols.industry] ?? "");
+      if(yearSel.size && !yearSel.has(y)) return false;
+      if(indSel.size  && !indSel.has(i)) return false;
+      return true;
+    });
+  }
+
+  // Pivot generic: month rows (1..12) vs client columns
+  function buildPivotLong(rows, valueCol){
+    const monthCol = clientCols.month;
+    const clientCol = clientCols.client;
+
+    const clients = uniqueSorted(rows.map(r=>r[clientCol]).filter(Boolean));
+    const pivot = new Map(); // key: monthIdx -> Map(client -> percent)
+
+    MONTHS.forEach(m=>{
+      pivot.set(m.idx, new Map());
+    });
+
+    rows.forEach(r=>{
+      const c = r[clientCol];
+      if(!c) return;
+      const mIdx = parseMonthIndex(r[monthCol]);
+      if(!mIdx) return;
+      const p = parsePercentValue(r[valueCol]);
+      if(p == null) return;
+      const map = pivot.get(mIdx);
+      if(!map) return;
+      // jika data dobel, pilih yang terakhir (bisa diubah jadi avg jika perlu)
+      map.set(String(c), p);
+    });
+
+    return {clients, pivot};
+  }
+
+  // Pivot wide: ada kolom metric + kolom bulan Jan..Des
+  function buildPivotWideMetric(rows, metricValueMatcher){
+    // deteksi kolom bulan pada header CSV
+    const fields = Object.keys(rows[0] || {});
+    const monthCols = [];
+    MONTHS.forEach(m=>{
+      const found = fields.find(f=> norm(f) === norm(m.label) || norm(f).includes(norm(m.label)));
+      if(found) monthCols.push({idx:m.idx,label:m.label,col:found});
+      else{
+        // fallback: JAN, FEB, etc
+        const abbr = m.label.slice(0,3);
+        const found2 = fields.find(f=> norm(f) === norm(abbr) || norm(f).includes(norm(abbr)));
+        if(found2) monthCols.push({idx:m.idx,label:m.label,col:found2});
+      }
+    });
+
+    const clients = uniqueSorted(rows.map(r=>r[clientCols.client]).filter(Boolean));
+    const pivot = new Map();
+    MONTHS.forEach(m=> pivot.set(m.idx,new Map()));
+
+    rows.forEach(r=>{
+      const metricText = norm(r[clientCols.metric] ?? "");
+      if(!metricValueMatcher(metricText)) return;
+      const c = r[clientCols.client];
+      if(!c) return;
+
+      monthCols.forEach(mc=>{
+        const p = parsePercentValue(r[mc.col]);
+        if(p == null) return;
+        pivot.get(mc.idx).set(String(c), p);
+      });
+    });
+
+    return {clients, pivot};
+  }
+
+  function renderPscPivotTable(headId, bodyId, pivotResult){
+    const thead = $(headId);
+    const tbody = $(bodyId);
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    const clients = pivotResult.clients || [];
+    const pivot = pivotResult.pivot;
+
+    // HEAD
+    const trh = document.createElement("tr");
+    const th0 = document.createElement("th");
+    th0.textContent = "Bulan";
+    trh.appendChild(th0);
+
+    clients.forEach(c=>{
+      const th = document.createElement("th");
+      th.textContent = String(c);
+      trh.appendChild(th);
+    });
+
+    thead.appendChild(trh);
+
+    // BODY 12 rows
+    MONTHS.forEach(m=>{
+      const tr = document.createElement("tr");
+      const tdMonth = document.createElement("td");
+      tdMonth.className = "col-label";
+      tdMonth.textContent = m.label;
+      tr.appendChild(tdMonth);
+
+      clients.forEach(c=>{
+        const td = document.createElement("td");
+        td.className = "percent-cell";
+        const mm = pivot.get(m.idx);
+        const v = mm ? mm.get(String(c)) : null;
+        td.textContent = formatPercent(v);
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updatePscTables(){
+    const errBox = $("psc-error-state");
+    errBox.style.display = "none";
+
+    if(!clientReportRows.length){
+      $("psc-submit-status").textContent = "Data client belum siap / belum ter-load.";
+      $("psc-qual-status").textContent = "Data client belum siap / belum ter-load.";
+      return;
+    }
+
+    const yearSel = pscYearMS ? pscYearMS.getSelected() : [];
+    const indSel  = pscIndustryMS ? pscIndustryMS.getSelected() : [];
+
+    const filtered = getPscFilteredRows();
+
+    // hint kalau belum pilih apa-apa
+    if(yearSel.length === 0 && indSel.length === 0){
+      $("psc-submit-status").textContent = "Menunggu filter Tahun / Industry...";
+      $("psc-qual-status").textContent = "Menunggu filter Tahun / Industry...";
+      // tampilkan head kosong minimal
+      renderPscPivotTable("psc-submit-head","psc-submit-body",{clients:[],pivot:new Map(MONTHS.map(m=>[m.idx,new Map()]))});
+      renderPscPivotTable("psc-qual-head","psc-qual-body",{clients:[],pivot:new Map(MONTHS.map(m=>[m.idx,new Map()]))});
+      return;
+    }
+
+    if(!filtered.length){
+      $("psc-submit-status").textContent = "Tidak ada data untuk kombinasi filter ini.";
+      $("psc-qual-status").textContent = "Tidak ada data untuk kombinasi filter ini.";
+      renderPscPivotTable("psc-submit-head","psc-submit-body",{clients:[],pivot:new Map(MONTHS.map(m=>[m.idx,new Map()]))});
+      renderPscPivotTable("psc-qual-head","psc-qual-body",{clients:[],pivot:new Map(MONTHS.map(m=>[m.idx,new Map()]))});
+      return;
+    }
+
+    let submitPivot = null;
+    let qualPivot = null;
+
+    // PRIORITY:
+    // (A) kalau ada kolom submit & qualified (format long) -> pakai buildPivotLong
+    // (B) kalau ada kolom metric + kolom bulan (format wide) -> pakai buildPivotWideMetric
+    try{
+      if(clientCols.submit && clientCols.qualified && clientCols.month && clientCols.client){
+        submitPivot = buildPivotLong(filtered, clientCols.submit);
+        qualPivot   = buildPivotLong(filtered, clientCols.qualified);
+      }else if(clientCols.metric && clientCols.client){
+        // wide metric
+        submitPivot = buildPivotWideMetric(filtered, (t)=> t.includes("SUBMIT"));
+        qualPivot   = buildPivotWideMetric(filtered, (t)=> t.includes("QUALIFIED"));
+      }else{
+        // fallback: coba cari kolom yang mengandung "SUBMIT" dan "QUALIFIED" di header
+        const fields = Object.keys(filtered[0] || {});
+        const submitCol = fields.find(f=> norm(f).includes("SUBMIT"));
+        const qualCol   = fields.find(f=> norm(f).includes("QUALIFIED"));
+        if(submitCol && qualCol && clientCols.month && clientCols.client){
+          submitPivot = buildPivotLong(filtered, submitCol);
+          qualPivot   = buildPivotLong(filtered, qualCol);
+        }else{
+          throw new Error("Kolom report client belum terdeteksi (butuh minimal: Tahun, Industry, Client, Bulan, dan kolom nilai Submit/Qualified atau kolom Metric).");
+        }
+      }
+
+      renderPscPivotTable("psc-submit-head","psc-submit-body",submitPivot);
+      renderPscPivotTable("psc-qual-head","psc-qual-body",qualPivot);
+
+      const labelYear = yearSel.length ? yearSel.join(", ") : "semua tahun";
+      const labelInd  = indSel.length  ? indSel.join(", ")  : "semua industry";
+      const clientCount = uniqueSorted(filtered.map(r=>r[clientCols.client]).filter(Boolean)).length;
+
+      $("psc-submit-status").textContent = `Filter: ${labelYear} · ${labelInd} · Client: ${clientCount} · Baris data: ${numberFmt.format(filtered.length)}`;
+      $("psc-qual-status").textContent   = `Filter: ${labelYear} · ${labelInd} · Client: ${clientCount} · Baris data: ${numberFmt.format(filtered.length)}`;
+    }catch(e){
+      console.error(e);
+      errBox.textContent = "PSC error: " + e.message;
+      errBox.style.display = "block";
+      $("psc-submit-status").textContent = "Gagal membentuk tabel (cek error).";
+      $("psc-qual-status").textContent = "Gagal membentuk tabel (cek error).";
+    }
+  }
+
+  /********** LOAD CSV ACM **********/
   function loadCsv(){
     const errBox = $("error-state");
     errBox.style.display = "none";
@@ -2578,7 +2965,6 @@
           initFilters();
           updateAllTables();
 
-          // Sourcing Analyst
           initSourcingAnalystFilters();
           updateSourcingAnalystAnalysis();
         }catch(e){
@@ -2599,12 +2985,65 @@
     });
   }
 
+  /********** LOAD CSV CLIENT (PSC) **********/
+  function loadClientCsv(){
+    const errBox = $("psc-error-state");
+    errBox.style.display = "none";
+    $("psc-load-state").style.display = "flex";
+
+    Papa.parse(CSV_URL_CLIENT,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
+      complete:(parsed)=>{
+        try{
+          clientReportRows = parsed.data || [];
+          const fields = parsed.meta && parsed.meta.fields ? parsed.meta.fields : [];
+          clientCols = detectClientReportColumns(fields);
+
+          $("psc-load-state").style.display = "none";
+
+          if(!clientReportRows.length){
+            errBox.textContent = "Data Query Report Client kosong atau CSV tidak terbaca.";
+            errBox.style.display = "block";
+            return;
+          }
+
+          // minimal check
+          if(!clientCols.year || !clientCols.industry || !clientCols.client){
+            errBox.textContent = "Kolom wajib di Query Report Client belum terdeteksi. Minimal butuh: Tahun, Industry, Client.";
+            errBox.style.display = "block";
+            // tetap coba init dengan apa yang ada, supaya terlihat
+          }
+
+          initPscFilters();
+        }catch(e){
+          console.error(e);
+          $("psc-load-state").style.display = "none";
+          errBox.textContent = "Terjadi kesalahan saat memproses Query Report Client: " + e.message;
+          errBox.style.display = "block";
+        }
+      },
+      error:(err)=>{
+        console.error(err);
+        $("psc-load-state").style.display = "none";
+        errBox.textContent =
+          "Terjadi kesalahan saat memuat CSV Query Report Client: " + err.message +
+          ". Pastikan link bisa dibuka di tab incognito tanpa login.";
+        errBox.style.display = "block";
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded",()=>{
     const clearBtn = $("clear-filters-btn");
     if(clearBtn) clearBtn.addEventListener("click",clearFilters);
 
     const saClearBtn = $("sa-clear-filters-btn");
     if(saClearBtn) saClearBtn.addEventListener("click",clearSaFilters);
+
+    const pscClearBtn = $("psc-clear-filters-btn");
+    if(pscClearBtn) pscClearBtn.addEventListener("click",clearPscFilters);
 
     // Toggle hamburger filter ACM
     const filterCard = document.querySelector(".filter-card");
@@ -2624,30 +3063,51 @@
       });
     }
 
+    // Toggle hamburger filter PSC
+    const pscFilterCard = document.querySelector(".psc-filter-card");
+    const pscFilterToggleBtn = $("psc-filter-toggle-btn");
+    if(pscFilterCard && pscFilterToggleBtn){
+      pscFilterToggleBtn.addEventListener("click",()=>{
+        pscFilterCard.classList.toggle("open");
+      });
+    }
+
     const tabACM = $("tab-ACM");
     const tabSa = $("tab-sa");
+    const tabPsc = $("tab-psc");
+
     const pageACM = $("page-ACM");
     const pageSa = $("page-sa");
+    const pagePsc = $("page-psc");
 
     function setPage(name){
+      const setActive = (btn, page, isActive)=>{
+        if(isActive){ btn.classList.add("active"); page.classList.add("active"); }
+        else{ btn.classList.remove("active"); page.classList.remove("active"); }
+      };
+
       if(name === "sa"){
-        pageACM.classList.remove("active");
-        pageSa.classList.add("active");
-        tabACM.classList.remove("active");
-        tabSa.classList.add("active");
+        setActive(tabACM,pageACM,false);
+        setActive(tabSa,pageSa,true);
+        setActive(tabPsc,pagePsc,false);
+      }else if(name === "psc"){
+        setActive(tabACM,pageACM,false);
+        setActive(tabSa,pageSa,false);
+        setActive(tabPsc,pagePsc,true);
       }else{
-        pageACM.classList.add("active");
-        pageSa.classList.remove("active");
-        tabACM.classList.add("active");
-        tabSa.classList.remove("active");
+        setActive(tabACM,pageACM,true);
+        setActive(tabSa,pageSa,false);
+        setActive(tabPsc,pagePsc,false);
       }
     }
 
     if(tabACM) tabACM.addEventListener("click",()=>setPage("ACM"));
     if(tabSa) tabSa.addEventListener("click",()=>setPage("sa"));
+    if(tabPsc) tabPsc.addEventListener("click",()=>setPage("psc"));
 
     setPage("ACM");
     loadCsv();
+    loadClientCsv();
   });
 </script>
 </body>
