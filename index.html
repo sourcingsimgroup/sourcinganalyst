@@ -1428,8 +1428,8 @@
   let PSC_FIELDS = [];
 
   const $ = id => document.getElementById(id);
-  const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
-  const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
+  const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:2});
+  const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:2});
   const norm = v => String(v ?? "").trim().toUpperCase();
 
   function parseCostValue(v){
@@ -2919,7 +2919,7 @@
           PSC_COL_CLIENT = det.client;
 
           // ======= FIX mapping kolom bulan sesuai permintaan kamu (berdasarkan huruf kolom) =======
-          const SUBMIT_LETTERS = ["E","H","K","N","Q","T","W","Z","AC","AE","AI","AL"];
+          const SUBMIT_LETTERS = ["E","H","K","N","Q","T","W","Z","AC","AF","AI","AL"];
           const QUAL_LETTERS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
 
           PSC_MONTH_COLS_SUBMIT = buildMonthColsFromLetters(PSC_FIELDS, SUBMIT_LETTERS);
