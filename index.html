@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- PapaParse -->
+  <!-- PapaParse untuk parsing CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
@@ -38,24 +38,55 @@
       color:var(--ink);
     }
 
-    body{display:flex;justify-content:center;padding:16px;}
-    .app-shell{width:100%;max-width:1240px;}
+    body{
+      display:flex;
+      justify-content:center;
+      padding:16px;
+    }
+
+    .app-shell{
+      width:100%;
+      max-width:1240px;
+    }
 
     header{
-      display:flex;flex-wrap:wrap;gap:12px;
-      justify-content:space-between;align-items:flex-start;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      justify-content:space-between;
+      align-items:flex-start;
       margin-bottom:12px;
     }
-    .title-block h1{font-size:1.6rem;font-weight:700;letter-spacing:0.02em;color:var(--ink);}
-    .title-block p{margin-top:4px;font-size:0.9rem;color:var(--muted);}
+
+    .title-block h1{
+      font-size:1.6rem;
+      font-weight:700;
+      letter-spacing:0.02em;
+      color:var(--ink);
+    }
+    .title-block p{
+      margin-top:4px;
+      font-size:0.9rem;
+      color:var(--muted);
+    }
 
     .pill{
-      padding:8px 14px;background:rgba(37,99,235,0.06);
-      border-radius:999px;font-size:0.8rem;color:var(--brand);
-      font-weight:600;display:inline-flex;align-items:center;gap:6px;
+      padding:8px 14px;
+      background:rgba(37,99,235,0.06);
+      border-radius:999px;
+      font-size:0.8rem;
+      color:var(--brand);
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
     }
+
     .pill-dot{
-      width:8px;height:8px;border-radius:999px;background:var(--brand);
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--brand);
       box-shadow:0 0 0 4px rgba(37,99,235,0.18);
     }
 
@@ -67,36 +98,68 @@
       border:1px solid rgba(148,163,184,0.18);
     }
 
-    /* TAB */
-    .tab-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-    .tab-btn{
-      border-radius:999px;border:1px solid var(--line);
-      background:#f9fafb;font-size:0.8rem;
-      padding:6px 14px;cursor:pointer;color:var(--muted);font-weight:500;
+    /* TAB / HALAMAN */
+    .tab-row{
+      display:flex;
+      gap:8px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
     }
-    .tab-btn.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+    .tab-btn{
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      font-size:0.8rem;
+      padding:6px 14px;
+      cursor:pointer;
+      color:var(--muted);
+      font-weight:500;
+    }
+    .tab-btn.active{
+      background:var(--brand);
+      color:#ffffff;
+      border-color:var(--brand);
+    }
+
     .page{display:none;}
     .page.active{display:block;}
 
-    /* FILTER – STICKY */
-    .filter-card,.sa-filter-card{
-      margin-bottom:14px;position:sticky;top:0;z-index:30;
+    /* FILTER – STICKY (ACM) */
+    .filter-card{
+      margin-bottom:14px;
+      position:sticky;
+      top:0;
+      z-index:30;
+    }
+
+    /* FILTER – STICKY (Sourcing Analyst) */
+    .sa-filter-card{
+      margin-bottom:14px;
+      position:sticky;
+      top:0;
+      z-index:30;
     }
 
     .filters{
       display:grid;
       grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:10px;margin-top:10px;
+      gap:10px;
+      margin-top:10px;
     }
+
     .sa-filters{
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:10px;margin-top:10px;
+      gap:10px;
+      margin-top:10px;
     }
+
+    /* Performance filter (native select) */
     .perf-filters{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;margin-top:10px;
+      gap:10px;
+      margin-top:10px;
     }
 
     @media (max-width:1024px){
@@ -105,166 +168,582 @@
       .perf-filters{grid-template-columns:1fr;}
     }
     @media (max-width:640px){
-      .filters,.sa-filters,.perf-filters{grid-template-columns:1fr;}
+      .filters{grid-template-columns:1fr;}
+      .sa-filters{grid-template-columns:1fr;}
       header{gap:8px;}
       .title-block h1{font-size:1.3rem;}
     }
 
-    .filter-group{display:flex;flex-direction:column;gap:4px;font-size:0.8rem;}
-    .filter-group-double{gap:6px;}
-    .filter-label{font-weight:600;color:var(--muted);font-size:0.78rem;}
+    .filter-group{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:0.8rem;
+    }
 
-    /* Multi-select custom */
-    .ms{position:relative;}
-    .ms-toggle{
-      width:100%;
-      border-radius:999px;border:1px solid var(--line);
-      background:#f9fafb;padding:7px 9px;font-size:0.78rem;
-      display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;
+    .filter-group-double{
+      gap:6px;
     }
-    .ms-placeholder{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .ms-counter{font-size:0.68rem;color:var(--muted);white-space:nowrap;}
-    .ms-arrow{font-size:0.68rem;}
-    .ms-panel{
-      position:absolute;left:0;right:0;top:100%;margin-top:4px;
-      background:#fff;border-radius:14px;box-shadow:0 12px 30px rgba(15,23,42,0.12);
-      border:1px solid rgba(148,163,184,0.4);padding:8px;z-index:20;display:none;
-    }
-    .ms.open .ms-panel{display:block;}
-    .ms-search{
-      width:100%;padding:6px 8px;border-radius:999px;border:1px solid var(--line);
-      font-size:0.75rem;margin-bottom:6px;outline:none;
-    }
-    .ms-options{max-height:220px;overflow-y:auto;}
-    .ms-option{display:flex;align-items:center;gap:6px;padding:3px 4px;font-size:0.76rem;cursor:pointer;}
-    .ms-option input{accent-color:var(--brand);}
-    .ms-empty{font-size:0.74rem;color:var(--muted);padding:4px 2px;display:none;}
-    .ms-disabled .ms-toggle{background:#e5e7eb;color:#9ca3af;cursor:not-allowed;}
 
-    .filter-hint{margin-top:8px;font-size:0.75rem;color:var(--muted);}
-
-    .card-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
-    .card-title{font-size:0.95rem;font-weight:600;}
-    .card-tag{
-      font-size:0.7rem;padding:4px 10px;border-radius:999px;
-      background:var(--brand-soft);color:var(--brand);font-weight:600;white-space:nowrap;
+    .filter-label{
+      font-weight:600;
+      color:var(--muted);
+      font-size:0.78rem;
     }
-    .header-right-flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
-    .clear-btn{
-      border-radius:999px;border:1px solid var(--line);background:#f9fafb;
-      font-size:0.75rem;padding:5px 10px;cursor:pointer;color:var(--muted);
-    }
-    .clear-btn:hover{background:#eef2ff;border-color:var(--brand);color:var(--brand);}
 
-    /* select pill */
+    /* Native select style */
     .select-pill{
       width:100%;
-      border-radius:999px;border:1px solid var(--line);
-      background:#f9fafb;padding:8px 10px;font-size:0.78rem;outline:none;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      padding:8px 10px;
+      font-size:0.78rem;
+      outline:none;
+      color:var(--ink);
+    }
+    .select-pill:disabled{
+      background:#e5e7eb;
+      color:#9ca3af;
+      cursor:not-allowed;
     }
 
-    /* HAMBURGER FILTER BUTTON */
-    .filter-toggle-btn{
-      display:none;border-radius:999px;border:1px solid var(--line);
-      background:#fff;font-size:0.75rem;padding:5px 10px;cursor:pointer;
-      color:var(--muted);align-items:center;gap:6px;box-shadow:0 6px 16px rgba(15,23,42,0.06);
+    /* Multi-select custom */
+    .ms{
+      position:relative;
     }
-    .filter-toggle-btn .hamburger-icon{font-size:0.9rem;line-height:1;}
-    .filter-body,.sa-filter-body{margin-top:6px;}
+    .ms-toggle{
+      width:100%;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      padding:7px 9px;
+      font-size:0.78rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      cursor:pointer;
+    }
+    .ms-placeholder{
+      flex:1;
+      text-align:left;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .ms-counter{
+      font-size:0.68rem;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .ms-arrow{
+      font-size:0.68rem;
+    }
+    .ms-panel{
+      position:absolute;
+      left:0;
+      right:0;
+      top:100%;
+      margin-top:4px;
+      background:#ffffff;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(15,23,42,0.12);
+      border:1px solid rgba(148,163,184,0.4);
+      padding:8px;
+      z-index:20;
+      display:none;
+    }
+    .ms.open .ms-panel{
+      display:block;
+    }
+    .ms-search{
+      width:100%;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:0.75rem;
+      margin-bottom:6px;
+      outline:none;
+    }
+    .ms-options{
+      max-height:220px;
+      overflow-y:auto;
+    }
+    .ms-option{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 4px;
+      font-size:0.76rem;
+      cursor:pointer;
+    }
+    .ms-option input{
+      accent-color:var(--brand);
+    }
+    .ms-empty{
+      font-size:0.74rem;
+      color:var(--muted);
+      padding:4px 2px;
+      display:none;
+    }
+    .ms-disabled .ms-toggle{
+      background:#e5e7eb;
+      color:#9ca3af;
+      cursor:not-allowed;
+    }
+
+    .filter-hint{
+      margin-top:8px;
+      font-size:0.75rem;
+      color:var(--muted);
+    }
+
+    .card-title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      gap:8px;
+    }
+
+    .card-title{
+      font-size:0.95rem;
+      font-weight:600;
+    }
+
+    .card-tag{
+      font-size:0.7rem;
+      padding:4px 10px;
+      border-radius:999px;
+      background:var(--brand-soft);
+      color:var(--brand);
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    .header-right-flex{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .clear-btn{
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      font-size:0.75rem;
+      padding:5px 10px;
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .clear-btn:hover{
+      background:#eef2ff;
+      border-color:var(--brand);
+      color:var(--brand);
+    }
+
+    /* HAMBURGER FILTER BUTTON (MOBILE/TABLET) */
+    .filter-toggle-btn{
+      display:none;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      font-size:0.75rem;
+      padding:5px 10px;
+      cursor:pointer;
+      color:var(--muted);
+      align-items:center;
+      gap:6px;
+      box-shadow:0 6px 16px rgba(15,23,42,0.06);
+    }
+    .filter-toggle-btn .hamburger-icon{
+      font-size:0.9rem;
+      line-height:1;
+    }
+
+    .filter-body,
+    .sa-filter-body{
+      margin-top:6px;
+    }
+
     @media (max-width:1024px){
-      .filter-toggle-btn{display:inline-flex;}
-      .filter-body,.sa-filter-body{display:none;}
+      .filter-toggle-btn{
+        display:inline-flex;
+      }
+      .filter-body,
+      .sa-filter-body{
+        display:none;
+      }
       .filter-card.open .filter-body,
-      .sa-filter-card.open .sa-filter-body{display:block;}
-      .filter-card,.sa-filter-card{
+      .sa-filter-card.open .sa-filter-body{
+        display:block;
+      }
+      .filter-card,
+      .sa-filter-card{
         box-shadow:0 18px 40px rgba(15,23,42,0.12);
         border-color:rgba(148,163,184,0.4);
       }
     }
 
-    /* Chart */
-    .chart-card{margin-bottom:14px;}
-    .chart-legend{display:flex;align-items:center;gap:16px;font-size:0.75rem;color:var(--muted);margin-bottom:6px;flex-wrap:wrap;}
-    .legend-item{display:flex;align-items:center;gap:6px;}
-    .legend-dot{width:14px;height:8px;border-radius:999px;}
+    /* Grafik bulanan – VERTIKAL */
+    .chart-card{
+      margin-bottom:14px;
+    }
+    .chart-legend{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      font-size:0.75rem;
+      color:var(--muted);
+      margin-bottom:6px;
+      flex-wrap:wrap;
+    }
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .legend-dot{
+      width:14px;
+      height:8px;
+      border-radius:999px;
+    }
+
     .legend-valid{background:#2563eb;}
     .legend-buffer{background:#f97316;}
+
     .chart-body{
-      display:flex;align-items:flex-end;gap:10px;height:260px;padding:8px 8px 4px;
-      border-radius:16px;background:linear-gradient(to top,#f9fafb,#fff);
-      border:1px solid var(--line);overflow-x:auto;
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+      height:260px;
+      padding:8px 8px 4px;
+      border-radius:16px;
+      background:linear-gradient(to top,#f9fafb,#ffffff);
+      border:1px solid var(--line);
+      overflow-x:auto;
     }
-    .chart-col{flex:1;min-width:48px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;}
-    .chart-col-bars{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:4px;width:100%;}
-    .chart-bar-vert{width:14px;border-radius:6px 6px 0 0;background:#e5e7eb;transition:height .25s ease-out;}
+
+    .chart-col{
+      flex:1;
+      min-width:48px;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-end;
+      gap:4px;
+    }
+
+    .chart-col-bars{
+      flex:1;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      gap:4px;
+      width:100%;
+    }
+
+    .chart-bar-vert{
+      width:14px;
+      border-radius:6px 6px 0 0;
+      background:#e5e7eb;
+      transition:height .25s ease-out;
+    }
+
     .bar-valid{background:#2563eb;}
     .bar-buffer{background:#f97316;}
-    .chart-col-values{font-size:0.7rem;text-align:center;font-variant-numeric:tabular-nums;color:#111827;line-height:1.2;}
-    .chart-col-label{font-size:0.7rem;text-align:center;color:var(--muted);white-space:nowrap;}
-    .chart-footer{margin-top:6px;font-size:0.72rem;color:var(--muted);font-style:italic;}
 
-    /* Summary */
-    .summary-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px;}
-    @media (max-width:900px){.summary-row{grid-template-columns:1fr;}}
+    .chart-col-values{
+      font-size:0.7rem;
+      text-align:center;
+      font-variant-numeric:tabular-nums;
+      color:#111827;
+      line-height:1.2;
+    }
+
+    .chart-col-label{
+      font-size:0.7rem;
+      text-align:center;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .chart-footer{
+      margin-top:6px;
+      font-size:0.72rem;
+      color:var(--muted);
+      font-style:italic;
+    }
+
+    /* Summary cards */
+    .summary-row{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+    @media (max-width:900px){
+      .summary-row{grid-template-columns:1fr;}
+    }
+
     .summary-card{
-      border-radius:16px;padding:12px 14px;background:#fff;
+      border-radius:16px;
+      padding:12px 14px;
+      background:#ffffff;
       box-shadow:0 14px 30px rgba(15,23,42,0.06);
       border:1px solid rgba(148,163,184,0.2);
-      display:flex;flex-direction:column;gap:6px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
-    .summary-header{display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;}
-    .summary-title{font-weight:600;}
-    .summary-tag{font-size:0.7rem;padding:3px 8px;border-radius:999px;background:#f3f4f6;}
-    .summary-body{display:flex;justify-content:space-between;gap:8px;font-size:0.8rem;margin-top:4px;}
-    .summary-metric{flex:1;}
-    .summary-label{color:var(--muted);font-size:0.73rem;}
-    .summary-value{font-weight:700;font-size:0.95rem;}
+
+    .summary-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:0.78rem;
+    }
+
+    .summary-title{
+      font-weight:600;
+    }
+
+    .summary-tag{
+      font-size:0.7rem;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#f3f4f6;
+    }
+
+    .summary-body{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:0.8rem;
+      margin-top:4px;
+    }
+
+    .summary-metric{
+      flex:1;
+    }
+
+    .summary-label{
+      color:var(--muted);
+      font-size:0.73rem;
+    }
+
+    .summary-value{
+      font-weight:700;
+      font-size:0.95rem;
+    }
+
     .summary-card.male .summary-title{color:var(--male);}
     .summary-card.female .summary-title{color:var(--female);}
     .summary-card.total .summary-title{color:var(--total);}
 
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:12px;}
-    @media (max-width:960px){.grid{grid-template-columns:1fr;}}
-    .card-subtext{font-size:0.75rem;color:var(--muted);margin-bottom:8px;}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:12px;
+    }
+    @media (max-width:960px){
+      .grid{grid-template-columns:1fr;}
+    }
 
-    .table-wrap{width:100%;overflow-x:auto;border-radius:12px;border:1px solid var(--line);background:#f9fafb;}
-    table{width:100%;border-collapse:collapse;font-size:0.78rem;min-width:860px;}
-    thead{background:#111827;color:#f9fafb;}
-    th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
-    thead th{position:sticky;top:0;z-index:1;}
-    tbody tr:nth-child(even){background:#f3f4f6;}
-    tbody tr:last-child td:first-child{border-bottom-left-radius:12px;}
-    tbody tr:last-child td:last-child{border-bottom-right-radius:12px;}
-    .col-label{font-weight:600;color:#111827;}
-    .col-number{text-align:right;font-variant-numeric:tabular-nums;}
-    .muted-row{color:var(--muted);}
-    .total-row{background:#e5e7eb;color:#111827;font-weight:700;}
+    .card-subtext{
+      font-size:0.75rem;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
 
-    .status-bar{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 0;font-size:0.72rem;color:var(--muted);gap:10px;flex-wrap:wrap;}
-    .status-left{display:flex;align-items:center;gap:6px;}
-    .status-dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,0.3);}
-    .status-right{font-style:italic;}
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+    }
 
-    .loading{display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--muted);margin-top:6px;}
-    .spinner{width:14px;height:14px;border-radius:999px;border:2px solid rgba(37,99,235,0.18);border-top-color:var(--brand);animation:spin 0.7s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .error{margin-top:8px;font-size:0.8rem;color:#b91c1c;}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.78rem;
+      min-width:520px;
+      table-layout:fixed; /* IMPORTANT: fixed width */
+    }
 
-    /* ANALISA TEXT */
-    .analysis-text{font-size:0.8rem;color:var(--ink);line-height:1.6;margin-top:4px;}
-    .analysis-intro{margin-bottom:6px;font-weight:500;}
+    thead{
+      background:#111827;
+      color:#f9fafb;
+    }
+
+    th,td{
+      padding:7px 10px;
+      text-align:left;
+      border-bottom:1px solid var(--line);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    tbody tr:nth-child(even){
+      background:#f3f4f6;
+    }
+
+    tbody tr:last-child td:first-child{
+      border-bottom-left-radius:12px;
+    }
+    tbody tr:last-child td:last-child{
+      border-bottom-right-radius:12px;
+    }
+
+    .col-label{
+      font-weight:600;
+      color:#111827;
+    }
+
+    .col-number{
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .muted-row{
+      color:var(--muted);
+    }
+
+    .total-row{
+      background:#e5e7eb;
+      color:#111827;
+      font-weight:700;
+    }
+
+    .status-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:4px 2px 0;
+      font-size:0.72rem;
+      color:var(--muted);
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .status-left{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:#22c55e;
+      box-shadow:0 0 0 3px rgba(34,197,94,0.3);
+    }
+
+    .status-right{
+      font-style:italic;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:0.8rem;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .spinner{
+      width:14px;
+      height:14px;
+      border-radius:999px;
+      border:2px solid rgba(37,99,235,0.18);
+      border-top-color:var(--brand);
+      animation:spin 0.7s linear infinite;
+    }
+
+    @keyframes spin{
+      to{transform:rotate(360deg);}
+    }
+
+    .error{
+      margin-top:8px;
+      font-size:0.8rem;
+      color:#b91c1c;
+    }
+
+    /* ANALISA TEXT (Sourcing Analyst) */
+    .analysis-text{
+      font-size:0.8rem;
+      color:var(--ink);
+      line-height:1.6;
+      margin-top:4px;
+    }
+    .analysis-intro{
+      margin-bottom:6px;
+      font-weight:500;
+    }
     .analysis-section{
-      display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:14px;
-      background:linear-gradient(to bottom right,#f9fafb,#fff);
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:linear-gradient(to bottom right,#f9fafb,#ffffff);
       border:1px solid rgba(148,163,184,0.35);
       box-shadow:0 10px 20px rgba(15,23,42,0.04);
       margin-top:8px;
     }
-    .analysis-icon{font-size:1.5rem;line-height:1;margin-top:2px;}
-    .analysis-body{flex:1;display:flex;flex-direction:column;gap:3px;}
-    .analysis-title{font-weight:600;font-size:0.85rem;}
-    .analysis-summary{font-size:0.8rem;color:var(--ink);}
-    .analysis-detail{font-size:0.75rem;color:#b91c1c;font-weight:500;}
+    .analysis-icon{
+      font-size:1.5rem;
+      line-height:1;
+      margin-top:2px;
+    }
+    .analysis-body{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .analysis-title{
+      font-weight:600;
+      font-size:0.85rem;
+    }
+    .analysis-summary{
+      font-size:0.8rem;
+      color:var(--ink);
+    }
+    .analysis-detail{
+      font-size:0.75rem;
+      color:#b91c1c;
+      font-weight:500;
+    }
+
+    /* ========= FIX WIDTH TABLES: ACM 3 columns ========= */
+    .acm-3col th:nth-child(1), .acm-3col td:nth-child(1){width:58%;}
+    .acm-3col th:nth-child(2), .acm-3col td:nth-child(2){width:21%;}
+    .acm-3col th:nth-child(3), .acm-3col td:nth-child(3){width:21%;}
+
+    /* ========= FIX WIDTH TABLES: Performance matrix (13 columns) ========= */
+    .matrix-13 th:nth-child(1), .matrix-13 td:nth-child(1){width:340px;}
+    .matrix-13 th:not(:first-child), .matrix-13 td:not(:first-child){width:96px; text-align:right;}
   </style>
 </head>
 
@@ -273,10 +752,12 @@
   <header>
     <div class="title-block">
       <h1>Sourcing Intelligence Market</h1>
-      <p>Analisa Sourcing berdasarkan Applicant Valid &amp; Buffer + Performance Sourcing Client &amp; Area.</p>
+      <p>Analisa Sourcing berdasarkan Applicant Valid &amp; Buffer + Performance (Client, Area, Jobtype).</p>
     </div>
     <div class="title-right">
-      <span class="pill"><span class="pill-dot"></span></span>
+      <span class="pill">
+        <span class="pill-dot"></span>
+      </span>
     </div>
   </header>
 
@@ -286,23 +767,27 @@
     <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
     <button id="tab-psc" class="tab-btn" type="button">Performance Sourcing Client</button>
     <button id="tab-psa" class="tab-btn" type="button">Performance Sourcing Area</button>
+    <button id="tab-pjt" class="tab-btn" type="button">Performance Jobtype</button>
   </div>
 
   <main>
-    <!-- ====================== PAGE: ACM ====================== -->
+    <!-- ========================================================= -->
+    <!-- PAGE: ACM -->
+    <!-- ========================================================= -->
     <section id="page-ACM" class="page active">
+
       <!-- FILTER -->
       <section class="card filter-card">
         <div class="card-title-row">
           <div class="card-title">Filter Data Applicant</div>
           <div class="header-right-flex">
             <button id="filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
+              <span class="hamburger-icon">☰</span>
+              <span>Filter</span>
             </button>
             <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
           </div>
         </div>
-
         <div class="card-subtext">
           Sesuaikan filter di bawah untuk melihat preview analisa. Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
         </div>
@@ -314,11 +799,13 @@
               <div class="ms" id="ms-prov">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Semua Provinsi</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada provinsi</div>
                 </div>
               </div>
             </div>
@@ -328,11 +815,13 @@
               <div class="ms ms-disabled" id="ms-kota">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari kota..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada kota</div>
                 </div>
               </div>
             </div>
@@ -342,11 +831,13 @@
               <div class="ms" id="ms-cycle">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Semua Cycle</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari cycle..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada cycle</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada cycle</div>
                 </div>
               </div>
             </div>
@@ -356,11 +847,13 @@
               <div class="ms" id="ms-periode">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Semua Periode</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari periode..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada periode</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada periode</div>
                 </div>
               </div>
             </div>
@@ -372,11 +865,13 @@
                 <div class="ms" id="ms-job-parent">
                   <button type="button" class="ms-toggle">
                     <span class="ms-placeholder">Semua Job Parent</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                    <span class="ms-counter"></span>
+                    <span class="ms-arrow">▾</span>
                   </button>
                   <div class="ms-panel">
                     <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
+                    <div class="ms-options"></div>
+                    <div class="ms-empty">Tidak ada job parent</div>
                   </div>
                 </div>
               </div>
@@ -385,11 +880,13 @@
                 <div class="ms ms-disabled" id="ms-job-type">
                   <button type="button" class="ms-toggle">
                     <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                    <span class="ms-counter"></span>
+                    <span class="ms-arrow">▾</span>
                   </button>
                   <div class="ms-panel">
                     <input class="ms-search" type="text" placeholder="Cari job type..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
+                    <div class="ms-options"></div>
+                    <div class="ms-empty">Tidak ada job type</div>
                   </div>
                 </div>
               </div>
@@ -418,14 +915,22 @@
           Pertumbuhan Applicant Valid (APLIKAN VALID - CTC 1) dan Buffer berdasarkan <strong>PERIODE PELAMAR</strong>. Mengikuti filter di atas.
         </p>
         <div class="chart-legend">
-          <div class="legend-item"><span class="legend-dot legend-valid"></span><span>Applicant Valid</span></div>
-          <div class="legend-item"><span class="legend-dot legend-buffer"></span><span>Buffer</span></div>
+          <div class="legend-item">
+            <span class="legend-dot legend-valid"></span>
+            <span>Applicant Valid</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-buffer"></span>
+            <span>Buffer</span>
+          </div>
         </div>
         <div id="chart-body" class="chart-body"></div>
-        <div id="chart-summary-text" class="chart-footer">Menunggu data...</div>
+        <div id="chart-summary-text" class="chart-footer">
+          Menunggu data...
+        </div>
       </section>
 
-      <!-- SUMMARY -->
+      <!-- SUMMARY BOXES -->
       <section class="summary-row">
         <div class="summary-card male">
           <div class="summary-header">
@@ -487,13 +992,22 @@
             <div class="card-tag">By Provinsi</div>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Provinsi</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
+            <table class="acm-3col">
+              <thead>
+              <tr>
+                <th>Provinsi</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
               <tbody id="tbl-prov-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-prov">Menunggu data...</span></div>
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-prov">Menunggu data...</span>
+            </div>
             <div class="status-right">KATEGORI APP = "APLIKAN VALID - CTC 1" · QUALIFIED = "YES"</div>
           </div>
         </article>
@@ -504,13 +1018,22 @@
             <div class="card-tag">Offline vs Online</div>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Metode Sourcing (MEDIA SOURCING)</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
+            <table class="acm-3col">
+              <thead>
+              <tr>
+                <th>Metode Sourcing (MEDIA SOURCING)</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
               <tbody id="tbl-metode-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-metode">Menunggu data...</span></div>
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-metode">Menunggu data...</span>
+            </div>
           </div>
         </article>
       </section>
@@ -523,13 +1046,22 @@
             <div class="card-tag">Per Platform</div>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Media Sosial</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
+            <table class="acm-3col">
+              <thead>
+              <tr>
+                <th>Media Sosial</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
               <tbody id="tbl-media-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-media">Menunggu data...</span></div>
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-media">Menunggu data...</span>
+            </div>
             <div class="status-right">Baris: kategori ONLINE - MEDIA SOSIAL</div>
           </div>
         </article>
@@ -540,13 +1072,22 @@
             <div class="card-tag">Tingkat Pendidikan</div>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Pendidikan Terakhir</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
+            <table class="acm-3col">
+              <thead>
+              <tr>
+                <th>Pendidikan Terakhir</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
               <tbody id="tbl-edu-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-edu">Menunggu data...</span></div>
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-edu">Menunggu data...</span>
+            </div>
             <div class="status-right">Sumber: kolom PENDIDIKAN TERAKHIR</div>
           </div>
         </article>
@@ -560,13 +1101,22 @@
             <div class="card-tag">Per Portal</div>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Job Portal</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
+            <table class="acm-3col">
+              <thead>
+              <tr>
+                <th>Job Portal</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
               <tbody id="tbl-portal-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-portal">Menunggu data...</span></div>
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-portal">Menunggu data...</span>
+            </div>
             <div class="status-right">Baris: kategori ONLINE - JOB PORTAL</div>
           </div>
         </article>
@@ -577,27 +1127,39 @@
             <div class="card-tag">Aktivitas Offline</div>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Aktivitas Offline</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
+            <table class="acm-3col">
+              <thead>
+              <tr>
+                <th>Aktivitas Offline</th>
+                <th>Applicant Valid</th>
+                <th>Buffer</th>
+              </tr>
+              </thead>
               <tbody id="tbl-offline-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-offline">Menunggu data...</span></div>
+            <div class="status-left">
+              <span class="status-dot"></span>
+              <span id="status-offline">Menunggu data...</span>
+            </div>
             <div class="status-right">Baris: kategori OFFLINE</div>
           </div>
         </article>
       </section>
     </section>
 
-    <!-- ====================== PAGE: SOURCING ANALYST ====================== -->
+    <!-- ========================================================= -->
+    <!-- PAGE: SOURCING ANALYST -->
+    <!-- ========================================================= -->
     <section id="page-sa" class="page">
       <section class="card sa-filter-card">
         <div class="card-title-row">
           <div class="card-title">Filter Sourcing Analyst</div>
           <div class="header-right-flex">
             <button id="sa-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
+              <span class="hamburger-icon">☰</span>
+              <span>Filter</span>
             </button>
             <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter Sourcing Analyst</button>
             <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
@@ -611,11 +1173,13 @@
               <div class="ms" id="sa-ms-prov">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Semua Provinsi</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada provinsi</div>
                 </div>
               </div>
             </div>
@@ -625,11 +1189,13 @@
               <div class="ms ms-disabled" id="sa-ms-kota">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari kota..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada kota</div>
                 </div>
               </div>
             </div>
@@ -639,11 +1205,13 @@
               <div class="ms" id="sa-ms-job-parent">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Semua Job Parent</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada job parent</div>
                 </div>
               </div>
             </div>
@@ -653,17 +1221,21 @@
               <div class="ms ms-disabled" id="sa-ms-job-type">
                 <button type="button" class="ms-toggle">
                   <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari job type..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada job type</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="filter-hint">* Pilih Provinsi terlebih dahulu.</div>
+          <div class="filter-hint">
+            * Pilih Provinsi terlebih dahulu.
+          </div>
         </div>
       </section>
 
@@ -678,21 +1250,30 @@
       </section>
     </section>
 
-    <!-- ====================== PAGE: PERFORMANCE SOURCING CLIENT ====================== -->
+    <!-- ========================================================= -->
+    <!-- PAGE: PERFORMANCE SOURCING CLIENT -->
+    <!-- ========================================================= -->
     <section id="page-psc" class="page">
       <section class="card">
         <div class="card-title-row">
           <div class="card-title">Filter Performance Sourcing Client</div>
           <div class="header-right-flex">
             <button id="psc-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
-            <div class="card-tag">Industry (Kolom B)</div>
+            <div class="card-tag">Industry → Client</div>
           </div>
+        </div>
+        <div class="card-subtext">
+          Pilih <b>Industry</b> dulu (kolom B). Setelah itu <b>Client</b> (kolom A) baru muncul pilihannya. Format persen: <b>xx.xx%</b>.
         </div>
 
         <div class="perf-filters">
           <div class="filter-group">
-            <label class="filter-label">Industry</label>
+            <label class="filter-label">Industry (Kolom B)</label>
             <select id="psc-industry" class="select-pill"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Client (Kolom A)</label>
+            <select id="psc-client" class="select-pill" disabled></select>
           </div>
         </div>
 
@@ -710,10 +1291,9 @@
           <div class="card-title">Achievement Rasio Submit</div>
           <div class="card-tag">Client (row) × Bulan (kolom)</div>
         </div>
-        <p class="card-subtext">Achievement Submit per client untuk Jan–Des (berdasarkan Industry terpilih).</p>
-
+        <p class="card-subtext">Menampilkan % Achievement Submit per client untuk Jan–Des berdasarkan filter Industry & Client.</p>
         <div class="table-wrap">
-          <table>
+          <table class="matrix-13">
             <thead>
               <tr>
                 <th>Client</th>
@@ -731,10 +1311,9 @@
           <div class="card-title">Achievement Applicant Qualified</div>
           <div class="card-tag">Client (row) × Bulan (kolom)</div>
         </div>
-        <p class="card-subtext">Achievement Qualified per client untuk Jan–Des (berdasarkan Industry terpilih).</p>
-
+        <p class="card-subtext">Menampilkan % Applicant Qualified per client untuk Jan–Des berdasarkan filter Industry & Client.</p>
         <div class="table-wrap">
-          <table>
+          <table class="matrix-13">
             <thead>
               <tr>
                 <th>Client</th>
@@ -748,27 +1327,29 @@
       </section>
     </section>
 
-    <!-- ====================== PAGE: PERFORMANCE SOURCING AREA ====================== -->
+    <!-- ========================================================= -->
+    <!-- PAGE: PERFORMANCE SOURCING AREA -->
+    <!-- ========================================================= -->
     <section id="page-psa" class="page">
       <section class="card">
         <div class="card-title-row">
           <div class="card-title">Filter Performance Sourcing Area</div>
           <div class="header-right-flex">
             <button id="psa-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
+            <div class="card-tag">Group Client → Area</div>
           </div>
         </div>
-
         <div class="card-subtext">
-          Pilih <b>Group Client</b> dan/atau <b>Area</b>. Tabel menampilkan <b>Area</b> dan <b>Bulan</b>.
+          Filter: <b>Group Client (Kolom A)</b> dan <b>Area (Kolom B)</b>. Area otomatis mengikuti Group Client. Format persen: <b>xx.xx%</b>.
         </div>
 
         <div class="perf-filters">
           <div class="filter-group">
-            <label class="filter-label">Group Client</label>
+            <label class="filter-label">Group Client (Kolom A)</label>
             <select id="psa-group" class="select-pill"></select>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Area</label>
+            <label class="filter-label">Area (Kolom B)</label>
             <select id="psa-area" class="select-pill"></select>
           </div>
         </div>
@@ -785,11 +1366,11 @@
       <section class="card" style="margin-top:14px;">
         <div class="card-title-row">
           <div class="card-title">Achievement Rasio Submit</div>
+          <div class="card-tag">Area (row) × Bulan (kolom)</div>
         </div>
-        <p class="card-subtext">Achievement Submit per area untuk Jan–Des (berdasarkan filter).</p>
-
+        <p class="card-subtext">Menampilkan % Achievement Submit per Area untuk Jan–Des berdasarkan filter Group Client & Area.</p>
         <div class="table-wrap">
-          <table>
+          <table class="matrix-13">
             <thead>
               <tr>
                 <th>Area</th>
@@ -805,11 +1386,11 @@
       <section class="card" style="margin-top:14px;">
         <div class="card-title-row">
           <div class="card-title">Achievement Qualified</div>
+          <div class="card-tag">Area (row) × Bulan (kolom)</div>
         </div>
-        <p class="card-subtext">Achievement Qualified per area untuk Jan–Des (berdasarkan filter).</p>
-
+        <p class="card-subtext">Menampilkan % Achievement Qualified per Area untuk Jan–Des berdasarkan filter Group Client & Area.</p>
         <div class="table-wrap">
-          <table>
+          <table class="matrix-13">
             <thead>
               <tr>
                 <th>Area</th>
@@ -822,1400 +1403,1772 @@
         </div>
       </section>
     </section>
+
+    <!-- ========================================================= -->
+    <!-- PAGE: PERFORMANCE JOBTYPE -->
+    <!-- ========================================================= -->
+    <section id="page-pjt" class="page">
+      <section class="card">
+        <div class="card-title-row">
+          <div class="card-title">Filter Performance Jobtype</div>
+          <div class="header-right-flex">
+            <button id="pjt-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
+            <div class="card-tag">Job Parent → Job Type</div>
+          </div>
+        </div>
+
+        <div class="card-subtext">
+          Pilih <b>Job Parent</b>, lalu <b>Job Type</b> akan menyesuaikan. Format persen: <b>xx.xx%</b>.
+        </div>
+
+        <div class="perf-filters">
+          <div class="filter-group">
+            <label class="filter-label">Job Parent</label>
+            <select id="pjt-parent" class="select-pill"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Job Type</label>
+            <select id="pjt-type" class="select-pill"></select>
+          </div>
+        </div>
+
+        <div class="status-bar" style="margin-top:10px;">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span id="pjt-status">Memuat data...</span>
+          </div>
+          <div class="status-right" id="pjt-colhint"></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:14px;">
+        <div class="card-title-row">
+          <div class="card-title">Achiement Rasio Submit Job Parent</div>
+          <div class="card-tag">Job Parent (row) × Bulan (kolom)</div>
+        </div>
+        <p class="card-subtext">Achievement Submit per Job Parent untuk Jan–Des (mengikuti filter).</p>
+
+        <div class="table-wrap">
+          <table class="matrix-13">
+            <thead>
+              <tr>
+                <th>Job Parent</th>
+                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
+                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
+              </tr>
+            </thead>
+            <tbody id="pjt-submit-parent-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:14px;">
+        <div class="card-title-row">
+          <div class="card-title">Achiement Rasio Submit</div>
+          <div class="card-tag">Job Type (row) × Bulan (kolom)</div>
+        </div>
+        <p class="card-subtext">Achievement Submit per Job Type untuk Jan–Des (mengikuti filter).</p>
+
+        <div class="table-wrap">
+          <table class="matrix-13">
+            <thead>
+              <tr>
+                <th>Job Type</th>
+                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
+                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
+              </tr>
+            </thead>
+            <tbody id="pjt-submit-type-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:14px;">
+        <div class="card-title-row">
+          <div class="card-title">Achiement Qualified</div>
+          <div class="card-tag">Job Type (row) × Bulan (kolom)</div>
+        </div>
+        <p class="card-subtext">Achievement Qualified per Job Type untuk Jan–Des (mengikuti filter).</p>
+
+        <div class="table-wrap">
+          <table class="matrix-13">
+            <thead>
+              <tr>
+                <th>Job Type</th>
+                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
+                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
+              </tr>
+            </thead>
+            <tbody id="pjt-qual-type-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
   </main>
 </div>
 
 <script>
-/* ===================== KONFIG URL ===================== */
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
+  /********** KONFIGURASI URL CSV **********/
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
 
-// Performance Client (Query Report Client)
-const PSC_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
+  // Performance URLs
+  const PSC_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
+  const PSA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=631317217&single=true&output=csv";
+  const PJT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1873604383&single=true&output=csv";
 
-// Performance Area (Query Report Area)
-const PSA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=631317217&single=true&output=csv";
+  const COL_PROV      = "PROVINSI MINAT PENEMPATAN";
+  const COL_KOTA      = "KOTA MINAT PENEMPATAN";
+  const COL_CYCLE     = "CYCLE HIRED";
+  const COL_PERIODE   = "PERIODE PELAMAR";
+  const COL_KATEGORI  = "KATEGORI APP";
+  const COL_QUALIFIED = "QUALIFIED";
+  const COL_METODE    = "METODE SOURCING";     // kolom AF
+  const COL_MEDIA_PREF= "MEDIA SOURCING";      // kolom AG
+  const COL_EDU       = "PENDIDIKAN TERAKHIR";
+  const COL_GENDER    = "JENIS KELAMIN";
+  const COL_COST_PER_APP = "Cost Per Applicant"; // kolom AJ (header di sheet)
 
-/* ===================== UTIL UMUM ===================== */
-const $ = id => document.getElementById(id);
-const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
-const norm = v => String(v ?? "").trim().toUpperCase();
+  let COL_JOB_PARENT = "JOB PARENT";
+  let COL_JOB_TYPE   = "JOB TYPE";
 
-const PERF_MONTHS = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
+  const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
 
-function uniqueSortedText(list){
-  return Array.from(new Set((list||[]).map(v=>String(v??"").trim()).filter(Boolean)))
-    .sort((a,b)=>a.localeCompare(b,"id"));
-}
+  const FIXED_PROV_LIST = [
+    "ACEH (NAD)","BALI","BANTEN","BENGKULU","DI YOGYAKARTA","DKI JAKARTA",
+    "GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR",
+    "KALIMANTAN BARAT","KALIMANTAN SELATAN","KALIMANTAN TENGAH",
+    "KALIMANTAN TIMUR","KALIMANTAN UTARA","KEPULAUAN BANGKA BELITUNG",
+    "KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA",
+    "NUSA TENGGARA BARAT (NTB)","NUSA TENGGARA TIMUR (NTT)",
+    "PAPUA","PAPUA BARAT DAYA","PAPUA SELATAN","PAPUA TENGAH",
+    "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGAH",
+    "SULAWESI TENGGARA","SULAWESI TIMUR","SULAWESI UTARA",
+    "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
+  ];
 
-function setSelectOptions(selectEl, options, placeholder){
-  selectEl.innerHTML = "";
-  const opt0 = document.createElement("option");
-  opt0.value = "";
-  opt0.textContent = placeholder || "Pilih...";
-  selectEl.appendChild(opt0);
-  (options||[]).forEach(v=>{
-    const opt = document.createElement("option");
-    opt.value = v;
-    opt.textContent = v;
-    selectEl.appendChild(opt);
-  });
-}
+  const FIXED_MEDIA_LIST = [
+    "Facebook","FLK","Instagram","Linkedin","SIM Talent Search",
+    "Telegram","Tiktok","Twitter","Whatsapp / Media Chat"
+  ];
 
-function colLetterToIndex(letter){
-  const s = String(letter||"").trim().toUpperCase();
-  let n = 0;
-  for(let i=0;i<s.length;i++){
-    const c = s.charCodeAt(i);
-    if(c<65 || c>90) return null;
-    n = n*26 + (c-64);
-  }
-  return n-1; // A=0
-}
+  const FIXED_PORTAL_LIST = [
+    "Glints","Hired Today","Indeed","JobStreet","Jobstreet Express",
+    "KarirHub","KitaLutus","KitaLulus","Lumina","Pintarnya"
+  ];
 
-function getFieldByLetter(fields, letter){
-  const idx = colLetterToIndex(letter);
-  if(idx == null) return null;
-  return fields && fields[idx] ? fields[idx] : null;
-}
+  const FIXED_OFFLINE_LIST = [
+    "Academy/Training/Seminar","Balai Latian Kerja (BLK)","Brosur/Banner/Spanduk/Flyer",
+    "Campus Hiring","Disnaker","Drop CV","Freelance Recruiter","Job Fair",
+    "Komunitas Informal","Referensi Client","Referensi Teman/Keluarga/Komunitas",
+    "School Hiring","Walk In Interview (WI)"
+  ];
 
-function parseNumFlexible(v){
-  if(v == null) return null;
-  const s0 = String(v).trim();
-  if(!s0) return null;
+  const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
 
-  // normalize common non-numeric
-  const u = s0.toUpperCase();
-  if(u === "-" || u === "N/A" || u === "#N/A" || u.includes("#DIV/0")) return null;
+  const MONTHS = [
+    {idx:1,label:"Januari"},{idx:2,label:"Februari"},{idx:3,label:"Maret"},{idx:4,label:"April"},
+    {idx:5,label:"Mei"},{idx:6,label:"Juni"},{idx:7,label:"Juli"},{idx:8,label:"Agustus"},
+    {idx:9,label:"September"},{idx:10,label:"Oktober"},{idx:11,label:"November"},{idx:12,label:"Desember"}
+  ];
 
-  // keep digits, dot, comma, minus, percent
-  let s = s0.replace(/[^0-9,\.\-%]/g,"");
-  if(!s) return null;
+  let rawRows = [];
+  let DETECTED_COL_MEDIA = COL_MEDIA_PREF;
 
-  // remove percent sign
-  s = s.replace(/%/g,"");
+  const provKotaMap = new Map();
+  const jobParentTypeMap = new Map();
 
-  // convert id format: "1.234,56" -> "1234.56"
-  // if has both dot and comma, assume dot thousands, comma decimals
-  if(s.includes(".") && s.includes(",")){
-    s = s.replace(/\./g,"").replace(",",".");
-  }else{
-    // if only comma -> decimal
-    if(s.includes(",") && !s.includes(".")) s = s.replace(",",".");
-  }
+  let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
+  let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
 
-  const n = Number(s);
-  return isNaN(n) ? null : n;
-}
+  const $ = id => document.getElementById(id);
+  const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
+  const norm = v => String(v ?? "").trim().toUpperCase();
 
-// Format persen 2 desimal: "100.00%"
-function formatPercent2(v){
-  const n = parseNumFlexible(v);
-  if(n == null) return "-";
-  // heuristic: kalau <= 1.2 → dianggap rasio (0–1)
-  const pct = (Math.abs(n) <= 1.2) ? (n*100) : n;
-  return pct.toFixed(2) + "%";
-}
+  /* ===================== PERFORMANCE: column mapping by letter ===================== */
+  // Submit: E Jan, H Feb, K Mar, N Apr, Q Mei, T Jun, W Jul, Z Aug, AC Sep, AE Oct, AI Nov, AL Dec
+  // Qualified: F Jan, I Feb, L Mar, O Apr, R Mei, U Jun, X Jul, AA Aug, AD Sep, AF Oct, AJ Nov, AM Dec
+  const PSC_SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AE","AI","AL"];
+  const PSC_QUAL_COLS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
 
-// matrix aggregator: keyField rows + monthFields[12] (field names)
-function buildKeyMatrix(rows, keyField, monthFields){
-  const map = new Map(); // key -> {sum[12], cnt[12]}
-  (rows||[]).forEach(r=>{
-    const key = String(r[keyField] ?? "").trim();
-    if(!key) return;
-    if(!map.has(key)){
-      map.set(key,{sum:Array(12).fill(0),cnt:Array(12).fill(0)});
+  function colLetterToIndex(letter){
+    let s = String(letter||"").trim().toUpperCase();
+    if(!s) return -1;
+    let n = 0;
+    for(let i=0;i<s.length;i++){
+      const c = s.charCodeAt(i);
+      if(c < 65 || c > 90) return -1;
+      n = n*26 + (c - 64);
     }
-    const obj = map.get(key);
-    for(let i=0;i<12;i++){
-      const f = monthFields[i];
-      if(!f) continue;
-      const val = parseNumFlexible(r[f]);
-      if(val == null) continue;
-      obj.sum[i] += val;
-      obj.cnt[i] += 1;
-    }
-  });
-
-  const out = [];
-  map.forEach((obj,key)=>{
-    const vals = obj.sum.map((s,i)=> obj.cnt[i] ? (s/obj.cnt[i]) : null);
-    out.push({key,vals});
-  });
-  out.sort((a,b)=>a.key.localeCompare(b.key,"id"));
-  return out;
-}
-
-function renderPerfMatrix(tbodyId, keyLabel, matrix){
-  const tbody = $(tbodyId);
-  tbody.innerHTML = "";
-
-  if(!matrix || !matrix.length){
-    tbody.innerHTML = `<tr><td class="muted-row" colspan="13">Tidak ada data.</td></tr>`;
-    return;
+    return n - 1; // 0-based
   }
 
-  matrix.forEach(row=>{
-    const tr = document.createElement("tr");
-    const td0 = document.createElement("td");
-    td0.className = "col-label";
-    td0.textContent = row.key;
-    tr.appendChild(td0);
-
-    for(let i=0;i<12;i++){
-      const td = document.createElement("td");
-      td.className = "col-number";
-      td.textContent = formatPercent2(row.vals[i]);
-      tr.appendChild(td);
-    }
-    tbody.appendChild(tr);
-  });
-}
-
-/* ===================== ACM + SA (kode kamu) ===================== */
-/* (Bagian JS ACM + SA di bawah ini dipertahankan seperti versi kamu, hanya ditambah load PSC/PSA & tab) */
-
-const COL_PROV      = "PROVINSI MINAT PENEMPATAN";
-const COL_KOTA      = "KOTA MINAT PENEMPATAN";
-const COL_CYCLE     = "CYCLE HIRED";
-const COL_PERIODE   = "PERIODE PELAMAR";
-const COL_KATEGORI  = "KATEGORI APP";
-const COL_QUALIFIED = "QUALIFIED";
-const COL_METODE    = "METODE SOURCING";
-const COL_MEDIA_PREF= "MEDIA SOURCING";
-const COL_EDU       = "PENDIDIKAN TERAKHIR";
-const COL_GENDER    = "JENIS KELAMIN";
-const COL_COST_PER_APP = "Cost Per Applicant";
-
-let COL_JOB_PARENT = "JOB PARENT";
-let COL_JOB_TYPE   = "JOB TYPE";
-
-const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
-const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
-
-const FIXED_PROV_LIST = [
-  "ACEH (NAD)","BALI","BANTEN","BENGKULU","DI YOGYAKARTA","DKI JAKARTA",
-  "GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR",
-  "KALIMANTAN BARAT","KALIMANTAN SELATAN","KALIMANTAN TENGAH",
-  "KALIMANTAN TIMUR","KALIMANTAN UTARA","KEPULAUAN BANGKA BELITUNG",
-  "KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA",
-  "NUSA TENGGARA BARAT (NTB)","NUSA TENGGARA TIMUR (NTT)",
-  "PAPUA","PAPUA BARAT DAYA","PAPUA SELATAN","PAPUA TENGAH",
-  "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGAH",
-  "SULAWESI TENGGARA","SULAWESI TIMUR","SULAWESI UTARA",
-  "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
-];
-
-const FIXED_MEDIA_LIST = ["Facebook","FLK","Instagram","Linkedin","SIM Talent Search","Telegram","Tiktok","Twitter","Whatsapp / Media Chat"];
-const FIXED_PORTAL_LIST = ["Glints","Hired Today","Indeed","JobStreet","Jobstreet Express","KarirHub","KitaLutus","KitaLulus","Lumina","Pintarnya"];
-const FIXED_OFFLINE_LIST = [
-  "Academy/Training/Seminar","Balai Latian Kerja (BLK)","Brosur/Banner/Spanduk/Flyer","Campus Hiring","Disnaker","Drop CV",
-  "Freelance Recruiter","Job Fair","Komunitas Informal","Referensi Client","Referensi Teman/Keluarga/Komunitas",
-  "School Hiring","Walk In Interview (WI)"
-];
-const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
-
-const MONTHS = [
-  {idx:1,label:"Januari"},{idx:2,label:"Februari"},{idx:3,label:"Maret"},{idx:4,label:"April"},
-  {idx:5,label:"Mei"},{idx:6,label:"Juni"},{idx:7,label:"Juli"},{idx:8,label:"Agustus"},
-  {idx:9,label:"September"},{idx:10,label:"Oktober"},{idx:11,label:"November"},{idx:12,label:"Desember"}
-];
-
-let rawRows = [];
-let DETECTED_COL_MEDIA = COL_MEDIA_PREF;
-const provKotaMap = new Map();
-const jobParentTypeMap = new Map();
-
-let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
-let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
-
-const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
-
-function parseCostValue(v){
-  if(v == null) return 0;
-  let s = String(v).trim();
-  if(!s) return 0;
-  s = s.replace(/[^0-9.,]/g,"");
-  s = s.replace(/\./g,"").replace(",",".");
-  const n = Number(s);
-  return isNaN(n) ? 0 : n;
-}
-function getApplicantValidValue(raw){ return norm(raw) === norm(KATEGORI_VALID_TARGET) ? 1 : 0; }
-function isQualifiedYes(raw){
-  const s = norm(raw);
-  return s === "YES" || s === "YA";
-}
-function uniqueSorted(list){
-  return Array.from(new Set(list.filter(Boolean))).sort((a,b)=>String(a).localeCompare(String(b),"id"));
-}
-
-function createMultiSelect(rootId, options, placeholder, disabled, onChange){
-  const root = $(rootId);
-  const toggle = root.querySelector(".ms-toggle");
-  const searchInput = root.querySelector(".ms-search");
-  const optsContainer = root.querySelector(".ms-options");
-  const emptyEl = root.querySelector(".ms-empty");
-  const labelSpan = root.querySelector(".ms-placeholder");
-  const counterSpan = root.querySelector(".ms-counter");
-  const state = { options:[...(options || [])], selected:new Set() };
-
-  function updateLabel(){
-    const count = state.selected.size;
-    if(count === 0){
-      labelSpan.textContent = placeholder;
-      counterSpan.textContent = "";
-    }else if(count <= 2){
-      labelSpan.textContent = Array.from(state.selected).join(", ");
-      counterSpan.textContent = "";
-    }else{
-      labelSpan.textContent = placeholder;
-      counterSpan.textContent = count + " dipilih";
-    }
+  function getFieldByLetter(fields, letter){
+    const idx = colLetterToIndex(letter);
+    if(idx < 0 || idx >= (fields||[]).length) return null;
+    return fields[idx];
   }
-  function renderOptions(){
-    optsContainer.innerHTML = "";
-    const term = searchInput.value.toLowerCase();
-    let visibleCount = 0;
-    state.options.forEach(val=>{
-      const text = String(val);
-      if(term && !text.toLowerCase().includes(term)) return;
-      visibleCount++;
-      const label = document.createElement("label");
-      label.className = "ms-option";
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.value = text;
-      cb.checked = state.selected.has(text);
-      cb.addEventListener("change",()=>{
-        if(cb.checked) state.selected.add(text);
-        else state.selected.delete(text);
-        updateLabel();
-        if(onChange) onChange(getSelected());
-      });
-      const span = document.createElement("span");
-      span.textContent = text;
-      label.appendChild(cb); label.appendChild(span);
-      optsContainer.appendChild(label);
+
+  function uniqueSortedText(list){
+    const arr = Array.from(new Set((list||[]).map(v=>String(v??"").trim()).filter(Boolean)));
+    arr.sort((a,b)=>a.localeCompare(b,"id"));
+    return arr;
+  }
+
+  function setSelectOptions(selectEl, options, placeholder){
+    if(!selectEl) return;
+    selectEl.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = placeholder || "Semua";
+    selectEl.appendChild(opt0);
+    (options||[]).forEach(v=>{
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      selectEl.appendChild(o);
     });
-    emptyEl.style.display = visibleCount ? "none" : "block";
-  }
-  function getSelected(){ return Array.from(state.selected); }
-  function setOptions(newOptions){
-    state.options = [...(newOptions || [])];
-    state.selected.clear();
-    searchInput.value = "";
-    renderOptions(); updateLabel();
-    if(onChange) onChange(getSelected());
-  }
-  function setDisabled(flag){
-    if(flag){
-      root.classList.add("ms-disabled");
-      root.classList.remove("open");
-    }else root.classList.remove("ms-disabled");
-  }
-  function clear(){
-    state.selected.clear();
-    searchInput.value = "";
-    renderOptions(); updateLabel();
-    if(onChange) onChange(getSelected());
   }
 
-  toggle.addEventListener("click",()=>{
-    if(root.classList.contains("ms-disabled")) return;
-    const isOpen = root.classList.toggle("open");
-    if(isOpen){
-      searchInput.value = "";
-      renderOptions();
-      searchInput.focus();
+  function parsePercentCell(v){
+    if(v == null) return null;
+    let s = String(v).trim();
+    if(!s) return null;
+    // accept "-" as empty
+    if(s === "-") return null;
+
+    // keep only digits, dot, comma, percent
+    const hasPct = s.includes("%");
+    s = s.replace(/[^0-9.,%\-]/g,"");
+    s = s.replace("%","").trim();
+    if(!s) return null;
+
+    // normalize decimal point
+    // if value like "10.000" (meaning 10.000) -> Number ok
+    // if value like "10,50" -> to dot
+    if(s.includes(",") && !s.includes(".")){
+      s = s.replace(",",".");
+    }else if(s.includes(",") && s.includes(".")){
+      // remove thousand separators: keep last separator as decimal? simplest: remove commas
+      s = s.replace(/,/g,"");
     }
-  });
-  searchInput.addEventListener("input",renderOptions);
-  document.addEventListener("click",(e)=>{ if(!root.contains(e.target)) root.classList.remove("open"); });
 
-  setDisabled(!!disabled);
-  renderOptions(); updateLabel();
-  return {getSelected,setOptions,setDisabled,clear};
-}
+    let n = Number(s);
+    if(!isFinite(n)) return null;
 
-function detectMediaColumn(fields){
-  if(!fields || !fields.length) return COL_MEDIA_PREF;
-  const preferredNorm = norm(COL_MEDIA_PREF);
-  let found = fields.find(f=>norm(f)===preferredNorm);
-  if(found) return found;
-  const candidates = fields.filter(f=>{
-    const s = norm(f);
-    return s.includes("MEDIA") || s.includes("SOURCING");
-  });
-  return candidates[0] || COL_MEDIA_PREF;
-}
-function detectJobColumns(fields){
-  if(!fields || !fields.length) return {parent:COL_JOB_PARENT,type:COL_JOB_TYPE};
-  let parent = null, type = null;
-  for(const f of fields){
-    const s = norm(f);
-    if(!parent && s.includes("JOB") && s.includes("PARENT")) parent = f;
-    if(!type && s.includes("JOB") && s.includes("TYPE")) type = f;
-  }
-  return { parent: parent || COL_JOB_PARENT, type: type || COL_JOB_TYPE };
-}
+    // if it was 0-1 and not explicitly percent, treat as ratio
+    if(!hasPct && n > 0 && n <= 1) n = n * 100;
 
-function buildProvKotaMap(){
-  provKotaMap.clear();
-  rawRows.forEach(row=>{
-    const p = row[COL_PROV];
-    const k = row[COL_KOTA];
-    if(!p || !k) return;
-    const provStr = String(p);
-    if(!provKotaMap.has(provStr)) provKotaMap.set(provStr,new Set());
-    provKotaMap.get(provStr).add(String(k));
-  });
-}
-function buildJobParentTypeMap(){
-  jobParentTypeMap.clear();
-  rawRows.forEach(row=>{
-    const jp = row[COL_JOB_PARENT];
-    const jt = row[COL_JOB_TYPE];
-    if(!jp || !jt) return;
-    const parentStr = String(jp);
-    if(!jobParentTypeMap.has(parentStr)) jobParentTypeMap.set(parentStr,new Set());
-    jobParentTypeMap.get(parentStr).add(String(jt));
-  });
-}
-function updateKotaOptionsByProv(selectedProv){
-  if(!msKota) return;
-  if(!selectedProv || !selectedProv.length){
-    msKota.setOptions([]);
-    msKota.setDisabled(true);
-    return;
-  }
-  const citySet = new Set();
-  selectedProv.forEach(p=>{
-    const s = provKotaMap.get(p);
-    if(s) s.forEach(c=>citySet.add(c));
-  });
-  const cityList = uniqueSorted(Array.from(citySet));
-  msKota.setOptions(cityList);
-  msKota.setDisabled(false);
-}
-function updateJobTypeOptionsByParent(selectedParents){
-  if(!msJobType) return;
-  if(!selectedParents || !selectedParents.length){
-    msJobType.setOptions([]);
-    msJobType.setDisabled(true);
-    return;
-  }
-  const typeSet = new Set();
-  selectedParents.forEach(p=>{
-    const s = jobParentTypeMap.get(p);
-    if(s) s.forEach(t=>typeSet.add(t));
-  });
-  const typeList = uniqueSorted(Array.from(typeSet));
-  msJobType.setOptions(typeList);
-  msJobType.setDisabled(false);
-}
-
-function updateSaKotaOptions(selectedProv){
-  if(!saKotaMS) return;
-  if(!selectedProv || !selectedProv.length){
-    saKotaMS.setOptions([]);
-    saKotaMS.setDisabled(true);
-    return;
-  }
-  const citySet = new Set();
-  selectedProv.forEach(p=>{
-    const s = provKotaMap.get(p);
-    if(s) s.forEach(c=>citySet.add(c));
-  });
-  const cityList = uniqueSorted(Array.from(citySet));
-  saKotaMS.setOptions(cityList);
-  saKotaMS.setDisabled(false);
-}
-function updateSaJobParentOptions(){
-  if(!saJobParentMS) return;
-  const provSel = saProvMS ? saProvMS.getSelected() : [];
-  const kotaSel = saKotaMS ? saKotaMS.getSelected() : [];
-
-  const parentsSet = new Set();
-  rawRows.forEach(row=>{
-    const rp = String(row[COL_PROV] ?? "");
-    const rk = String(row[COL_KOTA] ?? "");
-    if(provSel.length && !provSel.includes(rp)) return;
-    if(kotaSel.length && !kotaSel.includes(rk)) return;
-    const jp = row[COL_JOB_PARENT];
-    if(jp) parentsSet.add(String(jp));
-  });
-
-  const parentList = uniqueSorted(Array.from(parentsSet));
-  saJobParentMS.setOptions(parentList);
-  saJobParentMS.setDisabled(parentList.length === 0);
-
-  if(saJobTypeMS){
-    saJobTypeMS.setOptions([]);
-    saJobTypeMS.setDisabled(true);
-  }
-}
-function updateSaJobTypeOptions(){
-  if(!saJobTypeMS) return;
-  const provSel   = saProvMS ? saProvMS.getSelected() : [];
-  const kotaSel   = saKotaMS ? saKotaMS.getSelected() : [];
-  const parentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
-
-  if(!parentSel.length){
-    saJobTypeMS.setOptions([]);
-    saJobTypeMS.setDisabled(true);
-    return;
+    return n;
   }
 
-  const typeSet = new Set();
-  rawRows.forEach(row=>{
-    const rp = String(row[COL_PROV] ?? "");
-    const rk = String(row[COL_KOTA] ?? "");
-    const jp = String(row[COL_JOB_PARENT] ?? "");
-    const jt = row[COL_JOB_TYPE];
+  function formatPercent2(n){
+    if(n == null || !isFinite(n)) return "-";
+    return n.toFixed(2) + "%";
+  }
 
-    if(provSel.length && !provSel.includes(rp)) return;
-    if(kotaSel.length && !kotaSel.includes(rk)) return;
-    if(parentSel.length && !parentSel.includes(jp)) return;
-    if(jt) typeSet.add(String(jt));
-  });
+  function mean(nums){
+    const arr = (nums||[]).filter(x=>x!=null && isFinite(x));
+    if(!arr.length) return null;
+    return arr.reduce((a,b)=>a+b,0) / arr.length;
+  }
 
-  const typeList = uniqueSorted(Array.from(typeSet));
-  saJobTypeMS.setOptions(typeList);
-  saJobTypeMS.setDisabled(typeList.length === 0);
-}
-
-function initFilters(){
-  buildProvKotaMap();
-  buildJobParentTypeMap();
-
-  const provVals      = uniqueSorted(Array.from(provKotaMap.keys()));
-  const cycleVals     = uniqueSorted(rawRows.map(r => r[COL_CYCLE]));
-  const periodeVals   = uniqueSorted(rawRows.map(r => r[COL_PERIODE]));
-  const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
-
-  msProv = createMultiSelect("ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
-    updateKotaOptionsByProv(sel);
-    updateAllTables();
-  });
-  msKota = createMultiSelect("ms-kota",[], "Semua kota di provinsi ini",true,()=> updateAllTables());
-  msCycle = createMultiSelect("ms-cycle",cycleVals,"Semua Cycle",false,()=> updateAllTables());
-  msPeriode = createMultiSelect("ms-periode",periodeVals,"Semua Periode",false,()=> updateAllTables());
-
-  msJobParent = createMultiSelect("ms-job-parent",jobParentVals,"Semua Job Parent",false,(sel)=>{
-    updateJobTypeOptionsByParent(sel);
-    updateAllTables();
-  });
-  msJobType = createMultiSelect("ms-job-type",[], "Semua Job Type",true,()=> updateAllTables());
-}
-
-function initSourcingAnalystFilters(){
-  const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
-  const allJobParents = uniqueSorted(rawRows.map(r => r[COL_JOB_PARENT]).filter(Boolean));
-
-  saProvMS = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
-    updateSaKotaOptions(sel);
-    updateSaJobParentOptions();
-    updateSourcingAnalystAnalysis();
-  });
-
-  saKotaMS = createMultiSelect("sa-ms-kota",[], "Semua Kota",true,()=>{
-    updateSaJobParentOptions();
-    updateSourcingAnalystAnalysis();
-  });
-
-  saJobParentMS = createMultiSelect("sa-ms-job-parent",allJobParents,"Semua Job Parent",false,()=>{
-    updateSaJobTypeOptions();
-    updateSourcingAnalystAnalysis();
-  });
-
-  saJobTypeMS = createMultiSelect("sa-ms-job-type",[], "Semua Job Type",true,()=> updateSourcingAnalystAnalysis());
-
-  updateSaJobParentOptions();
-}
-
-function clearFilters(){
-  if(msProv) msProv.clear();
-  if(msCycle) msCycle.clear();
-  if(msPeriode) msPeriode.clear();
-  if(msKota){ msKota.setOptions([]); msKota.setDisabled(true); }
-  if(msJobParent) msJobParent.clear();
-  if(msJobType){ msJobType.setOptions([]); msJobType.setDisabled(true); }
-  updateAllTables();
-}
-function clearSaFilters(){
-  if(saProvMS) saProvMS.clear();
-  if(saKotaMS){ saKotaMS.setOptions([]); saKotaMS.setDisabled(true); }
-  if(saJobParentMS) saJobParentMS.clear();
-  if(saJobTypeMS){ saJobTypeMS.setOptions([]); saJobTypeMS.setDisabled(true); }
-  updateSaJobParentOptions();
-  updateSourcingAnalystAnalysis();
-}
-
-function getFilteredRows(){
-  const provSel      = new Set(msProv ? msProv.getSelected() : []);
-  const kotaSel      = new Set(msKota ? msKota.getSelected() : []);
-  const cycleSel     = new Set(msCycle ? msCycle.getSelected() : []);
-  const periodeSel   = new Set(msPeriode ? msPeriode.getSelected() : []);
-  const jobParentSel = new Set(msJobParent ? msJobParent.getSelected() : []);
-  const jobTypeSel   = new Set(msJobType ? msJobType.getSelected() : []);
-
-  return rawRows.filter(row=>{
-    const rowProv      = String(row[COL_PROV] ?? "");
-    const rowKota      = String(row[COL_KOTA] ?? "");
-    const rowCycle     = String(row[COL_CYCLE] ?? "");
-    const rowPeriode   = String(row[COL_PERIODE] ?? "");
-    const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
-    const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
-
-    if(provSel.size      && !provSel.has(rowProv)) return false;
-    if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
-    if(cycleSel.size     && !cycleSel.has(rowCycle)) return false;
-    if(periodeSel.size   && !periodeSel.has(rowPeriode)) return false;
-    if(jobParentSel.size && !jobParentSel.has(rowJobParent)) return false;
-    if(jobTypeSel.size   && !jobTypeSel.has(rowJobType)) return false;
-    return true;
-  });
-}
-function getSourcingAnalystFilteredRows(){
-  const provSel      = new Set(saProvMS ? saProvMS.getSelected() : []);
-  const kotaSel      = new Set(saKotaMS ? saKotaMS.getSelected() : []);
-  const jobParentSel = new Set(saJobParentMS ? saJobParentMS.getSelected() : []);
-  const jobTypeSel   = new Set(saJobTypeMS ? saJobTypeMS.getSelected() : []);
-
-  return rawRows.filter(row=>{
-    const rowProv      = String(row[COL_PROV] ?? "");
-    const rowKota      = String(row[COL_KOTA] ?? "");
-    const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
-    const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
-    if(provSel.size      && !provSel.has(rowProv)) return false;
-    if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
-    if(jobParentSel.size && !jobParentSel.has(rowJobParent)) return false;
-    if(jobTypeSel.size   && !jobTypeSel.has(rowJobType)) return false;
-    return true;
-  });
-}
-function isNoFilterActive(){
-  const provSel      = msProv ? msProv.getSelected() : [];
-  const kotaSel      = msKota ? msKota.getSelected() : [];
-  const cycleSel     = msCycle ? msCycle.getSelected() : [];
-  const periodeSel   = msPeriode ? msPeriode.getSelected() : [];
-  const jobParentSel = msJobParent ? msJobParent.getSelected() : [];
-  const jobTypeSel   = msJobType ? msJobType.getSelected() : [];
-  return !provSel.length && !kotaSel.length && !cycleSel.length && !periodeSel.length && !jobParentSel.length && !jobTypeSel.length;
-}
-
-function aggregateByFixedList(rows,dimCol,fixedList,withLainnya){
-  const result = fixedList.map(name=>({name,valid:0,buffer:0}));
-  const idxMap = new Map();
-  fixedList.forEach((name,i)=>{ idxMap.set(name,i); idxMap.set(norm(name),i); });
-  let lainnya = {name:LABEL_LAINNYA,valid:0,buffer:0};
-
-  rows.forEach(row=>{
-    const keyRaw = row[dimCol];
-    if(!keyRaw) return;
-    const keyStr = String(keyRaw);
-    const keyNorm = norm(keyStr);
-    let idx = idxMap.get(keyStr);
-    if(idx === undefined) idx = idxMap.get(keyNorm);
-
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-
-    if(idx === undefined){
-      if(withLainnya){
-        lainnya.valid += valid;
-        lainnya.buffer += buffer;
+  // Build matrix: key (row) × 12 months
+  function buildKeyMatrix(rows, keyCol, monthFields){
+    const map = new Map(); // key -> array[12] of arrays(values)
+    (rows||[]).forEach(r=>{
+      const key = String(r[keyCol] ?? "").trim();
+      if(!key) return;
+      if(!map.has(key)){
+        map.set(key, Array.from({length:12},()=>[]));
       }
+      const buckets = map.get(key);
+      for(let i=0;i<12;i++){
+        const f = monthFields[i];
+        const val = parsePercentCell(r[f]);
+        if(val != null) buckets[i].push(val);
+      }
+    });
+
+    const keys = Array.from(map.keys()).sort((a,b)=>a.localeCompare(b,"id"));
+    const out = keys.map(k=>{
+      const buckets = map.get(k);
+      const months = buckets.map(b=>mean(b));
+      return { key:k, months };
+    });
+    return out;
+  }
+
+  function renderMatrix(tbodyId, labelHeader, matrix){
+    const tbody = $(tbodyId);
+    tbody.innerHTML = "";
+    if(!matrix.length){
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 13;
+      td.textContent = "Tidak ada data untuk filter ini.";
+      td.className = "muted-row";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
       return;
     }
-    result[idx].valid += valid;
-    result[idx].buffer += buffer;
-  });
 
-  if(withLainnya) result.push(lainnya);
-  return result;
-}
+    matrix.forEach(row=>{
+      const tr = document.createElement("tr");
+      const td0 = document.createElement("td");
+      td0.textContent = row.key;
+      td0.className = "col-label";
+      tr.appendChild(td0);
 
-function aggregateProvDynamic(rows){
-  const map = new Map();
-  rows.forEach(row=>{
-    const prov = row[COL_PROV];
-    if(!prov) return;
-    const key = String(prov);
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-    if(!map.has(key)) map.set(key,{name:key,valid:0,buffer:0});
-    const obj = map.get(key);
-    obj.valid += valid;
-    obj.buffer += buffer;
-  });
-  const res = Array.from(map.values()).filter(r => (r.valid || r.buffer));
-  res.sort((a,b)=>String(a.name).localeCompare(String(b.name),"id"));
-  return res;
-}
-
-/* KATEGORI METODE */
-function getMethodCategory(row){
-  const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
-  const metodeText = norm(row[COL_METODE] ?? "");
-  const combined   = (mediaText + " " + metodeText).trim();
-
-  if(mediaText.includes("OFFLINE")) return "OFFLINE";
-  if(mediaText.includes("ONLINE - JOB PORTAL")) return "ONLINE - JOB PORTAL";
-  if(mediaText.includes("ONLINE - MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
-  if(mediaText.includes("ONLINE JOB PORTAL")) return "ONLINE - JOB PORTAL";
-  if(mediaText.includes("ONLINE MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
-
-  const text = combined;
-
-  const offlineTokens = ["OFFLINE","WALK IN","WALKIN","JOB FAIR","CAMPUS HIRING","CAMPUS","BALAI LATIHAN KERJA","BALAI LATIAN"," BLK","BROSUR","BANNER","SPANDUK","FLYER","DISNAKER","DROP CV","FREELANCE RECRUITER","FREELANCE REC","KOMUNITAS INFORMAL","REFERENSI CLIENT","REF CLIENT","REFERENSI TEMAN","REF TEMAN","REFERENSI KELUARGA","REFERENSI KOMUNITAS","SCHOOL HIRING","SCHOOL"];
-  const portalTokens  = ["GLINTS","HIRED TODAY","INDEED","JOBSTREET EXPRESS","JOB STREET EXPRESS","JOBSTREET","JOB STREET","KARIRHUB","KARIR HUB","KITA LULUS","KITALUTUS","KITALULUS","LUMINA","PINTARNYA","PORTAL"];
-  const mediaTokens   = ["FACEBOOK"," FB","FLK","INSTAGRAM"," IG","IG ","LINKEDIN","TIKTOK"," TT","WHATSAPP"," WA ","WA.","WA/","MEDIA CHAT","CHAT WA","TELEGRAM","TWITTER","MEDSOS","MEDIA SOSIAL","SIM TALENT SEARCH","SIM TALENT","SIMTALENT"];
-
-  if(offlineTokens.some(t=>text.includes(t))) return "OFFLINE";
-  if(portalTokens.some(t=>text.includes(t)))  return "ONLINE - JOB PORTAL";
-  if(mediaTokens.some(t=>text.includes(t)))   return "ONLINE - MEDIA SOSIAL";
-  if(text.includes("ONLINE")) return "ONLINE - MEDIA SOSIAL";
-  return "LAINNYA";
-}
-
-function aggregateMetodeSmart(rows){
-  const buckets = {
-    "OFFLINE": {name:"OFFLINE",valid:0,buffer:0},
-    "ONLINE - MEDIA SOSIAL": {name:"ONLINE - MEDIA SOSIAL",valid:0,buffer:0},
-    "ONLINE - JOB PORTAL": {name:"ONLINE - JOB PORTAL",valid:0,buffer:0},
-    "LAINNYA": {name:LABEL_LAINNYA,valid:0,buffer:0}
-  };
-  rows.forEach(row=>{
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-    const cat = getMethodCategory(row);
-    const bucket = buckets[cat] || buckets["LAINNYA"];
-    bucket.valid += valid; bucket.buffer += buffer;
-  });
-  return [buckets["OFFLINE"],buckets["ONLINE - MEDIA SOSIAL"],buckets["ONLINE - JOB PORTAL"],buckets["LAINNYA"]];
-}
-
-function aggregateMediaSocial(rows){
-  const map = new Map();
-  FIXED_MEDIA_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}));
-
-  const tokenMap = [
-    {token:"FACEBOOK",label:"Facebook"},
-    {token:" FLK",label:"FLK"},{token:"FLK ",label:"FLK"},
-    {token:"INSTAGRAM",label:"Instagram"},{token:" IG",label:"Instagram"},{token:"IG ",label:"Instagram"},
-    {token:"LINKEDIN",label:"Linkedin"},
-    {token:"SIM TALENT SEARCH",label:"SIM Talent Search"},{token:"SIM TALENT",label:"SIM Talent Search"},{token:"SIMTALENT",label:"SIM Talent Search"},
-    {token:"TELEGRAM",label:"Telegram"},
-    {token:"TIKTOK",label:"Tiktok"},{token:" TT",label:"Tiktok"},
-    {token:"TWITTER",label:"Twitter"},
-    {token:"WHATSAPP",label:"Whatsapp / Media Chat"},{token:" WA ",label:"Whatsapp / Media Chat"},{token:"WA.",label:"Whatsapp / Media Chat"},{token:"WA/",label:"Whatsapp / Media Chat"},{token:"MEDIA CHAT",label:"Whatsapp / Media Chat"},{token:"CHAT WA",label:"Whatsapp / Media Chat"}
-  ];
-
-  rows.forEach(row=>{
-    if(getMethodCategory(row) !== "ONLINE - MEDIA SOSIAL") return;
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-
-    const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
-    const metodeText = norm(row[COL_METODE] ?? "");
-    const text = (mediaText + " " + metodeText).trim();
-    if(!text) return;
-
-    let label = null;
-    for(const m of tokenMap){ if(text.includes(m.token)){ label = m.label; break; } }
-    if(!label) return;
-
-    const item = map.get(label);
-    if(!item) return;
-    item.valid += valid; item.buffer += buffer;
-    item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
-  });
-
-  return FIXED_MEDIA_LIST.map(name=>map.get(name));
-}
-
-function aggregateJobPortal(rows){
-  const map = new Map();
-  FIXED_PORTAL_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}));
-
-  const tokenMap = [
-    {token:"GLINTS",label:"Glints"},
-    {token:"HIRED TODAY",label:"Hired Today"},
-    {token:"INDEED",label:"Indeed"},
-    {token:"JOBSTREET EXPRESS",label:"Jobstreet Express"},
-    {token:"JOB STREET EXPRESS",label:"Jobstreet Express"},
-    {token:"JOBSTREET",label:"JobStreet"},
-    {token:"JOB STREET",label:"JobStreet"},
-    {token:"KARIRHUB",label:"KarirHub"},
-    {token:"KARIR HUB",label:"KarirHub"},
-    {token:"KITA LULUS",label:"KitaLulus"},
-    {token:"KITALULUS",label:"KitaLulus"},
-    {token:"LUMINA",label:"Lumina"},
-    {token:"PINTARNYA",label:"Pintarnya"}
-  ];
-
-  rows.forEach(row=>{
-    if(getMethodCategory(row) !== "ONLINE - JOB PORTAL") return;
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-
-    const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
-    const metodeText = norm(row[COL_METODE] ?? "");
-    const text = (mediaText + " " + metodeText).trim();
-    if(!text) return;
-
-    let label = null;
-    for(const m of tokenMap){ if(text.includes(m.token)){ label = m.label; break; } }
-    if(!label) return;
-
-    const item = map.get(label);
-    if(!item) return;
-    item.valid += valid; item.buffer += buffer;
-    item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
-  });
-
-  return FIXED_PORTAL_LIST.map(name=>map.get(name));
-}
-
-function aggregateOffline(rows){
-  const map = new Map();
-  FIXED_OFFLINE_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}));
-
-  const tokenMap = [
-    {token:"ACADEMY",label:"Academy/Training/Seminar"},
-    {token:"TRAINING",label:"Academy/Training/Seminar"},
-    {token:"SEMINAR",label:"Academy/Training/Seminar"},
-    {token:"BALAI LATIHAN KERJA",label:"Balai Latian Kerja (BLK)"},
-    {token:"BALAI LATIAN",label:"Balai Latian Kerja (BLK)"},
-    {token:" BLK",label:"Balai Latian Kerja (BLK)"},
-    {token:"BROSUR",label:"Brosur/Banner/Spanduk/Flyer"},
-    {token:"BANNER",label:"Brosur/Banner/Spanduk/Flyer"},
-    {token:"SPANDUK",label:"Brosur/Banner/Spanduk/Flyer"},
-    {token:"FLYER",label:"Brosur/Banner/Spanduk/Flyer"},
-    {token:"CAMPUS HIRING",label:"Campus Hiring"},
-    {token:"CAMPUS",label:"Campus Hiring"},
-    {token:"DISNAKER",label:"Disnaker"},
-    {token:"DROP CV",label:"Drop CV"},
-    {token:"FREELANCE RECRUITER",label:"Freelance Recruiter"},
-    {token:"FREELANCE REC",label:"Freelance Recruiter"},
-    {token:"JOB FAIR",label:"Job Fair"},
-    {token:"KOMUNITAS INFORMAL",label:"Komunitas Informal"},
-    {token:"REFERENSI CLIENT",label:"Referensi Client"},
-    {token:"REF CLIENT",label:"Referensi Client"},
-    {token:"REFERENSI TEMAN",label:"Referensi Teman/Keluarga/Komunitas"},
-    {token:"REF TEMAN",label:"Referensi Teman/Keluarga/Komunitas"},
-    {token:"REFERENSI KELUARGA",label:"Referensi Teman/Keluarga/Komunitas"},
-    {token:"REFERENSI KOMUNITAS",label:"Referensi Teman/Keluarga/Komunitas"},
-    {token:"SCHOOL HIRING",label:"School Hiring"},
-    {token:"SCHOOL",label:"School Hiring"},
-    {token:"WALK IN",label:"Walk In Interview (WI)"},
-    {token:"WALKIN",label:"Walk In Interview (WI)"},
-    {token:" WI",label:"Walk In Interview (WI)"}
-  ];
-
-  rows.forEach(row=>{
-    if(getMethodCategory(row) !== "OFFLINE") return;
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-
-    const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
-    const metodeText = norm(row[COL_METODE] ?? "");
-    const text = (mediaText + " " + metodeText).trim();
-    if(!text) return;
-
-    let label = null;
-    for(const m of tokenMap){ if(text.includes(m.token)){ label = m.label; break; } }
-    if(!label) return;
-
-    const item = map.get(label);
-    if(!item) return;
-    item.valid += valid; item.buffer += buffer;
-    item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
-  });
-
-  return FIXED_OFFLINE_LIST.map(name=>map.get(name));
-}
-
-function parseMonthIndex(str){
-  if(!str) return null;
-  const s = String(str).toLowerCase();
-  const monthNames = [
-    {idx:1,keys:["jan","januari"]},{idx:2,keys:["feb","peb","febuari","februari"]},{idx:3,keys:["mar","maret"]},{idx:4,keys:["apr","april"]},
-    {idx:5,keys:["mei","may"]},{idx:6,keys:["jun","juni","june"]},{idx:7,keys:["jul","juli","july"]},{idx:8,keys:["agu","agust","aug","agustus","august"]},
-    {idx:9,keys:["sep","sept","september"]},{idx:10,keys:["okt","oct","oktober","october"]},{idx:11,keys:["nov","november"]},{idx:12,keys:["des","dec","desember","december"]}
-  ];
-  for(const m of monthNames){ if(m.keys.some(k=>s.includes(k))) return m.idx; }
-  let m = s.match(/(\d{4})[-/](\d{1,2})(?:[-/]\d{1,2})?/);
-  if(m){ const month = Number(m[2]); if(month>=1 && month<=12) return month; }
-  m = s.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
-  if(m){
-    const a = Number(m[1]), b = Number(m[2]);
-    let month = null;
-    if(a>12 && b>=1 && b<=12) month = b;
-    else if(b>12 && a>=1 && a<=12) month = a;
-    else if(a>=1 && a<=12) month = a;
-    else if(b>=1 && b<=12) month = b;
-    if(month && month>=1 && month<=12) return month;
+      for(let i=0;i<12;i++){
+        const td = document.createElement("td");
+        td.textContent = formatPercent2(row.months[i]);
+        td.className = "col-number";
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    });
   }
-  return null;
-}
 
-function aggregateMonthly(rows){
-  const arr = MONTHS.map(m=>({idx:m.idx,name:m.label,valid:0,buffer:0}));
-  const idxMap = new Map();
-  arr.forEach((m,i)=>idxMap.set(m.idx,i));
-  rows.forEach(row=>{
-    const idx = parseMonthIndex(row[COL_PERIODE]);
-    if(!idx) return;
-    const i = idxMap.get(idx);
-    if(i === undefined) return;
-    const valid  = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!valid && !buffer) return;
-    arr[i].valid += valid;
-    arr[i].buffer += buffer;
-  });
-  return arr;
-}
+  /* ===================== ACM HELPERS (existing logic) ===================== */
+  function parseCostValue(v){
+    if(v == null) return 0;
+    let s = String(v).trim();
+    if(!s) return 0;
+    s = s.replace(/[^0-9.,]/g,"");
+    s = s.replace(/\./g,"").replace(",",".");
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+  }
 
-function updateChart(rows){
-  const container = $("chart-body");
-  if(!container) return;
-  container.innerHTML = "";
-  const monthly = aggregateMonthly(rows);
-  let maxVal = 0;
-  monthly.forEach(m=>{ maxVal = Math.max(maxVal,m.valid,m.buffer); });
-  if(maxVal === 0) maxVal = 1;
+  function getApplicantValidValue(raw){
+    return norm(raw) === norm(KATEGORI_VALID_TARGET) ? 1 : 0;
+  }
+  function isQualifiedYes(raw){
+    const s = norm(raw);
+    return s === "YES" || s === "YA";
+  }
 
-  monthly.forEach(m=>{
-    const col = document.createElement("div");
-    col.className = "chart-col";
-    const barsBox = document.createElement("div");
-    barsBox.className = "chart-col-bars";
-    const barValid = document.createElement("div");
-    barValid.className = "chart-bar-vert bar-valid";
-    barValid.style.height = (m.valid / maxVal * 100) + "%";
-    const barBuffer = document.createElement("div");
-    barBuffer.className = "chart-bar-vert bar-buffer";
-    barBuffer.style.height = (m.buffer / maxVal * 100) + "%";
-    barsBox.appendChild(barValid); barsBox.appendChild(barBuffer);
+  function uniqueSorted(list){
+    return Array.from(new Set(list.filter(Boolean)))
+      .sort((a,b)=>String(a).localeCompare(String(b),"id"));
+  }
 
-    const valuesBox = document.createElement("div");
-    valuesBox.className = "chart-col-values";
-    valuesBox.innerHTML = `<div>${numberFmt.format(m.valid)}</div><div>${numberFmt.format(m.buffer)}</div>`;
-    const label = document.createElement("div");
-    label.className = "chart-col-label";
-    label.textContent = m.name;
+  function createMultiSelect(rootId, options, placeholder, disabled, onChange){
+    const root = $(rootId);
+    const toggle = root.querySelector(".ms-toggle");
+    const panel = root.querySelector(".ms-panel");
+    const searchInput = root.querySelector(".ms-search");
+    const optsContainer = root.querySelector(".ms-options");
+    const emptyEl = root.querySelector(".ms-empty");
+    const labelSpan = root.querySelector(".ms-placeholder");
+    const counterSpan = root.querySelector(".ms-counter");
 
-    col.appendChild(barsBox);
-    col.appendChild(valuesBox);
-    col.appendChild(label);
-    container.appendChild(col);
-  });
+    const state = { options:[...(options || [])], selected:new Set() };
 
-  const totalValid = monthly.reduce((s,m)=>s+m.valid,0);
-  const totalBuffer = monthly.reduce((s,m)=>s+m.buffer,0);
-  $("chart-summary-text").textContent =
-    `Total Valid: ${numberFmt.format(totalValid)} · Total Buffer: ${numberFmt.format(totalBuffer)} (berdasarkan PERIODE PELAMAR & filter aktif)`;
-}
-
-function renderTable(tbodyId,rows,totalLabel){
-  const tbody = $(tbodyId);
-  tbody.innerHTML = "";
-  let grandValid = 0, grandBuffer = 0;
-
-  rows.forEach(r=>{
-    const tr = document.createElement("tr");
-    if(r.valid === 0 && r.buffer === 0) tr.classList.add("muted-row");
-
-    const tdLabel = document.createElement("td");
-    tdLabel.textContent = r.name;
-    tdLabel.className = "col-label";
-
-    const tdValid = document.createElement("td");
-    tdValid.textContent = numberFmt.format(r.valid || 0);
-    tdValid.className = "col-number";
-
-    const tdBuffer = document.createElement("td");
-    tdBuffer.textContent = numberFmt.format(r.buffer || 0);
-    tdBuffer.className = "col-number";
-
-    tr.appendChild(tdLabel); tr.appendChild(tdValid); tr.appendChild(tdBuffer);
-    tbody.appendChild(tr);
-
-    grandValid += (r.valid || 0);
-    grandBuffer += (r.buffer || 0);
-  });
-
-  const trTotal = document.createElement("tr");
-  trTotal.className = "total-row";
-  trTotal.innerHTML = `
-    <td class="col-label">${totalLabel}</td>
-    <td class="col-number">${numberFmt.format(grandValid)}</td>
-    <td class="col-number">${numberFmt.format(grandBuffer)}</td>
-  `;
-  tbody.appendChild(trTotal);
-  return {grandValid,grandBuffer};
-}
-
-function updateSummary(filtered){
-  let totalValid = 0, totalBuffer = 0;
-  let maleValid = 0, maleBuffer = 0;
-  let femaleValid = 0, femaleBuffer = 0;
-
-  filtered.forEach(row=>{
-    const valid = getApplicantValidValue(row[COL_KATEGORI]);
-    const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    totalValid += valid;
-    totalBuffer += buffer;
-
-    const g = norm(row[COL_GENDER]);
-    if(g.includes("LAKI") || g === "L" || g === "LAKI-LAKI"){
-      maleValid += valid; maleBuffer += buffer;
-    }else if(g.includes("PEREMPUAN") || g === "P" || g === "PEREMPUAN"){
-      femaleValid += valid; femaleBuffer += buffer;
+    function updateLabel(){
+      const count = state.selected.size;
+      if(count === 0){
+        labelSpan.textContent = placeholder;
+        counterSpan.textContent = "";
+      }else if(count <= 2){
+        labelSpan.textContent = Array.from(state.selected).join(", ");
+        counterSpan.textContent = "";
+      }else{
+        labelSpan.textContent = placeholder;
+        counterSpan.textContent = count + " dipilih";
+      }
     }
-  });
 
-  $("sum-male-valid").textContent    = numberFmt.format(maleValid);
-  $("sum-male-buffer").textContent   = numberFmt.format(maleBuffer);
-  $("sum-female-valid").textContent  = numberFmt.format(femaleValid);
-  $("sum-female-buffer").textContent = numberFmt.format(femaleBuffer);
-  $("sum-total-valid").textContent   = numberFmt.format(totalValid);
-  $("sum-total-buffer").textContent  = numberFmt.format(totalBuffer);
-}
+    function renderOptions(){
+      optsContainer.innerHTML = "";
+      const term = searchInput.value.toLowerCase();
+      let visibleCount = 0;
 
-function updateAllTables(){
-  const filtered = getFilteredRows();
-  const totalRows = filtered.length;
-  const noFilter = isNoFilterActive();
+      state.options.forEach(val=>{
+        const text = String(val);
+        if(term && !text.toLowerCase().includes(term)) return;
 
-  updateSummary(filtered);
-  updateChart(filtered);
+        visibleCount++;
+        const label = document.createElement("label");
+        label.className = "ms-option";
 
-  const provAgg = noFilter
-    ? aggregateByFixedList(filtered,COL_PROV,FIXED_PROV_LIST,false)
-    : aggregateProvDynamic(filtered);
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = text;
+        cb.checked = state.selected.has(text);
 
-  const totalProv = renderTable("tbl-prov-body",provAgg,"GRAND TOTAL PROVINSI");
-  $("status-prov").textContent =
-    `Ditampilkan ${provAgg.length} provinsi · ${numberFmt.format(totalRows)} baris terfilter · ` +
-    `Grand Total Valid: ${numberFmt.format(totalProv.grandValid)}, Buffer: ${numberFmt.format(totalProv.grandBuffer)}`;
+        cb.addEventListener("change",()=>{
+          if(cb.checked) state.selected.add(text);
+          else state.selected.delete(text);
+          updateLabel();
+          if(onChange) onChange(getSelected());
+        });
 
-  const metodeAgg = aggregateMetodeSmart(filtered);
-  const totalMetode = renderTable("tbl-metode-body",metodeAgg,"GRAND TOTAL METODE");
-  $("status-metode").textContent =
-    `Ditampilkan ${metodeAgg.length} metode · ${numberFmt.format(totalRows)} baris terfilter · ` +
-    `Grand Total Valid: ${numberFmt.format(totalMetode.grandValid)}, Buffer: ${numberFmt.format(totalMetode.grandBuffer)}`;
+        const span = document.createElement("span");
+        span.textContent = text;
 
-  const mediaAgg = aggregateMediaSocial(filtered);
-  const totalMedia = renderTable("tbl-media-body",mediaAgg,"GRAND TOTAL MEDIA SOSIAL");
-  $("status-media").textContent =
-    `Ditampilkan ${mediaAgg.length} media · ${numberFmt.format(totalRows)} baris terfilter · ` +
-    `Grand Total Valid: ${numberFmt.format(totalMedia.grandValid)}, Buffer: ${numberFmt.format(totalMedia.grandBuffer)}`;
+        label.appendChild(cb);
+        label.appendChild(span);
+        optsContainer.appendChild(label);
+      });
 
-  const eduAgg = aggregateByFixedList(filtered,COL_EDU,FIXED_EDU_LIST,false);
-  const totalEdu = renderTable("tbl-edu-body",eduAgg,"GRAND TOTAL PENDIDIKAN");
-  $("status-edu").textContent =
-    `Ditampilkan ${eduAgg.length} level pendidikan · ${numberFmt.format(totalRows)} baris terfilter · ` +
-    `Grand Total Valid: ${numberFmt.format(totalEdu.grandValid)}, Buffer: ${numberFmt.format(totalEdu.grandBuffer)}`;
+      emptyEl.style.display = visibleCount ? "none" : "block";
+    }
 
-  const portalAgg = aggregateJobPortal(filtered);
-  const totalPortal = renderTable("tbl-portal-body",portalAgg,"GRAND TOTAL JOB PORTAL");
-  $("status-portal").textContent =
-    `Ditampilkan ${portalAgg.length} portal · ${numberFmt.format(totalRows)} baris terfilter · ` +
-    `Grand Total Valid: ${numberFmt.format(totalPortal.grandValid)}, Buffer: ${numberFmt.format(totalPortal.grandBuffer)}`;
+    function getSelected(){ return Array.from(state.selected); }
 
-  const offlineAgg = aggregateOffline(filtered);
-  const totalOffline = renderTable("tbl-offline-body",offlineAgg,"GRAND TOTAL OFFLINE");
-  $("status-offline").textContent =
-    `Ditampilkan ${offlineAgg.length} aktivitas · ${numberFmt.format(totalRows)} baris terfilter · ` +
-    `Grand Total Valid: ${numberFmt.format(totalOffline.grandValid)}, Buffer: ${numberFmt.format(totalOffline.grandBuffer)}`;
-}
+    function setOptions(newOptions){
+      state.options = [...(newOptions || [])];
+      state.selected.clear();
+      searchInput.value = "";
+      renderOptions();
+      updateLabel();
+      if(onChange) onChange(getSelected());
+    }
 
-/* SA analysis (tetap seperti kamu; ringkas: gunakan yang sudah ada) */
-function computeSaMethod3MonthSummary(rows, methodCategory){
-  let valid = 0, buffer = 0;
-  const monthSet = new Set();
-  rows.forEach(row=>{
-    if(getMethodCategory(row) !== methodCategory) return;
-    const v = getApplicantValidValue(row[COL_KATEGORI]);
-    const b = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-    if(!v && !b) return;
-    valid += v; buffer += b;
-    const mIdx = parseMonthIndex(row[COL_PERIODE]);
-    if(mIdx) monthSet.add(mIdx);
-  });
-  if(valid === 0 && buffer === 0) return {totalValid:0,totalBuffer:0,estValid3:0,estBuffer3:0};
-  const monthCount = monthSet.size || 1;
-  const estValid3 = Math.round((valid/monthCount) * 3);
-  const estBuffer3 = Math.round((buffer/monthCount) * 3);
-  return {totalValid:valid,totalBuffer:buffer,estValid3,estBuffer3};
-}
-function pickTop(list,n){
-  return [...list].filter(r => (r && (r.valid || r.buffer)))
-    .sort((a,b)=> (b.valid + b.buffer) - (a.valid + a.buffer))
-    .slice(0,n);
-}
-function formatChannelList(channels){
-  return channels.map(ch=>{
-    const totalCost = ch.totalCost ? ch.totalCost : 0;
-    const costText = currencyFmt.format(totalCost);
-    return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
-  }).join("; ");
-}
-function updateSourcingAnalystAnalysis(){
-  const container = $("sa-analysis-text");
-  if(!container) return;
+    function setDisabled(flag){
+      if(flag){
+        root.classList.add("ms-disabled");
+        root.classList.remove("open");
+      }else{
+        root.classList.remove("ms-disabled");
+      }
+    }
 
-  const provSel      = saProvMS ? saProvMS.getSelected() : [];
-  const kotaSel      = saKotaMS ? saKotaMS.getSelected() : [];
-  const jobParentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
-  const jobTypeSel   = saJobTypeMS ? saJobTypeMS.getSelected() : [];
+    function clear(){
+      state.selected.clear();
+      searchInput.value = "";
+      renderOptions();
+      updateLabel();
+      if(onChange) onChange(getSelected());
+    }
 
-  if(!provSel.length && !kotaSel.length && !jobParentSel.length && !jobTypeSel.length){
-    container.innerHTML = "Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.";
-    return;
+    toggle.addEventListener("click",()=>{
+      if(root.classList.contains("ms-disabled")) return;
+      const isOpen = root.classList.toggle("open");
+      if(isOpen){
+        searchInput.value = "";
+        renderOptions();
+        searchInput.focus();
+      }
+    });
+
+    searchInput.addEventListener("input",renderOptions);
+
+    document.addEventListener("click",(e)=>{
+      if(!root.contains(e.target)){
+        root.classList.remove("open");
+      }
+    });
+
+    setDisabled(!!disabled);
+    renderOptions();
+    updateLabel();
+
+    return {getSelected,setOptions,setDisabled,clear};
   }
 
-  const rows = getSourcingAnalystFilteredRows();
-  if(!rows.length){
-    container.innerHTML = "Belum ada analisa untuk kombinasi filter saat ini (data tidak ditemukan).";
-    return;
+  function detectMediaColumn(fields){
+    if(!fields || !fields.length) return COL_MEDIA_PREF;
+    const preferredNorm = norm(COL_MEDIA_PREF);
+    let found = fields.find(f=>norm(f)===preferredNorm);
+    if(found) return found;
+
+    const candidates = fields.filter(f=>{
+      const s = norm(f);
+      return s.includes("MEDIA") || s.includes("SOURCING");
+    });
+    return candidates[0] || COL_MEDIA_PREF;
   }
 
-  const provName = provSel[0] || "semua provinsi";
-  const kotaName = kotaSel[0] || "";
-  const jpName   = jobParentSel[0] || "";
-  const jtName   = jobTypeSel[0] || "";
+  function detectJobColumns(fields){
+    if(!fields || !fields.length) return {parent:COL_JOB_PARENT,type:COL_JOB_TYPE};
+    let parent = null;
+    let type   = null;
 
-  let headerLine = "Untuk ";
-  if(jtName){
-    headerLine += `Job <strong>${jtName}</strong>`;
-    if(jpName && jpName !== jtName) headerLine += ` (Job Parent <strong>${jpName}</strong>)`;
-  }else if(jpName){
-    headerLine += `Job Parent <strong>${jpName}</strong>`;
-  }else headerLine += "kombinasi job";
+    for(const f of fields){
+      const s = norm(f);
+      if(!parent && s.includes("JOB") && s.includes("PARENT")) parent = f;
+      if(!type && s.includes("JOB") && s.includes("TYPE")) type = f;
+    }
 
-  headerLine += kotaName ? ` di <strong>${kotaName}</strong>, <strong>${provName}</strong>,` : ` di <strong>${provName}</strong>,`;
-  headerLine += " pola sourcing yang terlihat paling efektif berdasarkan data Applicant Valid &amp; Buffer adalah:";
-
-  const portalAgg  = aggregateJobPortal(rows);
-  const mediaAgg   = aggregateMediaSocial(rows);
-  const offlineAgg = aggregateOffline(rows);
-
-  const topPortal  = pickTop(portalAgg,5);
-  const topMedia   = pickTop(mediaAgg,3);
-  const topOffline = pickTop(offlineAgg,2);
-
-  const portalSummary = computeSaMethod3MonthSummary(rows,"ONLINE - JOB PORTAL");
-  const mediaSummary  = computeSaMethod3MonthSummary(rows,"ONLINE - MEDIA SOSIAL");
-  const offSummary    = computeSaMethod3MonthSummary(rows,"OFFLINE");
-
-  const parts = [];
-  parts.push(`<p class="analysis-intro">${headerLine}</p>`);
-
-  if(topPortal.length && (portalSummary.totalValid || portalSummary.totalBuffer)){
-    parts.push(`
-      <div class="analysis-section">
-        <div class="analysis-icon">🌐</div>
-        <div class="analysis-body">
-          <div class="analysis-title">Job Portal</div>
-          <div class="analysis-summary">Sourcing menggunakan Job Portal didominasi oleh: ${formatChannelList(topPortal)}.</div>
-          <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: <strong>${numberFmt.format(portalSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</div>
-        </div>
-      </div>
-    `);
-  }
-  if(topMedia.length && (mediaSummary.totalValid || mediaSummary.totalBuffer)){
-    parts.push(`
-      <div class="analysis-section">
-        <div class="analysis-icon">📱</div>
-        <div class="analysis-body">
-          <div class="analysis-title">Online - Media Sosial</div>
-          <div class="analysis-summary">Platform paling efektif: ${formatChannelList(topMedia)}.</div>
-          <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: <strong>${numberFmt.format(mediaSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</div>
-        </div>
-      </div>
-    `);
-  }
-  if(topOffline.length && (offSummary.totalValid || offSummary.totalBuffer)){
-    parts.push(`
-      <div class="analysis-section">
-        <div class="analysis-icon">👣</div>
-        <div class="analysis-body">
-          <div class="analysis-title">Sourcing Offline</div>
-          <div class="analysis-summary">Aktivitas offline paling efektif: ${formatChannelList(topOffline)}.</div>
-          <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: <strong>${numberFmt.format(offSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</div>
-        </div>
-      </div>
-    `);
+    return { parent: parent || COL_JOB_PARENT, type: type || COL_JOB_TYPE };
   }
 
-  container.innerHTML = parts.join("");
-}
+  function buildProvKotaMap(){
+    provKotaMap.clear();
+    rawRows.forEach(row=>{
+      const p = row[COL_PROV];
+      const k = row[COL_KOTA];
+      if(!p || !k) return;
+      const provStr = String(p);
+      if(!provKotaMap.has(provStr)) provKotaMap.set(provStr,new Set());
+      provKotaMap.get(provStr).add(String(k));
+    });
+  }
 
-/* LOAD ACM CSV */
-function loadCsv(){
-  const errBox = $("error-state");
-  errBox.style.display = "none";
-  $("load-state").style.display = "flex";
+  function buildJobParentTypeMap(){
+    jobParentTypeMap.clear();
+    rawRows.forEach(row=>{
+      const jp = row[COL_JOB_PARENT];
+      const jt = row[COL_JOB_TYPE];
+      if(!jp || !jt) return;
+      const parentStr = String(jp);
+      if(!jobParentTypeMap.has(parentStr)) jobParentTypeMap.set(parentStr,new Set());
+      jobParentTypeMap.get(parentStr).add(String(jt));
+    });
+  }
 
-  Papa.parse(CSV_URL,{
-    download:true, header:true, skipEmptyLines:true,
-    complete:(parsed)=>{
-      try{
-        rawRows = parsed.data || [];
-        const fields = parsed.meta && parsed.meta.fields ? parsed.meta.fields : [];
-        DETECTED_COL_MEDIA = detectMediaColumn(fields);
-        const jobCols = detectJobColumns(fields);
-        COL_JOB_PARENT = jobCols.parent;
-        COL_JOB_TYPE   = jobCols.type;
+  function updateKotaOptionsByProv(selectedProv){
+    if(!msKota) return;
+    if(!selectedProv || !selectedProv.length){
+      msKota.setOptions([]);
+      msKota.setDisabled(true);
+      return;
+    }
+    const citySet = new Set();
+    selectedProv.forEach(p=>{
+      const s = provKotaMap.get(p);
+      if(s) s.forEach(c=>citySet.add(c));
+    });
+    const cityList = uniqueSorted(Array.from(citySet));
+    msKota.setOptions(cityList);
+    msKota.setDisabled(false);
+  }
 
-        $("load-state").style.display = "none";
+  function updateJobTypeOptionsByParent(selectedParents){
+    if(!msJobType) return;
+    if(!selectedParents || !selectedParents.length){
+      msJobType.setOptions([]);
+      msJobType.setDisabled(true);
+      return;
+    }
+    const typeSet = new Set();
+    selectedParents.forEach(p=>{
+      const s = jobParentTypeMap.get(p);
+      if(s) s.forEach(t=>typeSet.add(t));
+    });
+    const typeList = uniqueSorted(Array.from(typeSet));
+    msJobType.setOptions(typeList);
+    msJobType.setDisabled(false);
+  }
 
-        if(!rawRows.length){
-          errBox.textContent = "Data kosong atau header kolom belum sesuai dengan konfigurasi.";
+  function updateSaKotaOptions(selectedProv){
+    if(!saKotaMS) return;
+    if(!selectedProv || !selectedProv.length){
+      saKotaMS.setOptions([]);
+      saKotaMS.setDisabled(true);
+      return;
+    }
+    const citySet = new Set();
+    selectedProv.forEach(p=>{
+      const s = provKotaMap.get(p);
+      if(s) s.forEach(c=>citySet.add(c));
+    });
+    const cityList = uniqueSorted(Array.from(citySet));
+    saKotaMS.setOptions(cityList);
+    saKotaMS.setDisabled(false);
+  }
+
+  function updateSaJobParentOptions(){
+    if(!saJobParentMS) return;
+    const provSel = saProvMS ? saProvMS.getSelected() : [];
+    const kotaSel = saKotaMS ? saKotaMS.getSelected() : [];
+
+    const parentsSet = new Set();
+    rawRows.forEach(row=>{
+      const rp = String(row[COL_PROV] ?? "");
+      const rk = String(row[COL_KOTA] ?? "");
+      if(provSel.length && !provSel.includes(rp)) return;
+      if(kotaSel.length && !kotaSel.includes(rk)) return;
+      const jp = row[COL_JOB_PARENT];
+      if(jp) parentsSet.add(String(jp));
+    });
+
+    const parentList = uniqueSorted(Array.from(parentsSet));
+    saJobParentMS.setOptions(parentList);
+    saJobParentMS.setDisabled(parentList.length === 0);
+
+    if(saJobTypeMS){
+      saJobTypeMS.setOptions([]);
+      saJobTypeMS.setDisabled(true);
+    }
+  }
+
+  function updateSaJobTypeOptions(){
+    if(!saJobTypeMS) return;
+    const provSel   = saProvMS ? saProvMS.getSelected()      : [];
+    const kotaSel   = saKotaMS ? saKotaMS.getSelected()      : [];
+    const parentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
+
+    if(!parentSel.length){
+      saJobTypeMS.setOptions([]);
+      saJobTypeMS.setDisabled(true);
+      return;
+    }
+
+    const typeSet = new Set();
+    rawRows.forEach(row=>{
+      const rp = String(row[COL_PROV] ?? "");
+      const rk = String(row[COL_KOTA] ?? "");
+      const jp = String(row[COL_JOB_PARENT] ?? "");
+      const jt = row[COL_JOB_TYPE];
+
+      if(provSel.length && !provSel.includes(rp)) return;
+      if(kotaSel.length && !kotaSel.includes(rk)) return;
+      if(parentSel.length && !parentSel.includes(jp)) return;
+      if(jt) typeSet.add(String(jt));
+    });
+
+    const typeList = uniqueSorted(Array.from(typeSet));
+    saJobTypeMS.setOptions(typeList);
+    saJobTypeMS.setDisabled(typeList.length === 0);
+  }
+
+  function initFilters(){
+    buildProvKotaMap();
+    buildJobParentTypeMap();
+
+    const provVals      = uniqueSorted(Array.from(provKotaMap.keys()));
+    const cycleVals     = uniqueSorted(rawRows.map(r => r[COL_CYCLE]));
+    const periodeVals   = uniqueSorted(rawRows.map(r => r[COL_PERIODE]));
+    const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
+
+    msProv = createMultiSelect("ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
+      updateKotaOptionsByProv(sel);
+      updateAllTables();
+    });
+    msKota = createMultiSelect("ms-kota",[], "Semua kota di provinsi ini",true,()=>{
+      updateAllTables();
+    });
+    msCycle = createMultiSelect("ms-cycle",cycleVals,"Semua Cycle",false,()=>{
+      updateAllTables();
+    });
+    msPeriode = createMultiSelect("ms-periode",periodeVals,"Semua Periode",false,()=>{
+      updateAllTables();
+    });
+
+    msJobParent = createMultiSelect("ms-job-parent",jobParentVals,"Semua Job Parent",false,(sel)=>{
+      updateJobTypeOptionsByParent(sel);
+      updateAllTables();
+    });
+    msJobType = createMultiSelect("ms-job-type",[], "Semua Job Type",true,()=>{
+      updateAllTables();
+    });
+  }
+
+  function initSourcingAnalystFilters(){
+    const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
+    const allJobParents = uniqueSorted(rawRows.map(r => r[COL_JOB_PARENT]).filter(Boolean));
+
+    saProvMS = createMultiSelect("sa-ms-prov",provVals,"Semua Provinsi",false,(sel)=>{
+      updateSaKotaOptions(sel);
+      updateSaJobParentOptions();
+      updateSourcingAnalystAnalysis();
+    });
+
+    saKotaMS = createMultiSelect("sa-ms-kota",[], "Semua Kota",true,()=>{
+      updateSaJobParentOptions();
+      updateSourcingAnalystAnalysis();
+    });
+
+    saJobParentMS = createMultiSelect("sa-ms-job-parent",allJobParents,"Semua Job Parent",false,()=>{
+      updateSaJobTypeOptions();
+      updateSourcingAnalystAnalysis();
+    });
+
+    saJobTypeMS = createMultiSelect("sa-ms-job-type",[], "Semua Job Type",true,()=>{
+      updateSourcingAnalystAnalysis();
+    });
+
+    updateSaJobParentOptions();
+  }
+
+  function clearFilters(){
+    if(msProv)      msProv.clear();
+    if(msCycle)     msCycle.clear();
+    if(msPeriode)   msPeriode.clear();
+    if(msKota){
+      msKota.setOptions([]);
+      msKota.setDisabled(true);
+    }
+    if(msJobParent) msJobParent.clear();
+    if(msJobType){
+      msJobType.setOptions([]);
+      msJobType.setDisabled(true);
+    }
+    updateAllTables();
+  }
+
+  function clearSaFilters(){
+    if(saProvMS) saProvMS.clear();
+    if(saKotaMS){
+      saKotaMS.setOptions([]);
+      saKotaMS.setDisabled(true);
+    }
+    if(saJobParentMS) saJobParentMS.clear();
+    if(saJobTypeMS){
+      saJobTypeMS.setOptions([]);
+      saJobTypeMS.setDisabled(true);
+    }
+    updateSaJobParentOptions();
+    updateSourcingAnalystAnalysis();
+  }
+
+  function getFilteredRows(){
+    const provSel      = new Set(msProv ? msProv.getSelected()      : []);
+    const kotaSel      = new Set(msKota ? msKota.getSelected()      : []);
+    const cycleSel     = new Set(msCycle ? msCycle.getSelected()    : []);
+    const periodeSel   = new Set(msPeriode ? msPeriode.getSelected():[]);
+    const jobParentSel = new Set(msJobParent ? msJobParent.getSelected():[]);
+    const jobTypeSel   = new Set(msJobType ? msJobType.getSelected():[]);
+
+    return rawRows.filter(row=>{
+      const rowProv      = String(row[COL_PROV] ?? "");
+      const rowKota      = String(row[COL_KOTA] ?? "");
+      const rowCycle     = String(row[COL_CYCLE] ?? "");
+      const rowPeriode   = String(row[COL_PERIODE] ?? "");
+      const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
+      const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
+
+      if(provSel.size      && !provSel.has(rowProv)) return false;
+      if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
+      if(cycleSel.size     && !cycleSel.has(rowCycle)) return false;
+      if(periodeSel.size   && !periodeSel.has(rowPeriode)) return false;
+      if(jobParentSel.size && !jobParentSel.has(rowJobParent)) return false;
+      if(jobTypeSel.size   && !jobTypeSel.has(rowJobType)) return false;
+      return true;
+    });
+  }
+
+  function getSourcingAnalystFilteredRows(){
+    const provSel      = new Set(saProvMS ? saProvMS.getSelected()      : []);
+    const kotaSel      = new Set(saKotaMS ? saKotaMS.getSelected()      : []);
+    const jobParentSel = new Set(saJobParentMS ? saJobParentMS.getSelected() : []);
+    const jobTypeSel   = new Set(saJobTypeMS ? saJobTypeMS.getSelected()   : []);
+
+    return rawRows.filter(row=>{
+      const rowProv      = String(row[COL_PROV] ?? "");
+      const rowKota      = String(row[COL_KOTA] ?? "");
+      const rowJobParent = String(row[COL_JOB_PARENT] ?? "");
+      const rowJobType   = String(row[COL_JOB_TYPE] ?? "");
+
+      if(provSel.size      && !provSel.has(rowProv)) return false;
+      if(kotaSel.size      && !kotaSel.has(rowKota)) return false;
+      if(jobParentSel.size && !jobParentSel.has(rowJobParent)) return false;
+      if(jobTypeSel.size   && !jobTypeSel.has(rowJobType)) return false;
+      return true;
+    });
+  }
+
+  function isNoFilterActive(){
+    const provSel      = msProv      ? msProv.getSelected()      : [];
+    const kotaSel      = msKota      ? msKota.getSelected()      : [];
+    const cycleSel     = msCycle     ? msCycle.getSelected()     : [];
+    const periodeSel   = msPeriode   ? msPeriode.getSelected()   : [];
+    const jobParentSel = msJobParent ? msJobParent.getSelected() : [];
+    const jobTypeSel   = msJobType   ? msJobType.getSelected()   : [];
+    return (
+      provSel.length===0 && kotaSel.length===0 && cycleSel.length===0 &&
+      periodeSel.length===0 && jobParentSel.length===0 && jobTypeSel.length===0
+    );
+  }
+
+  function aggregateByFixedList(rows,dimCol,fixedList,withLainnya){
+    const result = fixedList.map(name=>({name,valid:0,buffer:0}));
+    const idxMap = new Map();
+    fixedList.forEach((name,i)=>{
+      idxMap.set(name,i);
+      idxMap.set(norm(name),i);
+    });
+
+    let lainnya = {name:LABEL_LAINNYA,valid:0,buffer:0};
+
+    rows.forEach(row=>{
+      const keyRaw = row[dimCol];
+      if(!keyRaw) return;
+      const keyStr = String(keyRaw);
+      const keyNorm = norm(keyStr);
+      let idx = idxMap.get(keyStr);
+      if(idx === undefined) idx = idxMap.get(keyNorm);
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      if(idx === undefined){
+        if(withLainnya){
+          lainnya.valid  += valid;
+          lainnya.buffer += buffer;
+        }
+        return;
+      }
+
+      result[idx].valid  += valid;
+      result[idx].buffer += buffer;
+    });
+
+    if(withLainnya) result.push(lainnya);
+    return result;
+  }
+
+  function aggregateProvDynamic(rows){
+    const map = new Map();
+    rows.forEach(row=>{
+      const prov = row[COL_PROV];
+      if(!prov) return;
+      const key = String(prov);
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      if(!map.has(key)) map.set(key,{name:key,valid:0,buffer:0});
+      const obj = map.get(key);
+      obj.valid  += valid;
+      obj.buffer += buffer;
+    });
+
+    const res = Array.from(map.values()).filter(r => (r.valid || r.buffer));
+    res.sort((a,b)=>String(a.name).localeCompare(String(b.name),"id"));
+    return res;
+  }
+
+  function getMethodCategory(row){
+    const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+    const metodeText = norm(row[COL_METODE] ?? "");
+    const combined   = (mediaText + " " + metodeText).trim();
+
+    if(mediaText.includes("OFFLINE")) return "OFFLINE";
+    if(mediaText.includes("ONLINE - JOB PORTAL")) return "ONLINE - JOB PORTAL";
+    if(mediaText.includes("ONLINE - MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
+    if(mediaText.includes("ONLINE JOB PORTAL")) return "ONLINE - JOB PORTAL";
+    if(mediaText.includes("ONLINE MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
+
+    const text = combined;
+
+    const offlineTokens = ["OFFLINE","WALK IN","WALKIN","JOB FAIR","CAMPUS HIRING","CAMPUS","BLK","BROSUR","BANNER","SPANDUK","FLYER","DISNAKER","DROP CV","FREELANCE","KOMUNITAS","REFERENSI","SCHOOL"];
+    const portalTokens  = ["GLINTS","HIRED TODAY","INDEED","JOBSTREET EXPRESS","JOBSTREET","KARIRHUB","KITA LULUS","KITALULUS","LUMINA","PINTARNYA","PORTAL"];
+    const mediaTokens   = ["FACEBOOK","FLK","INSTAGRAM","LINKEDIN","TIKTOK","WHATSAPP","TELEGRAM","TWITTER","MEDSOS","MEDIA SOSIAL","SIM TALENT"];
+
+    if(offlineTokens.some(t=>text.includes(t))) return "OFFLINE";
+    if(portalTokens.some(t=>text.includes(t)))  return "ONLINE - JOB PORTAL";
+    if(mediaTokens.some(t=>text.includes(t)))   return "ONLINE - MEDIA SOSIAL";
+    if(text.includes("ONLINE")) return "ONLINE - MEDIA SOSIAL";
+    return "LAINNYA";
+  }
+
+  function aggregateMetodeSmart(rows){
+    const buckets = {
+      "OFFLINE": {name:"OFFLINE",valid:0,buffer:0},
+      "ONLINE - MEDIA SOSIAL": {name:"ONLINE - MEDIA SOSIAL",valid:0,buffer:0},
+      "ONLINE - JOB PORTAL": {name:"ONLINE - JOB PORTAL",valid:0,buffer:0},
+      "LAINNYA": {name:LABEL_LAINNYA,valid:0,buffer:0}
+    };
+
+    rows.forEach(row=>{
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+      const cat = getMethodCategory(row);
+      const bucket = buckets[cat] || buckets["LAINNYA"];
+      bucket.valid  += valid;
+      bucket.buffer += buffer;
+    });
+
+    return [buckets["OFFLINE"],buckets["ONLINE - MEDIA SOSIAL"],buckets["ONLINE - JOB PORTAL"],buckets["LAINNYA"]];
+  }
+
+  function aggregateMediaSocial(rows){
+    const map = new Map();
+    FIXED_MEDIA_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
+
+    const tokenMap = [
+      {token:"FACEBOOK",label:"Facebook"},
+      {token:"FLK",label:"FLK"},
+      {token:"INSTAGRAM",label:"Instagram"},
+      {token:"LINKEDIN",label:"Linkedin"},
+      {token:"SIM TALENT",label:"SIM Talent Search"},
+      {token:"TELEGRAM",label:"Telegram"},
+      {token:"TIKTOK",label:"Tiktok"},
+      {token:"TWITTER",label:"Twitter"},
+      {token:"WHATSAPP",label:"Whatsapp / Media Chat"},
+      {token:"MEDIA CHAT",label:"Whatsapp / Media Chat"}
+    ];
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== "ONLINE - MEDIA SOSIAL") return;
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+      const metodeText = norm(row[COL_METODE] ?? "");
+      const text = (mediaText + " " + metodeText).trim();
+      if(!text) return;
+
+      let label = null;
+      for(const m of tokenMap){
+        if(text.includes(m.token)){
+          label = m.label;
+          break;
+        }
+      }
+      if(!label) return;
+
+      const item = map.get(label);
+      if(!item) return;
+      item.valid  += valid;
+      item.buffer += buffer;
+      item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
+    });
+
+    return FIXED_MEDIA_LIST.map(name=>map.get(name));
+  }
+
+  function aggregateJobPortal(rows){
+    const map = new Map();
+    FIXED_PORTAL_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
+
+    const tokenMap = [
+      {token:"GLINTS",label:"Glints"},
+      {token:"HIRED TODAY",label:"Hired Today"},
+      {token:"INDEED",label:"Indeed"},
+      {token:"JOBSTREET EXPRESS",label:"Jobstreet Express"},
+      {token:"JOBSTREET",label:"JobStreet"},
+      {token:"KARIRHUB",label:"KarirHub"},
+      {token:"KITA LULUS",label:"KitaLulus"},
+      {token:"KITALULUS",label:"KitaLulus"},
+      {token:"LUMINA",label:"Lumina"},
+      {token:"PINTARNYA",label:"Pintarnya"}
+    ];
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== "ONLINE - JOB PORTAL") return;
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+      const metodeText = norm(row[COL_METODE] ?? "");
+      const text = (mediaText + " " + metodeText).trim();
+      if(!text) return;
+
+      let label = null;
+      for(const m of tokenMap){
+        if(text.includes(m.token)){
+          label = m.label;
+          break;
+        }
+      }
+      if(!label) return;
+
+      const item = map.get(label);
+      if(!item) return;
+      item.valid  += valid;
+      item.buffer += buffer;
+      item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
+    });
+
+    return FIXED_PORTAL_LIST.map(name=>map.get(name));
+  }
+
+  function aggregateOffline(rows){
+    const map = new Map();
+    FIXED_OFFLINE_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
+
+    const tokenMap = [
+      {token:"ACADEMY",label:"Academy/Training/Seminar"},
+      {token:"TRAINING",label:"Academy/Training/Seminar"},
+      {token:"SEMINAR",label:"Academy/Training/Seminar"},
+      {token:"BLK",label:"Balai Latian Kerja (BLK)"},
+      {token:"BROSUR",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"BANNER",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"SPANDUK",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"FLYER",label:"Brosur/Banner/Spanduk/Flyer"},
+      {token:"CAMPUS",label:"Campus Hiring"},
+      {token:"DISNAKER",label:"Disnaker"},
+      {token:"DROP CV",label:"Drop CV"},
+      {token:"FREELANCE",label:"Freelance Recruiter"},
+      {token:"JOB FAIR",label:"Job Fair"},
+      {token:"KOMUNITAS",label:"Komunitas Informal"},
+      {token:"REFERENSI CLIENT",label:"Referensi Client"},
+      {token:"SCHOOL",label:"School Hiring"},
+      {token:"WALK IN",label:"Walk In Interview (WI)"},
+      {token:"WALKIN",label:"Walk In Interview (WI)"}
+    ];
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== "OFFLINE") return;
+
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+
+      const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
+      const metodeText = norm(row[COL_METODE] ?? "");
+      const text = (mediaText + " " + metodeText).trim();
+      if(!text) return;
+
+      let label = null;
+      for(const m of tokenMap){
+        if(text.includes(m.token)){
+          label = m.label;
+          break;
+        }
+      }
+      if(!label) return;
+
+      const item = map.get(label);
+      if(!item) return;
+      item.valid  += valid;
+      item.buffer += buffer;
+      item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
+    });
+
+    return FIXED_OFFLINE_LIST.map(name=>map.get(name));
+  }
+
+  function parseMonthIndex(str){
+    if(!str) return null;
+    const s = String(str).toLowerCase();
+
+    const monthNames = [
+      {idx:1,keys:["jan","januari"]},
+      {idx:2,keys:["feb","peb","febuari","februari"]},
+      {idx:3,keys:["mar","maret"]},
+      {idx:4,keys:["apr","april"]},
+      {idx:5,keys:["mei","may"]},
+      {idx:6,keys:["jun","juni","june"]},
+      {idx:7,keys:["jul","juli","july"]},
+      {idx:8,keys:["agu","agust","aug","agustus","august"]},
+      {idx:9,keys:["sep","sept","september"]},
+      {idx:10,keys:["okt","oct","oktober","october"]},
+      {idx:11,keys:["nov","november"]},
+      {idx:12,keys:["des","dec","desember","december"]}
+    ];
+
+    for(const m of monthNames){
+      if(m.keys.some(k=>s.includes(k))) return m.idx;
+    }
+    return null;
+  }
+
+  function aggregateMonthly(rows){
+    const arr = MONTHS.map(m=>({idx:m.idx,name:m.label,valid:0,buffer:0}));
+    const idxMap = new Map();
+    arr.forEach((m,i)=>idxMap.set(m.idx,i));
+
+    rows.forEach(row=>{
+      const idx = parseMonthIndex(row[COL_PERIODE]);
+      if(!idx) return;
+      const i = idxMap.get(idx);
+      if(i === undefined) return;
+      const valid  = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!valid && !buffer) return;
+      arr[i].valid  += valid;
+      arr[i].buffer += buffer;
+    });
+
+    return arr;
+  }
+
+  function updateChart(rows){
+    const container = $("chart-body");
+    if(!container) return;
+    container.innerHTML = "";
+
+    const monthly = aggregateMonthly(rows);
+    let maxVal = 0;
+    monthly.forEach(m=>{
+      maxVal = Math.max(maxVal,m.valid,m.buffer);
+    });
+    if(maxVal === 0) maxVal = 1;
+
+    monthly.forEach(m=>{
+      const col = document.createElement("div");
+      col.className = "chart-col";
+
+      const barsBox = document.createElement("div");
+      barsBox.className = "chart-col-bars";
+
+      const barValid = document.createElement("div");
+      barValid.className = "chart-bar-vert bar-valid";
+      barValid.style.height = (m.valid / maxVal * 100) + "%";
+
+      const barBuffer = document.createElement("div");
+      barBuffer.className = "chart-bar-vert bar-buffer";
+      barBuffer.style.height = (m.buffer / maxVal * 100) + "%";
+
+      barsBox.appendChild(barValid);
+      barsBox.appendChild(barBuffer);
+
+      const valuesBox = document.createElement("div");
+      valuesBox.className = "chart-col-values";
+      valuesBox.innerHTML =
+        `<div>${numberFmt.format(m.valid)}</div><div>${numberFmt.format(m.buffer)}</div>`;
+
+      const label = document.createElement("div");
+      label.className = "chart-col-label";
+      label.textContent = m.name;
+
+      col.appendChild(barsBox);
+      col.appendChild(valuesBox);
+      col.appendChild(label);
+      container.appendChild(col);
+    });
+
+    const totalValid = monthly.reduce((s,m)=>s+m.valid,0);
+    const totalBuffer = monthly.reduce((s,m)=>s+m.buffer,0);
+    $("chart-summary-text").textContent =
+      `Total Valid: ${numberFmt.format(totalValid)} · Total Buffer: ${numberFmt.format(totalBuffer)} (berdasarkan PERIODE PELAMAR & filter aktif)`;
+  }
+
+  function renderTable(tbodyId,rows,totalLabel){
+    const tbody = $(tbodyId);
+    tbody.innerHTML = "";
+
+    let grandValid = 0;
+    let grandBuffer = 0;
+
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      if(r.valid === 0 && r.buffer === 0){
+        tr.classList.add("muted-row");
+      }
+
+      const tdLabel = document.createElement("td");
+      tdLabel.textContent = r.name;
+      tdLabel.className = "col-label";
+
+      const tdValid = document.createElement("td");
+      tdValid.textContent = numberFmt.format(r.valid || 0);
+      tdValid.className = "col-number";
+
+      const tdBuffer = document.createElement("td");
+      tdBuffer.textContent = numberFmt.format(r.buffer || 0);
+      tdBuffer.className = "col-number";
+
+      tr.appendChild(tdLabel);
+      tr.appendChild(tdValid);
+      tr.appendChild(tdBuffer);
+      tbody.appendChild(tr);
+
+      grandValid += (r.valid || 0);
+      grandBuffer += (r.buffer || 0);
+    });
+
+    const trTotal = document.createElement("tr");
+    trTotal.className = "total-row";
+
+    const tdLabelTotal = document.createElement("td");
+    tdLabelTotal.textContent = totalLabel;
+    tdLabelTotal.className = "col-label";
+
+    const tdValidTotal = document.createElement("td");
+    tdValidTotal.textContent = numberFmt.format(grandValid);
+    tdValidTotal.className = "col-number";
+
+    const tdBufferTotal = document.createElement("td");
+    tdBufferTotal.textContent = numberFmt.format(grandBuffer);
+    tdBufferTotal.className = "col-number";
+
+    trTotal.appendChild(tdLabelTotal);
+    trTotal.appendChild(tdValidTotal);
+    trTotal.appendChild(tdBufferTotal);
+    tbody.appendChild(trTotal);
+
+    return {grandValid,grandBuffer};
+  }
+
+  function updateSummary(filtered){
+    let totalValid = 0;
+    let totalBuffer = 0;
+    let maleValid = 0, maleBuffer = 0;
+    let femaleValid = 0, femaleBuffer = 0;
+
+    filtered.forEach(row=>{
+      const valid = getApplicantValidValue(row[COL_KATEGORI]);
+      const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(valid) totalValid += valid;
+      if(buffer) totalBuffer += buffer;
+
+      const g = norm(row[COL_GENDER]);
+      if(g.includes("LAKI") || g === "L" || g === "LAKI-LAKI"){
+        maleValid  += valid;
+        maleBuffer += buffer;
+      }else if(g.includes("PEREMPUAN") || g === "P" || g === "PEREMPUAN"){
+        femaleValid  += valid;
+        femaleBuffer += buffer;
+      }
+    });
+
+    $("sum-male-valid").textContent    = numberFmt.format(maleValid);
+    $("sum-male-buffer").textContent   = numberFmt.format(maleBuffer);
+    $("sum-female-valid").textContent  = numberFmt.format(femaleValid);
+    $("sum-female-buffer").textContent = numberFmt.format(femaleBuffer);
+    $("sum-total-valid").textContent   = numberFmt.format(totalValid);
+    $("sum-total-buffer").textContent  = numberFmt.format(totalBuffer);
+  }
+
+  function updateAllTables(){
+    const filtered = getFilteredRows();
+    const totalRows = filtered.length;
+    const noFilter = isNoFilterActive();
+
+    updateSummary(filtered);
+    updateChart(filtered);
+
+    const provAgg = noFilter ? aggregateByFixedList(filtered,COL_PROV,FIXED_PROV_LIST,false) : aggregateProvDynamic(filtered);
+    const totalProv = renderTable("tbl-prov-body",provAgg,"GRAND TOTAL PROVINSI");
+    $("status-prov").textContent =
+      `Ditampilkan ${provAgg.length} provinsi · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalProv.grandValid)}, Buffer: ${numberFmt.format(totalProv.grandBuffer)}`;
+
+    const metodeAgg = aggregateMetodeSmart(filtered);
+    const totalMetode = renderTable("tbl-metode-body",metodeAgg,"GRAND TOTAL METODE");
+    $("status-metode").textContent =
+      `Ditampilkan ${metodeAgg.length} metode · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalMetode.grandValid)}, Buffer: ${numberFmt.format(totalMetode.grandBuffer)}`;
+
+    const mediaAgg = aggregateMediaSocial(filtered);
+    const totalMedia = renderTable("tbl-media-body",mediaAgg,"GRAND TOTAL MEDIA SOSIAL");
+    $("status-media").textContent =
+      `Ditampilkan ${mediaAgg.length} media · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalMedia.grandValid)}, Buffer: ${numberFmt.format(totalMedia.grandBuffer)}`;
+
+    const eduAgg = aggregateByFixedList(filtered,COL_EDU,FIXED_EDU_LIST,false);
+    const totalEdu = renderTable("tbl-edu-body",eduAgg,"GRAND TOTAL PENDIDIKAN");
+    $("status-edu").textContent =
+      `Ditampilkan ${eduAgg.length} level pendidikan · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalEdu.grandValid)}, Buffer: ${numberFmt.format(totalEdu.grandBuffer)}`;
+
+    const portalAgg = aggregateJobPortal(filtered);
+    const totalPortal = renderTable("tbl-portal-body",portalAgg,"GRAND TOTAL JOB PORTAL");
+    $("status-portal").textContent =
+      `Ditampilkan ${portalAgg.length} portal · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalPortal.grandValid)}, Buffer: ${numberFmt.format(totalPortal.grandBuffer)}`;
+
+    const offlineAgg = aggregateOffline(filtered);
+    const totalOffline = renderTable("tbl-offline-body",offlineAgg,"GRAND TOTAL OFFLINE");
+    $("status-offline").textContent =
+      `Ditampilkan ${offlineAgg.length} aktivitas · ${numberFmt.format(totalRows)} baris terfilter · ` +
+      `Grand Total Valid: ${numberFmt.format(totalOffline.grandValid)}, Buffer: ${numberFmt.format(totalOffline.grandBuffer)}`;
+  }
+
+  /* ===================== SA ANALYSIS ===================== */
+  function computeSaMethod3MonthSummary(rows, methodCategory){
+    let valid = 0;
+    let buffer = 0;
+    const monthSet = new Set();
+
+    rows.forEach(row=>{
+      if(getMethodCategory(row) !== methodCategory) return;
+      const v = getApplicantValidValue(row[COL_KATEGORI]);
+      const b = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
+      if(!v && !b) return;
+      valid += v;
+      buffer += b;
+      const mIdx = parseMonthIndex(row[COL_PERIODE]);
+      if(mIdx) monthSet.add(mIdx);
+    });
+
+    if(valid === 0 && buffer === 0){
+      return {totalValid:0,totalBuffer:0,estValid3:0,estBuffer3:0};
+    }
+
+    const monthCount = monthSet.size || 1;
+    const avgValidPerMonth = valid / monthCount;
+    const avgBufferPerMonth = buffer / monthCount;
+
+    const estValid3 = Math.round(avgValidPerMonth * 3);
+    const estBuffer3 = Math.round(avgBufferPerMonth * 3);
+
+    return {totalValid:valid,totalBuffer:buffer,estValid3,estBuffer3};
+  }
+
+  function pickTop(list,n){
+    return [...list]
+      .filter(r => (r && (r.valid || r.buffer)))
+      .sort((a,b)=> (b.valid + b.buffer) - (a.valid + a.buffer))
+      .slice(0,n);
+  }
+
+  const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
+  function formatChannelList(channels){
+    return channels.map(ch=>{
+      const totalCost = ch.totalCost ? ch.totalCost : 0;
+      const costText = currencyFmt.format(totalCost);
+      return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
+    }).join("; ");
+  }
+
+  function updateSourcingAnalystAnalysis(){
+    const container = $("sa-analysis-text");
+    if(!container) return;
+
+    const provSel      = saProvMS ? saProvMS.getSelected()      : [];
+    const kotaSel      = saKotaMS ? saKotaMS.getSelected()      : [];
+    const jobParentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
+    const jobTypeSel   = saJobTypeMS ? saJobTypeMS.getSelected()   : [];
+
+    if(provSel.length === 0 && kotaSel.length === 0 && jobParentSel.length === 0 && jobTypeSel.length === 0){
+      container.innerHTML = "Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.";
+      return;
+    }
+
+    const rows = getSourcingAnalystFilteredRows();
+    if(!rows.length){
+      container.innerHTML = "Belum ada analisa untuk area dan job parent ini (data tidak ditemukan untuk kombinasi filter saat ini).";
+      return;
+    }
+
+    const provName = provSel[0] || "semua provinsi";
+    const kotaName = kotaSel[0] || "";
+    const jpName   = jobParentSel[0] || "";
+    const jtName   = jobTypeSel[0] || "";
+
+    let headerLine = "Untuk ";
+    if(jtName){
+      headerLine += `Job <strong>${jtName}</strong>`;
+      if(jpName && jpName !== jtName){
+        headerLine += ` (Job Parent <strong>${jpName}</strong>)`;
+      }
+    }else if(jpName){
+      headerLine += `Job Parent <strong>${jpName}</strong>`;
+    }else{
+      headerLine += "kombinasi job";
+    }
+
+    if(kotaName){
+      headerLine += ` di <strong>${kotaName}</strong>, <strong>${provName}</strong>,`;
+    }else{
+      headerLine += ` di <strong>${provName}</strong>,`;
+    }
+    headerLine += " pola sourcing yang terlihat paling efektif berdasarkan data Applicant Valid &amp; Buffer adalah:";
+
+    const portalAgg  = aggregateJobPortal(rows);
+    const mediaAgg   = aggregateMediaSocial(rows);
+    const offlineAgg = aggregateOffline(rows);
+
+    const topPortal  = pickTop(portalAgg,5);
+    const topMedia   = pickTop(mediaAgg,3);
+    const topOffline = pickTop(offlineAgg,2);
+
+    const portalSummary = computeSaMethod3MonthSummary(rows,"ONLINE - JOB PORTAL");
+    const mediaSummary  = computeSaMethod3MonthSummary(rows,"ONLINE - MEDIA SOSIAL");
+    const offSummary    = computeSaMethod3MonthSummary(rows,"OFFLINE");
+
+    const parts = [];
+    parts.push(`<p class="analysis-intro">${headerLine}</p>`);
+
+    if(topPortal.length && (portalSummary.totalValid || portalSummary.totalBuffer)){
+      const chText = formatChannelList(topPortal);
+      parts.push(
+        `<div class="analysis-section">
+          <div class="analysis-icon">🌐</div>
+          <div class="analysis-body">
+            <div class="analysis-title">Job Portal</div>
+            <div class="analysis-summary">Sourcing menggunakan Job Portal didominasi oleh: ${chText}.</div>
+            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~<strong>${numberFmt.format(portalSummary.estValid3)}</strong> valid & <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</div>
+          </div>
+        </div>`
+      );
+    }
+
+    if(topMedia.length && (mediaSummary.totalValid || mediaSummary.totalBuffer)){
+      const chText = formatChannelList(topMedia);
+      parts.push(
+        `<div class="analysis-section">
+          <div class="analysis-icon">📱</div>
+          <div class="analysis-body">
+            <div class="analysis-title">Online - Media Sosial</div>
+            <div class="analysis-summary">Platform paling efektif: ${chText}.</div>
+            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~<strong>${numberFmt.format(mediaSummary.estValid3)}</strong> valid & <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</div>
+          </div>
+        </div>`
+      );
+    }
+
+    if(topOffline.length && (offSummary.totalValid || offSummary.totalBuffer)){
+      const chText = formatChannelList(topOffline);
+      parts.push(
+        `<div class="analysis-section">
+          <div class="analysis-icon">👣</div>
+          <div class="analysis-body">
+            <div class="analysis-title">Sourcing Offline</div>
+            <div class="analysis-summary">Aktivitas offline paling kuat: ${chText}.</div>
+            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~<strong>${numberFmt.format(offSummary.estValid3)}</strong> valid & <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</div>
+          </div>
+        </div>`
+      );
+    }
+
+    if(parts.length === 1){
+      parts.push(`<p>Belum ada analisa yang cukup untuk area dan job parent ini.</p>`);
+    }
+
+    container.innerHTML = parts.join("");
+  }
+
+  /* ===================== LOAD ACM CSV ===================== */
+  function loadCsv(){
+    const errBox = $("error-state");
+    errBox.style.display = "none";
+    $("load-state").style.display = "flex";
+
+    Papa.parse(CSV_URL,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
+      complete:(parsed)=>{
+        try{
+          rawRows = parsed.data || [];
+          const fields = parsed.meta && parsed.meta.fields ? parsed.meta.fields : [];
+
+          DETECTED_COL_MEDIA = detectMediaColumn(fields);
+          const jobCols = detectJobColumns(fields);
+          COL_JOB_PARENT = jobCols.parent;
+          COL_JOB_TYPE   = jobCols.type;
+
+          $("load-state").style.display = "none";
+
+          if(!rawRows.length){
+            errBox.textContent = "Data kosong atau header kolom belum sesuai dengan konfigurasi.";
+            errBox.style.display = "block";
+            return;
+          }
+
+          initFilters();
+          updateAllTables();
+
+          initSourcingAnalystFilters();
+          updateSourcingAnalystAnalysis();
+        }catch(e){
+          console.error(e);
+          $("load-state").style.display = "none";
+          errBox.textContent = "Terjadi kesalahan saat memproses data: " + e.message;
           errBox.style.display = "block";
+        }
+      },
+      error:(err)=>{
+        console.error(err);
+        $("load-state").style.display = "none";
+        errBox.textContent =
+          "Terjadi kesalahan saat memuat data CSV: " + err.message +
+          ". Pastikan link ini bisa dibuka di tab incognito tanpa login.";
+        errBox.style.display = "block";
+      }
+    });
+  }
+
+  /* ===================== PERFORMANCE: CLIENT ===================== */
+  const psc = { rows:[], fields:[], colClient:null, colIndustry:null, submitFields:[], qualFields:[] };
+
+  function pscApply(){
+    const industry = $("psc-industry").value;
+    const client = $("psc-client").value;
+
+    let filtered = psc.rows.slice();
+    if(industry) filtered = filtered.filter(r => String(r[psc.colIndustry] ?? "").trim() === industry);
+    if(client)   filtered = filtered.filter(r => String(r[psc.colClient] ?? "").trim() === client);
+
+    const submitMatrix = buildKeyMatrix(filtered, psc.colClient, psc.submitFields);
+    const qualMatrix   = buildKeyMatrix(filtered, psc.colClient, psc.qualFields);
+
+    renderMatrix("psc-submit-body", "Client", submitMatrix);
+    renderMatrix("psc-qual-body", "Client", qualMatrix);
+  }
+
+  function pscSyncClientsByIndustry(){
+    const industry = $("psc-industry").value;
+    const clientSel = $("psc-client");
+
+    if(!industry){
+      clientSel.disabled = true;
+      setSelectOptions(clientSel, [], "Pilih Industry dulu");
+      $("psc-client").value = "";
+      pscApply();
+      return;
+    }
+
+    const clients = uniqueSortedText(
+      psc.rows
+        .filter(r => String(r[psc.colIndustry] ?? "").trim() === industry)
+        .map(r => r[psc.colClient])
+    );
+
+    clientSel.disabled = false;
+    setSelectOptions(clientSel, clients, "Semua Client");
+    pscApply();
+  }
+
+  function pscClear(){
+    $("psc-industry").value = "";
+    $("psc-client").value = "";
+    $("psc-client").disabled = true;
+    setSelectOptions($("psc-client"), [], "Pilih Industry dulu");
+    pscApply();
+  }
+
+  function loadPerformanceClient(){
+    $("psc-status").textContent = "Memuat data Performance Client...";
+    Papa.parse(PSC_URL,{
+      download:true, header:true, skipEmptyLines:true,
+      complete:(parsed)=>{
+        psc.rows = parsed.data || [];
+        psc.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
+        if(!psc.rows.length){
+          $("psc-status").textContent = "Data Performance Client kosong / gagal dibaca.";
           return;
         }
 
-        initFilters();
-        updateAllTables();
+        // Client = col A, Industry = col B
+        psc.colClient = getFieldByLetter(psc.fields,"A");
+        psc.colIndustry = getFieldByLetter(psc.fields,"B");
 
-        initSourcingAnalystFilters();
-        updateSourcingAnalystAnalysis();
-      }catch(e){
-        console.error(e);
-        $("load-state").style.display = "none";
-        errBox.textContent = "Terjadi kesalahan saat memproses data: " + e.message;
-        errBox.style.display = "block";
+        psc.submitFields = PSC_SUBMIT_COLS.map(L=>getFieldByLetter(psc.fields,L));
+        psc.qualFields   = PSC_QUAL_COLS.map(L=>getFieldByLetter(psc.fields,L));
+
+        const industries = uniqueSortedText(psc.rows.map(r=>r[psc.colIndustry]));
+        setSelectOptions($("psc-industry"), industries, "Pilih Industry");
+
+        setSelectOptions($("psc-client"), [], "Pilih Industry dulu");
+        $("psc-client").disabled = true;
+
+        $("psc-industry").addEventListener("change", pscSyncClientsByIndustry);
+        $("psc-client").addEventListener("change", pscApply);
+        $("psc-clear-btn").addEventListener("click", pscClear);
+
+        pscApply();
+      },
+      error:(err)=>{
+        $("psc-status").textContent = "Gagal load Performance Client: " + (err?.message || "Unknown error");
       }
-    },
-    error:(err)=>{
-      console.error(err);
-      $("load-state").style.display = "none";
-      errBox.textContent = "Terjadi kesalahan saat memuat data CSV: " + err.message + ". Pastikan link bisa dibuka tanpa login.";
-      errBox.style.display = "block";
-    }
-  });
-}
-
-/* ===================== PERFORMANCE CLIENT (FINAL REVISI) ===================== */
-const psc = { rows:[], fields:[], colClient:null, colIndustry:null, submitFields:[], qualFields:[] };
-
-// mapping kolom sesuai arahan kamu
-const PSC_SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AE","AI","AL"];
-const PSC_QUAL_COLS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
-
-function pscBuildMonthFields(fields, letters){
-  return letters.map(L => getFieldByLetter(fields,L));
-}
-
-function pscUpdateUI(){
-  const industry = $("psc-industry").value;
-
-  // Wajib pilih industry dulu agar client tampil
-  if(!industry){
-    $("psc-status").textContent = "Silakan pilih Industry terlebih dahulu agar nama klien muncul di tabel.";
-    $("psc-submit-body").innerHTML = `<tr><td class="muted-row" colspan="13">Pilih Industry dulu.</td></tr>`;
-    $("psc-qual-body").innerHTML = `<tr><td class="muted-row" colspan="13">Pilih Industry dulu.</td></tr>`;
-    return;
-  }
-
-  const filtered = psc.rows.filter(r => String(r[psc.colIndustry] ?? "").trim() === industry);
-  $("psc-status").textContent = `Filter: ${industry} · Baris data: ${filtered.length}`;
-
-  const submitMatrix = buildKeyMatrix(filtered, psc.colClient, psc.submitFields);
-  const qualMatrix   = buildKeyMatrix(filtered, psc.colClient, psc.qualFields);
-
-  renderPerfMatrix("psc-submit-body","Client",submitMatrix);
-  renderPerfMatrix("psc-qual-body","Client",qualMatrix);
-}
-
-function pscClear(){
-  $("psc-industry").value = "";
-  pscUpdateUI();
-}
-
-function loadPerformanceClient(){
-  $("psc-status").textContent = "Memuat data Performance Client...";
-  Papa.parse(PSC_URL,{
-    download:true, header:true, skipEmptyLines:true,
-    complete:(parsed)=>{
-      psc.rows = parsed.data || [];
-      psc.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
-      if(!psc.rows.length){
-        $("psc-status").textContent = "Data Performance Client kosong / gagal dibaca.";
-        return;
-      }
-
-      // Client=kolom A, Industry=kolom B
-      psc.colClient   = getFieldByLetter(psc.fields,"A");
-      psc.colIndustry = getFieldByLetter(psc.fields,"B");
-
-      // Bulan by letter mapping (sesuai revisi kamu)
-      psc.submitFields = pscBuildMonthFields(psc.fields, PSC_SUBMIT_COLS);
-      psc.qualFields   = pscBuildMonthFields(psc.fields, PSC_QUAL_COLS);
-
-      const industries = uniqueSortedText(psc.rows.map(r=>r[psc.colIndustry]));
-      setSelectOptions($("psc-industry"), industries, "Pilih Industry");
-
-      $("psc-industry").addEventListener("change", pscUpdateUI);
-      $("psc-clear-btn").addEventListener("click", pscClear);
-
-      // default: kosong sampai pilih industry
-      pscUpdateUI();
-    },
-    error:(err)=>{
-      $("psc-status").textContent = "Gagal load Performance Client: " + (err?.message || "Unknown error");
-    }
-  });
-}
-
-/* ===================== PERFORMANCE AREA (FINAL REVISI) ===================== */
-const psa = { rows:[], fields:[], colGroup:null, colArea:null, submitFields:[], qualFields:[] };
-
-function psaBuildMonthFields(fields, letters){
-  return letters.map(L => getFieldByLetter(fields,L));
-}
-
-function psaSyncAreaOptionsByGroup(){
-  const g = $("psa-group").value;
-  const allAreas = uniqueSortedText(psa.rows.map(r=>r[psa.colArea]));
-  if(!g){
-    setSelectOptions($("psa-area"), allAreas, "Semua Area");
-    return;
-  }
-  const areas = uniqueSortedText(psa.rows.filter(r=>String(r[psa.colGroup]??"").trim()===g).map(r=>r[psa.colArea]));
-  setSelectOptions($("psa-area"), areas, "Semua Area");
-}
-
-function psaUpdateUI(){
-  const g = $("psa-group").value;
-  const a = $("psa-area").value;
-
-  let filtered = psa.rows.slice();
-  if(g) filtered = filtered.filter(r=>String(r[psa.colGroup]??"").trim()===g);
-  if(a) filtered = filtered.filter(r=>String(r[psa.colArea]??"").trim()===a);
-
-  $("psa-status").textContent = `Filter: ${g || "Semua Group"} · ${a || "Semua Area"} · Baris data: ${filtered.length}`;
-
-  // key = Area (kolom B)
-  const submitMatrix = buildKeyMatrix(filtered, psa.colArea, psa.submitFields);
-  const qualMatrix   = buildKeyMatrix(filtered, psa.colArea, psa.qualFields);
-
-  renderPerfMatrix("psa-submit-body","Area",submitMatrix);
-  renderPerfMatrix("psa-qual-body","Area",qualMatrix);
-}
-
-function psaClear(){
-  $("psa-group").value = "";
-  psaSyncAreaOptionsByGroup();
-  $("psa-area").value = "";
-  psaUpdateUI();
-}
-
-function loadPerformanceArea(){
-  $("psa-status").textContent = "Memuat data Performance Area...";
-  Papa.parse(PSA_URL,{
-    download:true, header:true, skipEmptyLines:true,
-    complete:(parsed)=>{
-      psa.rows = parsed.data || [];
-      psa.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
-      if(!psa.rows.length){
-        $("psa-status").textContent = "Data Performance Area kosong / gagal dibaca.";
-        return;
-      }
-
-      // Group Client
-      psa.colGroup = getFieldByLetter(psa.fields,"A");
-      psa.colArea  = getFieldByLetter(psa.fields,"B");
-
-      // Bulan: pakai mapping kolom yang sama (aman, karena report biasanya konsisten)
-      psa.submitFields = psaBuildMonthFields(psa.fields, PSC_SUBMIT_COLS);
-      psa.qualFields   = psaBuildMonthFields(psa.fields, PSC_QUAL_COLS);
-
-      const groups = uniqueSortedText(psa.rows.map(r=>r[psa.colGroup]));
-      setSelectOptions($("psa-group"), groups, "Semua Group");
-
-      psaSyncAreaOptionsByGroup();
-
-      $("psa-group").addEventListener("change", ()=>{
-        psaSyncAreaOptionsByGroup();
-        $("psa-area").value = "";
-        psaUpdateUI();
-      });
-      $("psa-area").addEventListener("change", psaUpdateUI);
-      $("psa-clear-btn").addEventListener("click", psaClear);
-
-      psaUpdateUI();
-    },
-    error:(err)=>{
-      $("psa-status").textContent = "Gagal load Performance Area: " + (err?.message || "Unknown error");
-    }
-  });
-}
-
-/* ===================== DOM READY: TAB + LOAD ALL ===================== */
-document.addEventListener("DOMContentLoaded",()=>{
-  // ACM clear
-  const clearBtn = $("clear-filters-btn");
-  if(clearBtn) clearBtn.addEventListener("click",clearFilters);
-
-  // SA clear
-  const saClearBtn = $("sa-clear-filters-btn");
-  if(saClearBtn) saClearBtn.addEventListener("click",clearSaFilters);
-
-  // Toggle hamburger ACM
-  const filterCard = document.querySelector(".filter-card");
-  const filterToggleBtn = $("filter-toggle-btn");
-  if(filterCard && filterToggleBtn){
-    filterToggleBtn.addEventListener("click",()=> filterCard.classList.toggle("open"));
-  }
-
-  // Toggle hamburger SA
-  const saFilterCard = document.querySelector(".sa-filter-card");
-  const saFilterToggleBtn = $("sa-filter-toggle-btn");
-  if(saFilterCard && saFilterToggleBtn){
-    saFilterToggleBtn.addEventListener("click",()=> saFilterCard.classList.toggle("open"));
-  }
-
-  // Tab handlers
-  const tabs = {
-    ACM: {btn:$("tab-ACM"), page:$("page-ACM")},
-    sa:  {btn:$("tab-sa"),  page:$("page-sa")},
-    psc: {btn:$("tab-psc"), page:$("page-psc")},
-    psa: {btn:$("tab-psa"), page:$("page-psa")}
-  };
-
-  function setPage(key){
-    Object.values(tabs).forEach(t=>{
-      t.page.classList.remove("active");
-      t.btn.classList.remove("active");
     });
-    tabs[key].page.classList.add("active");
-    tabs[key].btn.classList.add("active");
   }
 
-  tabs.ACM.btn.addEventListener("click",()=>setPage("ACM"));
-  tabs.sa.btn.addEventListener("click",()=>setPage("sa"));
-  tabs.psc.btn.addEventListener("click",()=>setPage("psc"));
-  tabs.psa.btn.addEventListener("click",()=>setPage("psa"));
+  /* ===================== PERFORMANCE: AREA ===================== */
+  const psa = { rows:[], fields:[], colGroup:null, colArea:null, submitFields:[], qualFields:[] };
 
-  setPage("ACM");
+  function psaSyncAreaByGroup(){
+    const group = $("psa-group").value;
+    const areaSel = $("psa-area");
 
-  // Load semua data
-  loadCsv();
-  loadPerformanceClient();
-  loadPerformanceArea();
-});
+    let areas = [];
+    if(group){
+      areas = uniqueSortedText(
+        psa.rows
+          .filter(r => String(r[psa.colGroup] ?? "").trim() === group)
+          .map(r => r[psa.colArea])
+      );
+    }else{
+      areas = uniqueSortedText(psa.rows.map(r=>r[psa.colArea]));
+    }
+    setSelectOptions(areaSel, areas, "Semua Area");
+  }
+
+  function psaApply(){
+    const group = $("psa-group").value;
+    const area = $("psa-area").value;
+
+    let filtered = psa.rows.slice();
+    if(group) filtered = filtered.filter(r => String(r[psa.colGroup] ?? "").trim() === group);
+    if(area)  filtered = filtered.filter(r => String(r[psa.colArea] ?? "").trim() === area);
+
+    $("psa-status").textContent = `Filter: ${group || "Semua Group"} · ${area || "Semua Area"} · Baris data: ${filtered.length}`;
+
+    const submitMatrix = buildKeyMatrix(filtered, psa.colArea, psa.submitFields);
+    const qualMatrix   = buildKeyMatrix(filtered, psa.colArea, psa.qualFields);
+
+    renderMatrix("psa-submit-body", "Area", submitMatrix);
+    renderMatrix("psa-qual-body", "Area", qualMatrix);
+  }
+
+  function psaClear(){
+    $("psa-group").value = "";
+    psaSyncAreaByGroup();
+    $("psa-area").value = "";
+    psaApply();
+  }
+
+  function loadPerformanceArea(){
+    $("psa-status").textContent = "Memuat data Performance Area...";
+    Papa.parse(PSA_URL,{
+      download:true, header:true, skipEmptyLines:true,
+      complete:(parsed)=>{
+        psa.rows = parsed.data || [];
+        psa.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
+        if(!psa.rows.length){
+          $("psa-status").textContent = "Data Performance Area kosong / gagal dibaca.";
+          return;
+        }
+
+        // Group Client = col A, Area = col B
+        psa.colGroup = getFieldByLetter(psa.fields,"A");
+        psa.colArea  = getFieldByLetter(psa.fields,"B");
+
+        psa.submitFields = PSC_SUBMIT_COLS.map(L=>getFieldByLetter(psa.fields,L));
+        psa.qualFields   = PSC_QUAL_COLS.map(L=>getFieldByLetter(psa.fields,L));
+
+        const groups = uniqueSortedText(psa.rows.map(r=>r[psa.colGroup]));
+        setSelectOptions($("psa-group"), groups, "Semua Group Client");
+
+        psaSyncAreaByGroup();
+
+        $("psa-group").addEventListener("change", ()=>{
+          psaSyncAreaByGroup();
+          $("psa-area").value = "";
+          psaApply();
+        });
+        $("psa-area").addEventListener("change", psaApply);
+        $("psa-clear-btn").addEventListener("click", psaClear);
+
+        psaApply();
+      },
+      error:(err)=>{
+        $("psa-status").textContent = "Gagal load Performance Area: " + (err?.message || "Unknown error");
+      }
+    });
+  }
+
+  /* ===================== PERFORMANCE: JOBTYPE ===================== */
+  const pjt = { rows:[], fields:[], colParent:null, colType:null, submitFields:[], qualFields:[] };
+
+  function pjtSyncTypeOptionsByParent(){
+    const parent = $("pjt-parent").value;
+    const typeSel = $("pjt-type");
+
+    let types = [];
+    if(parent){
+      types = uniqueSortedText(
+        pjt.rows
+          .filter(r => String(r[pjt.colParent] ?? "").trim() === parent)
+          .map(r => r[pjt.colType])
+      );
+    }else{
+      types = uniqueSortedText(pjt.rows.map(r=>r[pjt.colType]));
+    }
+    setSelectOptions(typeSel, types, "Semua Job Type");
+  }
+
+  function pjtApply(){
+    const parent = $("pjt-parent").value;
+    const type = $("pjt-type").value;
+
+    let filtered = pjt.rows.slice();
+    if(parent) filtered = filtered.filter(r => String(r[pjt.colParent] ?? "").trim() === parent);
+    if(type)   filtered = filtered.filter(r => String(r[pjt.colType] ?? "").trim() === type);
+
+    $("pjt-status").textContent = `Filter: ${parent || "Semua Parent"} · ${type || "Semua Type"} · Baris data: ${filtered.length}`;
+
+    const submitParentMatrix = buildKeyMatrix(filtered, pjt.colParent, pjt.submitFields);
+    const submitTypeMatrix   = buildKeyMatrix(filtered, pjt.colType,   pjt.submitFields);
+    const qualTypeMatrix     = buildKeyMatrix(filtered, pjt.colType,   pjt.qualFields);
+
+    renderMatrix("pjt-submit-parent-body", "Job Parent", submitParentMatrix);
+    renderMatrix("pjt-submit-type-body",   "Job Type",   submitTypeMatrix);
+    renderMatrix("pjt-qual-type-body",     "Job Type",   qualTypeMatrix);
+  }
+
+  function pjtClear(){
+    $("pjt-parent").value = "";
+    pjtSyncTypeOptionsByParent();
+    $("pjt-type").value = "";
+    pjtApply();
+  }
+
+  function loadPerformanceJobType(){
+    $("pjt-status").textContent = "Memuat data Performance Jobtype...";
+    Papa.parse(PJT_URL,{
+      download:true, header:true, skipEmptyLines:true,
+      complete:(parsed)=>{
+        pjt.rows = parsed.data || [];
+        pjt.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
+        if(!pjt.rows.length){
+          $("pjt-status").textContent = "Data Performance Jobtype kosong / gagal dibaca.";
+          return;
+        }
+
+        // Job Parent = col A, Job Type = col B
+        pjt.colParent = getFieldByLetter(pjt.fields,"A");
+        pjt.colType   = getFieldByLetter(pjt.fields,"B");
+
+        pjt.submitFields = PSC_SUBMIT_COLS.map(L=>getFieldByLetter(pjt.fields,L));
+        pjt.qualFields   = PSC_QUAL_COLS.map(L=>getFieldByLetter(pjt.fields,L));
+
+        const parents = uniqueSortedText(pjt.rows.map(r=>r[pjt.colParent]));
+        setSelectOptions($("pjt-parent"), parents, "Semua Job Parent");
+
+        pjtSyncTypeOptionsByParent();
+
+        $("pjt-parent").addEventListener("change", ()=>{
+          pjtSyncTypeOptionsByParent();
+          $("pjt-type").value = "";
+          pjtApply();
+        });
+        $("pjt-type").addEventListener("change", pjtApply);
+        $("pjt-clear-btn").addEventListener("click", pjtClear);
+
+        pjtApply();
+      },
+      error:(err)=>{
+        $("pjt-status").textContent = "Gagal load Performance Jobtype: " + (err?.message || "Unknown error");
+      }
+    });
+  }
+
+  /* ===================== DOM READY ===================== */
+  document.addEventListener("DOMContentLoaded",()=>{
+    // ACM buttons
+    $("clear-filters-btn")?.addEventListener("click", clearFilters);
+
+    // SA buttons
+    $("sa-clear-filters-btn")?.addEventListener("click", clearSaFilters);
+
+    // Toggle hamburger filter ACM
+    const filterCard = document.querySelector(".filter-card");
+    $("filter-toggle-btn")?.addEventListener("click",()=> filterCard?.classList.toggle("open"));
+
+    // Toggle hamburger filter SA
+    const saFilterCard = document.querySelector(".sa-filter-card");
+    $("sa-filter-toggle-btn")?.addEventListener("click",()=> saFilterCard?.classList.toggle("open"));
+
+    // Tabs
+    const tabs = {
+      ACM: {btn:$("tab-ACM"), page:$("page-ACM")},
+      sa:  {btn:$("tab-sa"),  page:$("page-sa")},
+      psc: {btn:$("tab-psc"), page:$("page-psc")},
+      psa: {btn:$("tab-psa"), page:$("page-psa")},
+      pjt: {btn:$("tab-pjt"), page:$("page-pjt")}
+    };
+
+    function setPage(key){
+      Object.keys(tabs).forEach(k=>{
+        const isActive = (k === key);
+        tabs[k].btn?.classList.toggle("active", isActive);
+        tabs[k].page?.classList.toggle("active", isActive);
+      });
+    }
+
+    tabs.ACM.btn?.addEventListener("click",()=>setPage("ACM"));
+    tabs.sa.btn?.addEventListener("click",()=>setPage("sa"));
+    tabs.psc.btn?.addEventListener("click",()=>setPage("psc"));
+    tabs.psa.btn?.addEventListener("click",()=>setPage("psa"));
+    tabs.pjt.btn?.addEventListener("click",()=>setPage("pjt"));
+
+    setPage("ACM");
+
+    // Load all datasets
+    loadCsv();
+    loadPerformanceClient();
+    loadPerformanceArea();
+    loadPerformanceJobType();
+  });
 </script>
+
 </body>
 </html>
