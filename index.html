@@ -2793,9 +2793,6 @@ function initPerfClient(){
   $("pc-load-state").style.display = "none";
   $("pc-status-text").textContent = `Data siap · ${numberFmt.format(perfClientRows.length)} baris`;
 
-  const note = `Mapping (kolom spreadsheet): Submit = ${SUBMIT_COLS.join(", ")} | Qualified = ${QUAL_COLS.join(", ")}`;
-  $("pc-col-note").textContent = note;
-
   industrySelect.addEventListener("change", updatePerfClientTables);
   $("pc-clear-btn").addEventListener("click", ()=>{
     industrySelect.value = "";
@@ -2874,9 +2871,6 @@ let perfAreaAreasForJobtype = []; // to feed Jobtype area dropdown
 function initPerfArea(){
   $("pa-load-state").style.display = "none";
   $("pa-status-text").textContent = `Data siap · ${numberFmt.format(perfAreaRows.length)} baris`;
-
-  const note = `Mapping (kolom spreadsheet): Submit = ${SUBMIT_COLS.join(", ")} | Qualified = ${QUAL_COLS.join(", ")}`;
-  $("pa-col-note").textContent = note;
 
   renderMatrixHead($("pa-submit-head"), "Area");
   renderMatrixHead($("pa-qual-head"), "Area");
@@ -3022,9 +3016,6 @@ function syncAreaToJobtypeDropdown(){
 function initPerfJobtype(){
   $("pj-load-state").style.display = "none";
   $("pj-status-text").textContent = `Data siap · ${numberFmt.format(perfJobRows.length)} baris`;
-
-  const note = `Mapping (kolom spreadsheet): Submit = ${SUBMIT_COLS.join(", ")} | Qualified = ${QUAL_COLS.join(", ")}`;
-  $("pj-col-note").textContent = note;
 
   renderMatrixHead($("pj-parent-submit-head"), "Job Parent");
   renderMatrixHead($("pj-submit-head"), "Job Type");
