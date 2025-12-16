@@ -1584,9 +1584,9 @@
   const norm = v => String(v ?? "").trim().toUpperCase();
 
   /* ===================== PERFORMANCE: column mapping by letter ===================== */
-  // Submit: E Jan, H Feb, K Mar, N Apr, Q Mei, T Jun, W Jul, Z Aug, AC Sep, AE Oct, AI Nov, AL Dec
+  // Submit: E Jan, H Feb, K Mar, N Apr, Q Mei, T Jun, W Jul, Z Aug, AC Sep, AF Oct, AI Nov, AL Dec
   // Qualified: F Jan, I Feb, L Mar, O Apr, R Mei, U Jun, X Jul, AA Aug, AD Sep, AF Oct, AJ Nov, AM Dec
-  const PSC_SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AE","AI","AL"];
+  const PSC_SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AF","AI","AL"];
   const PSC_QUAL_COLS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
 
   function colLetterToIndex(letter){
