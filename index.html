@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- PapaParse untuk parsing CSV -->
+  <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
@@ -27,6 +27,7 @@
       --male:#1d4ed8;
       --female:#db2777;
       --total:#059669;
+      --warn:#b91c1c;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -44,10 +45,7 @@
       padding:16px;
     }
 
-    .app-shell{
-      width:100%;
-      max-width:1240px;
-    }
+    .app-shell{ width:100%; max-width:1240px; }
 
     header{
       display:flex;
@@ -68,6 +66,8 @@
       margin-top:4px;
       font-size:0.9rem;
       color:var(--muted);
+      max-width:860px;
+      line-height:1.4;
     }
 
     .pill{
@@ -81,12 +81,8 @@
       align-items:center;
       gap:6px;
     }
-
     .pill-dot{
-      width:8px;
-      height:8px;
-      border-radius:999px;
-      background:var(--brand);
+      width:8px;height:8px;border-radius:999px;background:var(--brand);
       box-shadow:0 0 0 4px rgba(37,99,235,0.18);
     }
 
@@ -98,7 +94,7 @@
       border:1px solid rgba(148,163,184,0.18);
     }
 
-    /* TAB / HALAMAN */
+    /* Tabs */
     .tab-row{
       display:flex;
       gap:8px;
@@ -113,190 +109,23 @@
       padding:6px 14px;
       cursor:pointer;
       color:var(--muted);
-      font-weight:500;
+      font-weight:600;
+      white-space:nowrap;
     }
     .tab-btn.active{
       background:var(--brand);
       color:#ffffff;
       border-color:var(--brand);
     }
-
     .page{display:none;}
     .page.active{display:block;}
 
-    /* FILTER – STICKY (ACM) */
-    .filter-card{
+    /* Filter sticky */
+    .filter-card, .sa-filter-card, .perf-filter-card{
       margin-bottom:14px;
       position:sticky;
       top:0;
       z-index:30;
-    }
-
-    /* FILTER – STICKY (Sourcing Analyst) */
-    .sa-filter-card{
-      margin-bottom:14px;
-      position:sticky;
-      top:0;
-      z-index:30;
-    }
-
-    .filters{
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .sa-filters{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-
-    /* Performance filter (native select) */
-    .perf-filters{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-
-    @media (max-width:1024px){
-      .filters{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .sa-filters{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .perf-filters{grid-template-columns:1fr;}
-    }
-    @media (max-width:640px){
-      .filters{grid-template-columns:1fr;}
-      .sa-filters{grid-template-columns:1fr;}
-      header{gap:8px;}
-      .title-block h1{font-size:1.3rem;}
-    }
-
-    .filter-group{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      font-size:0.8rem;
-    }
-
-    .filter-group-double{
-      gap:6px;
-    }
-
-    .filter-label{
-      font-weight:600;
-      color:var(--muted);
-      font-size:0.78rem;
-    }
-
-    /* Native select style */
-    .select-pill{
-      width:100%;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#f9fafb;
-      padding:8px 10px;
-      font-size:0.78rem;
-      outline:none;
-      color:var(--ink);
-    }
-    .select-pill:disabled{
-      background:#e5e7eb;
-      color:#9ca3af;
-      cursor:not-allowed;
-    }
-
-    /* Multi-select custom */
-    .ms{
-      position:relative;
-    }
-    .ms-toggle{
-      width:100%;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#f9fafb;
-      padding:7px 9px;
-      font-size:0.78rem;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:6px;
-      cursor:pointer;
-    }
-    .ms-placeholder{
-      flex:1;
-      text-align:left;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .ms-counter{
-      font-size:0.68rem;
-      color:var(--muted);
-      white-space:nowrap;
-    }
-    .ms-arrow{
-      font-size:0.68rem;
-    }
-    .ms-panel{
-      position:absolute;
-      left:0;
-      right:0;
-      top:100%;
-      margin-top:4px;
-      background:#ffffff;
-      border-radius:14px;
-      box-shadow:0 12px 30px rgba(15,23,42,0.12);
-      border:1px solid rgba(148,163,184,0.4);
-      padding:8px;
-      z-index:20;
-      display:none;
-    }
-    .ms.open .ms-panel{
-      display:block;
-    }
-    .ms-search{
-      width:100%;
-      padding:6px 8px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      font-size:0.75rem;
-      margin-bottom:6px;
-      outline:none;
-    }
-    .ms-options{
-      max-height:220px;
-      overflow-y:auto;
-    }
-    .ms-option{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      padding:3px 4px;
-      font-size:0.76rem;
-      cursor:pointer;
-    }
-    .ms-option input{
-      accent-color:var(--brand);
-    }
-    .ms-empty{
-      font-size:0.74rem;
-      color:var(--muted);
-      padding:4px 2px;
-      display:none;
-    }
-    .ms-disabled .ms-toggle{
-      background:#e5e7eb;
-      color:#9ca3af;
-      cursor:not-allowed;
-    }
-
-    .filter-hint{
-      margin-top:8px;
-      font-size:0.75rem;
-      color:var(--muted);
     }
 
     .card-title-row{
@@ -305,21 +134,23 @@
       align-items:center;
       margin-bottom:8px;
       gap:8px;
+      flex-wrap:wrap;
     }
-
-    .card-title{
-      font-size:0.95rem;
-      font-weight:600;
-    }
-
+    .card-title{ font-size:0.95rem; font-weight:700; }
     .card-tag{
       font-size:0.7rem;
       padding:4px 10px;
       border-radius:999px;
       background:var(--brand-soft);
       color:var(--brand);
-      font-weight:600;
+      font-weight:700;
       white-space:nowrap;
+    }
+    .card-subtext{
+      font-size:0.75rem;
+      color:var(--muted);
+      margin-bottom:8px;
+      line-height:1.45;
     }
 
     .header-right-flex{
@@ -329,7 +160,6 @@
       flex-wrap:wrap;
       justify-content:flex-end;
     }
-
     .clear-btn{
       border-radius:999px;
       border:1px solid var(--line);
@@ -338,6 +168,7 @@
       padding:5px 10px;
       cursor:pointer;
       color:var(--muted);
+      font-weight:600;
     }
     .clear-btn:hover{
       background:#eef2ff;
@@ -345,7 +176,7 @@
       color:var(--brand);
     }
 
-    /* HAMBURGER FILTER BUTTON (MOBILE/TABLET) */
+    /* Hamburger filter */
     .filter-toggle-btn{
       display:none;
       border-radius:999px;
@@ -358,126 +189,149 @@
       align-items:center;
       gap:6px;
       box-shadow:0 6px 16px rgba(15,23,42,0.06);
+      font-weight:700;
     }
-    .filter-toggle-btn .hamburger-icon{
-      font-size:0.9rem;
-      line-height:1;
-    }
+    .filter-toggle-btn .hamburger-icon{ font-size:0.9rem; line-height:1; }
 
-    .filter-body,
-    .sa-filter-body{
-      margin-top:6px;
-    }
+    .filter-body, .sa-filter-body, .perf-filter-body{ margin-top:6px; }
 
     @media (max-width:1024px){
-      .filter-toggle-btn{
-        display:inline-flex;
-      }
-      .filter-body,
-      .sa-filter-body{
-        display:none;
-      }
+      .filter-toggle-btn{ display:inline-flex; }
+      .filter-body, .sa-filter-body, .perf-filter-body{ display:none; }
       .filter-card.open .filter-body,
-      .sa-filter-card.open .sa-filter-body{
-        display:block;
-      }
-      .filter-card,
-      .sa-filter-card{
+      .sa-filter-card.open .sa-filter-body,
+      .perf-filter-card.open .perf-filter-body{ display:block; }
+      .filter-card,.sa-filter-card,.perf-filter-card{
         box-shadow:0 18px 40px rgba(15,23,42,0.12);
         border-color:rgba(148,163,184,0.4);
       }
     }
 
-    /* Grafik bulanan – VERTIKAL */
-    .chart-card{
-      margin-bottom:14px;
-    }
-    .chart-legend{
-      display:flex;
-      align-items:center;
-      gap:16px;
-      font-size:0.75rem;
-      color:var(--muted);
-      margin-bottom:6px;
-      flex-wrap:wrap;
-    }
-    .legend-item{
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-    .legend-dot{
-      width:14px;
-      height:8px;
-      border-radius:999px;
-    }
-
-    .legend-valid{background:#2563eb;}
-    .legend-buffer{background:#f97316;}
-
-    .chart-body{
-      display:flex;
-      align-items:flex-end;
+    /* Multi-select custom (ACM + SA) */
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
       gap:10px;
-      height:260px;
-      padding:8px 8px 4px;
+      margin-top:10px;
+    }
+    .sa-filters{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width:1024px){
+      .filters{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .sa-filters{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media (max-width:640px){
+      .filters{grid-template-columns:1fr;}
+      .sa-filters{grid-template-columns:1fr;}
+      header{gap:8px;}
+      .title-block h1{font-size:1.3rem;}
+    }
+
+    .filter-group{ display:flex; flex-direction:column; gap:4px; font-size:0.8rem; }
+    .filter-group-double{ gap:6px; }
+    .filter-label{ font-weight:700; color:var(--muted); font-size:0.78rem; }
+
+    .ms{ position:relative; }
+    .ms-toggle{
+      width:100%;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      padding:7px 9px;
+      font-size:0.78rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .ms-placeholder{ flex:1; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ms-counter{ font-size:0.68rem; color:var(--muted); white-space:nowrap; }
+    .ms-arrow{ font-size:0.68rem; }
+    .ms-panel{
+      position:absolute; left:0; right:0; top:100%; margin-top:4px;
+      background:#ffffff; border-radius:14px;
+      box-shadow:0 12px 30px rgba(15,23,42,0.12);
+      border:1px solid rgba(148,163,184,0.4);
+      padding:8px; z-index:20; display:none;
+    }
+    .ms.open .ms-panel{ display:block; }
+    .ms-search{
+      width:100%; padding:6px 8px; border-radius:999px;
+      border:1px solid var(--line);
+      font-size:0.75rem; margin-bottom:6px; outline:none;
+    }
+    .ms-options{ max-height:220px; overflow-y:auto; }
+    .ms-option{ display:flex; align-items:center; gap:6px; padding:3px 4px; font-size:0.76rem; cursor:pointer; }
+    .ms-option input{ accent-color:var(--brand); }
+    .ms-empty{ font-size:0.74rem; color:var(--muted); padding:4px 2px; display:none; }
+    .ms-disabled .ms-toggle{ background:#e5e7eb; color:#9ca3af; cursor:not-allowed; }
+    .filter-hint{ margin-top:8px; font-size:0.75rem; color:var(--muted); }
+
+    /* Loading */
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:0.8rem;
+      color:var(--muted);
+      margin-top:6px;
+    }
+    .spinner{
+      width:14px;height:14px;border-radius:999px;
+      border:2px solid rgba(37,99,235,0.18);
+      border-top-color:var(--brand);
+      animation:spin 0.7s linear infinite;
+    }
+    @keyframes spin{ to{transform:rotate(360deg);} }
+    .error{ margin-top:8px; font-size:0.8rem; color:var(--warn); font-weight:600; }
+
+    /* Chart (ACM) */
+    .chart-card{ margin-bottom:14px; }
+    .chart-legend{
+      display:flex; align-items:center; gap:16px;
+      font-size:0.75rem; color:var(--muted);
+      margin-bottom:6px; flex-wrap:wrap;
+    }
+    .legend-item{ display:flex; align-items:center; gap:6px; }
+    .legend-dot{ width:14px; height:8px; border-radius:999px; }
+    .legend-valid{ background:#2563eb; }
+    .legend-buffer{ background:#f97316; }
+    .chart-body{
+      display:flex; align-items:flex-end; gap:10px;
+      height:260px; padding:8px 8px 4px;
       border-radius:16px;
       background:linear-gradient(to top,#f9fafb,#ffffff);
       border:1px solid var(--line);
       overflow-x:auto;
     }
-
     .chart-col{
-      flex:1;
-      min-width:48px;
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-end;
+      flex:1; min-width:48px; height:100%;
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
       gap:4px;
     }
-
     .chart-col-bars{
-      flex:1;
-      display:flex;
-      align-items:flex-end;
-      justify-content:center;
-      gap:4px;
-      width:100%;
+      flex:1; display:flex; align-items:flex-end; justify-content:center;
+      gap:4px; width:100%;
     }
-
-    .chart-bar-vert{
-      width:14px;
-      border-radius:6px 6px 0 0;
-      background:#e5e7eb;
-      transition:height .25s ease-out;
-    }
-
-    .bar-valid{background:#2563eb;}
-    .bar-buffer{background:#f97316;}
-
+    .chart-bar-vert{ width:14px; border-radius:6px 6px 0 0; background:#e5e7eb; transition:height .25s ease-out; }
+    .bar-valid{ background:#2563eb; }
+    .bar-buffer{ background:#f97316; }
     .chart-col-values{
       font-size:0.7rem;
       text-align:center;
       font-variant-numeric:tabular-nums;
       color:#111827;
       line-height:1.2;
+      font-weight:700;
     }
-
-    .chart-col-label{
-      font-size:0.7rem;
-      text-align:center;
-      color:var(--muted);
-      white-space:nowrap;
-    }
-
-    .chart-footer{
-      margin-top:6px;
-      font-size:0.72rem;
-      color:var(--muted);
-      font-style:italic;
-    }
+    .chart-col-label{ font-size:0.7rem; text-align:center; color:var(--muted); white-space:nowrap; }
+    .chart-footer{ margin-top:6px; font-size:0.72rem; color:var(--muted); font-style:italic; }
 
     /* Summary cards */
     .summary-row{
@@ -486,10 +340,7 @@
       gap:12px;
       margin-bottom:18px;
     }
-    @media (max-width:900px){
-      .summary-row{grid-template-columns:1fr;}
-    }
-
+    @media (max-width:900px){ .summary-row{grid-template-columns:1fr;} }
     .summary-card{
       border-radius:16px;
       padding:12px 14px;
@@ -500,67 +351,39 @@
       flex-direction:column;
       gap:6px;
     }
-
     .summary-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+      display:flex; justify-content:space-between; align-items:center;
       font-size:0.78rem;
     }
-
-    .summary-title{
-      font-weight:600;
-    }
-
+    .summary-title{ font-weight:800; }
     .summary-tag{
       font-size:0.7rem;
       padding:3px 8px;
       border-radius:999px;
       background:#f3f4f6;
-    }
-
-    .summary-body{
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-      font-size:0.8rem;
-      margin-top:4px;
-    }
-
-    .summary-metric{
-      flex:1;
-    }
-
-    .summary-label{
-      color:var(--muted);
-      font-size:0.73rem;
-    }
-
-    .summary-value{
       font-weight:700;
-      font-size:0.95rem;
     }
-
+    .summary-body{
+      display:flex; justify-content:space-between;
+      gap:8px; font-size:0.8rem; margin-top:4px;
+    }
+    .summary-metric{ flex:1; }
+    .summary-label{ color:var(--muted); font-size:0.73rem; }
+    .summary-value{ font-weight:900; font-size:1.05rem; }
     .summary-card.male .summary-title{color:var(--male);}
     .summary-card.female .summary-title{color:var(--female);}
     .summary-card.total .summary-title{color:var(--total);}
 
+    /* Grid cards */
     .grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:16px;
       margin-bottom:12px;
     }
-    @media (max-width:960px){
-      .grid{grid-template-columns:1fr;}
-    }
+    @media (max-width:960px){ .grid{grid-template-columns:1fr;} }
 
-    .card-subtext{
-      font-size:0.75rem;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
-
+    /* Table */
     .table-wrap{
       width:100%;
       overflow-x:auto;
@@ -568,182 +391,121 @@
       border:1px solid var(--line);
       background:#f9fafb;
     }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:0.78rem;
-      min-width:520px;
-      table-layout:fixed; /* IMPORTANT: fixed width */
-    }
-
-    thead{
-      background:#111827;
-      color:#f9fafb;
-    }
-
+    table{ width:100%; border-collapse:collapse; font-size:0.78rem; }
+    thead{ background:#111827; color:#f9fafb; }
     th,td{
       padding:7px 10px;
       text-align:left;
       border-bottom:1px solid var(--line);
       white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
-
-    thead th{
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-
-    tbody tr:nth-child(even){
-      background:#f3f4f6;
-    }
-
-    tbody tr:last-child td:first-child{
-      border-bottom-left-radius:12px;
-    }
-    tbody tr:last-child td:last-child{
-      border-bottom-right-radius:12px;
-    }
-
-    .col-label{
-      font-weight:600;
-      color:#111827;
-    }
-
-    .col-number{
-      text-align:right;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .muted-row{
-      color:var(--muted);
-    }
-
-    .total-row{
-      background:#e5e7eb;
-      color:#111827;
-      font-weight:700;
-    }
-
+    thead th{ position:sticky; top:0; z-index:1; }
+    tbody tr:nth-child(even){ background:#f3f4f6; }
+    tbody tr:last-child td:first-child{ border-bottom-left-radius:12px; }
+    tbody tr:last-child td:last-child{ border-bottom-right-radius:12px; }
+    .col-label{ font-weight:800; color:#111827; }
+    .col-number{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+    .muted-row{ color:var(--muted); }
+    .total-row{ background:#e5e7eb; color:#111827; font-weight:900; }
     .status-bar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between;
       margin:4px 2px 0;
       font-size:0.72rem;
       color:var(--muted);
-      gap:10px;
+      gap:8px;
       flex-wrap:wrap;
     }
-
-    .status-left{
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
+    .status-left{ display:flex; align-items:center; gap:6px; }
     .status-dot{
-      width:8px;
-      height:8px;
-      border-radius:999px;
-      background:#22c55e;
+      width:8px;height:8px;border-radius:999px;background:#22c55e;
       box-shadow:0 0 0 3px rgba(34,197,94,0.3);
     }
+    .status-right{ font-style:italic; }
 
-    .status-right{
-      font-style:italic;
-      max-width:100%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
+    /* FIXED MIN-WIDTH per table (ACM) */
+    .t-prov   { min-width:520px; }
+    .t-metode { min-width:520px; }
+    .t-media  { min-width:520px; }
+    .t-edu    { min-width:520px; }
+    .t-portal { min-width:520px; }
+    .t-offline{ min-width:520px; }
 
-    .loading{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:0.8rem;
-      color:var(--muted);
-      margin-top:6px;
-    }
-
-    .spinner{
-      width:14px;
-      height:14px;
-      border-radius:999px;
-      border:2px solid rgba(37,99,235,0.18);
-      border-top-color:var(--brand);
-      animation:spin 0.7s linear infinite;
-    }
-
-    @keyframes spin{
-      to{transform:rotate(360deg);}
-    }
-
-    .error{
-      margin-top:8px;
-      font-size:0.8rem;
-      color:#b91c1c;
-    }
-
-    /* ANALISA TEXT (Sourcing Analyst) */
-    .analysis-text{
-      font-size:0.8rem;
-      color:var(--ink);
-      line-height:1.6;
-      margin-top:4px;
-    }
-    .analysis-intro{
-      margin-bottom:6px;
-      font-weight:500;
-    }
+    /* SA analysis blocks */
+    .analysis-text{ font-size:0.8rem; color:var(--ink); line-height:1.6; margin-top:4px; }
+    .analysis-intro{ margin-bottom:6px; font-weight:600; }
     .analysis-section{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
+      display:flex; align-items:flex-start; gap:10px;
+      padding:10px 12px; border-radius:14px;
       background:linear-gradient(to bottom right,#f9fafb,#ffffff);
       border:1px solid rgba(148,163,184,0.35);
       box-shadow:0 10px 20px rgba(15,23,42,0.04);
       margin-top:8px;
     }
-    .analysis-icon{
-      font-size:1.5rem;
-      line-height:1;
-      margin-top:2px;
-    }
-    .analysis-body{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:3px;
-    }
-    .analysis-title{
-      font-weight:600;
-      font-size:0.85rem;
-    }
-    .analysis-summary{
-      font-size:0.8rem;
-      color:var(--ink);
-    }
-    .analysis-detail{
-      font-size:0.75rem;
-      color:#b91c1c;
-      font-weight:500;
-    }
+    .analysis-icon{ font-size:1.5rem; line-height:1; margin-top:2px; }
+    .analysis-body{ flex:1; display:flex; flex-direction:column; gap:3px; }
+    .analysis-title{ font-weight:800; font-size:0.85rem; }
+    .analysis-summary{ font-size:0.8rem; color:var(--ink); }
+    .analysis-detail{ font-size:0.75rem; color:var(--warn); font-weight:700; }
 
-    /* ========= FIX WIDTH TABLES: ACM 3 columns ========= */
-    .acm-3col th:nth-child(1), .acm-3col td:nth-child(1){width:58%;}
-    .acm-3col th:nth-child(2), .acm-3col td:nth-child(2){width:21%;}
-    .acm-3col th:nth-child(3), .acm-3col td:nth-child(3){width:21%;}
+    /* Performance pages */
+    .perf-filters{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .perf-filters-3{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+    @media (max-width:1024px){
+      .perf-filters{ grid-template-columns:1fr; }
+      .perf-filters-3{ grid-template-columns:1fr; }
+    }
+    .select-pill{
+      width:100%;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      padding:8px 10px;
+      font-size:0.78rem;
+      font-weight:700;
+      outline:none;
+    }
+    .select-pill:disabled{
+      background:#e5e7eb;
+      color:#9ca3af;
+      cursor:not-allowed;
+    }
+    .mini-note{
+      margin-top:6px;
+      font-size:0.72rem;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .mini-note strong{ color:#111827; }
 
-    /* ========= FIX WIDTH TABLES: Performance matrix (13 columns) ========= */
-    .matrix-13 th:nth-child(1), .matrix-13 td:nth-child(1){width:340px;}
-    .matrix-13 th:not(:first-child), .matrix-13 td:not(:first-child){width:96px; text-align:right;}
+    .matrix-table{
+      min-width:980px; /* matrix butuh lebar */
+    }
+    .matrix-table th:first-child,
+    .matrix-table td:first-child{
+      position:sticky;
+      left:0;
+      background:#111827;
+      color:#f9fafb;
+      z-index:2;
+    }
+    .matrix-table tbody td:first-child{
+      background:#ffffff;
+      color:#111827;
+      border-right:1px solid var(--line);
+      z-index:1;
+      font-weight:800;
+    }
+    .matrix-table tbody tr:nth-child(even) td:first-child{
+      background:#f3f4f6;
+    }
+    .matrix-table td{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+    .matrix-table td:first-child{ text-align:left; }
+
   </style>
 </head>
 
@@ -752,16 +514,17 @@
   <header>
     <div class="title-block">
       <h1>Sourcing Intelligence Market</h1>
-      <p>Analisa Sourcing berdasarkan Applicant Valid &amp; Buffer + Performance (Client, Area, Jobtype).</p>
+      <p>
+        Analisa sourcing berdasarkan Applicant Valid &amp; Buffer (ACM), insight best practice (Sourcing Analyst),
+        serta performance matrix (Client / Area / Jobtype).
+      </p>
     </div>
     <div class="title-right">
-      <span class="pill">
-        <span class="pill-dot"></span>
-      </span>
+      <span class="pill"><span class="pill-dot"></span> Live</span>
     </div>
   </header>
 
-  <!-- TAB -->
+  <!-- TABS -->
   <div class="tab-row">
     <button id="tab-ACM" class="tab-btn active" type="button">ACM</button>
     <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
@@ -771,25 +534,21 @@
   </div>
 
   <main>
-    <!-- ========================================================= -->
-    <!-- PAGE: ACM -->
-    <!-- ========================================================= -->
+    <!-- ===================== PAGE: ACM ===================== -->
     <section id="page-ACM" class="page active">
-
-      <!-- FILTER -->
+      <!-- FILTER ACM -->
       <section class="card filter-card">
         <div class="card-title-row">
           <div class="card-title">Filter Data Applicant</div>
           <div class="header-right-flex">
             <button id="filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span>
-              <span>Filter</span>
+              <span class="hamburger-icon">☰</span><span>Filter</span>
             </button>
             <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
           </div>
         </div>
         <div class="card-subtext">
-          Sesuaikan filter di bawah untuk melihat preview analisa. Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
+          Kosongkan filter (tanpa pilihan) untuk menampilkan keseluruhan.
         </div>
 
         <div class="filter-body">
@@ -858,7 +617,6 @@
               </div>
             </div>
 
-            <!-- Kolom ke-5: Job Parent + Job Type -->
             <div class="filter-group filter-group-double">
               <div>
                 <label class="filter-label">Job Parent</label>
@@ -894,275 +652,160 @@
           </div>
 
           <div class="filter-hint">
-            * Klik filter untuk membuka daftar + kolom search. Bisa memilih lebih dari satu nilai di setiap filter. Job Type baru muncul setelah Job Parent dipilih.
+            * Multi-select + search. Job Type muncul setelah Job Parent dipilih.
           </div>
         </div>
 
         <div id="load-state" class="loading">
-          <div class="spinner"></div>
-          <span>Memuat data dari Google Sheets...</span>
+          <div class="spinner"></div><span>Memuat data ACM dari Google Sheets...</span>
         </div>
         <div id="error-state" class="error" style="display:none;"></div>
       </section>
 
-      <!-- GRAFIK BULANAN -->
+      <!-- CHART -->
       <section class="card chart-card">
         <div class="card-title-row">
           <div class="card-title">Trend Applicant Valid &amp; Buffer per Bulan</div>
           <div class="card-tag">Vertical bar · Jan–Des</div>
         </div>
         <p class="card-subtext">
-          Pertumbuhan Applicant Valid (APLIKAN VALID - CTC 1) dan Buffer berdasarkan <strong>PERIODE PELAMAR</strong>. Mengikuti filter di atas.
+          Pertumbuhan Applicant Valid (APLIKAN VALID - CTC 1) dan Buffer berdasarkan <strong>PERIODE PELAMAR</strong>.
         </p>
         <div class="chart-legend">
-          <div class="legend-item">
-            <span class="legend-dot legend-valid"></span>
-            <span>Applicant Valid</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-dot legend-buffer"></span>
-            <span>Buffer</span>
-          </div>
+          <div class="legend-item"><span class="legend-dot legend-valid"></span><span>Applicant Valid</span></div>
+          <div class="legend-item"><span class="legend-dot legend-buffer"></span><span>Buffer</span></div>
         </div>
         <div id="chart-body" class="chart-body"></div>
-        <div id="chart-summary-text" class="chart-footer">
-          Menunggu data...
-        </div>
+        <div id="chart-summary-text" class="chart-footer">Menunggu data...</div>
       </section>
 
-      <!-- SUMMARY BOXES -->
+      <!-- SUMMARY -->
       <section class="summary-row">
         <div class="summary-card male">
-          <div class="summary-header">
-            <div class="summary-title">Summary Laki-Laki</div>
-            <div class="summary-tag">Jenis Kelamin: L</div>
-          </div>
+          <div class="summary-header"><div class="summary-title">Summary Laki-Laki</div><div class="summary-tag">L</div></div>
           <div class="summary-body">
-            <div class="summary-metric">
-              <div class="summary-label">Applicant Valid</div>
-              <div id="sum-male-valid" class="summary-value">0</div>
-            </div>
-            <div class="summary-metric">
-              <div class="summary-label">Buffer</div>
-              <div id="sum-male-buffer" class="summary-value">0</div>
-            </div>
+            <div class="summary-metric"><div class="summary-label">Applicant Valid</div><div id="sum-male-valid" class="summary-value">0</div></div>
+            <div class="summary-metric"><div class="summary-label">Buffer</div><div id="sum-male-buffer" class="summary-value">0</div></div>
           </div>
         </div>
-
         <div class="summary-card female">
-          <div class="summary-header">
-            <div class="summary-title">Summary Perempuan</div>
-            <div class="summary-tag">Jenis Kelamin: P</div>
-          </div>
+          <div class="summary-header"><div class="summary-title">Summary Perempuan</div><div class="summary-tag">P</div></div>
           <div class="summary-body">
-            <div class="summary-metric">
-              <div class="summary-label">Applicant Valid</div>
-              <div id="sum-female-valid" class="summary-value">0</div>
-            </div>
-            <div class="summary-metric">
-              <div class="summary-label">Buffer</div>
-              <div id="sum-female-buffer" class="summary-value">0</div>
-            </div>
+            <div class="summary-metric"><div class="summary-label">Applicant Valid</div><div id="sum-female-valid" class="summary-value">0</div></div>
+            <div class="summary-metric"><div class="summary-label">Buffer</div><div id="sum-female-buffer" class="summary-value">0</div></div>
           </div>
         </div>
-
         <div class="summary-card total">
-          <div class="summary-header">
-            <div class="summary-title">Total Nasional</div>
-            <div class="summary-tag">Semua gender</div>
-          </div>
+          <div class="summary-header"><div class="summary-title">Total Nasional</div><div class="summary-tag">All</div></div>
           <div class="summary-body">
-            <div class="summary-metric">
-              <div class="summary-label">Applicant Valid</div>
-              <div id="sum-total-valid" class="summary-value">0</div>
-            </div>
-            <div class="summary-metric">
-              <div class="summary-label">Buffer</div>
-              <div id="sum-total-buffer" class="summary-value">0</div>
-            </div>
+            <div class="summary-metric"><div class="summary-label">Applicant Valid</div><div id="sum-total-valid" class="summary-value">0</div></div>
+            <div class="summary-metric"><div class="summary-label">Buffer</div><div id="sum-total-buffer" class="summary-value">0</div></div>
           </div>
         </div>
       </section>
 
-      <!-- TABEL 1 & 2 -->
+      <!-- TABLES -->
       <section class="grid">
         <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Applicant Valid X Buffer</div>
-            <div class="card-tag">By Provinsi</div>
-          </div>
+          <div class="card-title-row"><div class="card-title">Preview Applicant Valid X Buffer</div><div class="card-tag">By Provinsi</div></div>
           <div class="table-wrap">
-            <table class="acm-3col">
-              <thead>
-              <tr>
-                <th>Provinsi</th>
-                <th>Applicant Valid</th>
-                <th>Buffer</th>
-              </tr>
-              </thead>
+            <table class="t-prov">
+              <thead><tr><th>Provinsi</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
               <tbody id="tbl-prov-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left">
-              <span class="status-dot"></span>
-              <span id="status-prov">Menunggu data...</span>
-            </div>
-            <div class="status-right">KATEGORI APP = "APLIKAN VALID - CTC 1" · QUALIFIED = "YES"</div>
+            <div class="status-left"><span class="status-dot"></span><span id="status-prov">Menunggu data...</span></div>
+            <div class="status-right">KATEGORI APP="APLIKAN VALID - CTC 1" · QUALIFIED="YES"</div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Metode Sourcing</div>
-            <div class="card-tag">Offline vs Online</div>
-          </div>
+          <div class="card-title-row"><div class="card-title">Preview Metode Sourcing</div><div class="card-tag">Offline vs Online</div></div>
           <div class="table-wrap">
-            <table class="acm-3col">
-              <thead>
-              <tr>
-                <th>Metode Sourcing (MEDIA SOURCING)</th>
-                <th>Applicant Valid</th>
-                <th>Buffer</th>
-              </tr>
-              </thead>
+            <table class="t-metode">
+              <thead><tr><th>Metode Sourcing (MEDIA SOURCING)</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
               <tbody id="tbl-metode-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left">
-              <span class="status-dot"></span>
-              <span id="status-metode">Menunggu data...</span>
-            </div>
+            <div class="status-left"><span class="status-dot"></span><span id="status-metode">Menunggu data...</span></div>
           </div>
         </article>
       </section>
 
-      <!-- TABEL 3 & 4 -->
       <section class="grid">
         <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Sourcing Media Sosial</div>
-            <div class="card-tag">Per Platform</div>
-          </div>
+          <div class="card-title-row"><div class="card-title">Preview Sourcing Media Sosial</div><div class="card-tag">Per Platform</div></div>
           <div class="table-wrap">
-            <table class="acm-3col">
-              <thead>
-              <tr>
-                <th>Media Sosial</th>
-                <th>Applicant Valid</th>
-                <th>Buffer</th>
-              </tr>
-              </thead>
+            <table class="t-media">
+              <thead><tr><th>Media Sosial</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
               <tbody id="tbl-media-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left">
-              <span class="status-dot"></span>
-              <span id="status-media">Menunggu data...</span>
-            </div>
+            <div class="status-left"><span class="status-dot"></span><span id="status-media">Menunggu data...</span></div>
             <div class="status-right">Baris: kategori ONLINE - MEDIA SOSIAL</div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Profiling Applicant</div>
-            <div class="card-tag">Tingkat Pendidikan</div>
-          </div>
+          <div class="card-title-row"><div class="card-title">Preview Profiling Applicant</div><div class="card-tag">Pendidikan</div></div>
           <div class="table-wrap">
-            <table class="acm-3col">
-              <thead>
-              <tr>
-                <th>Pendidikan Terakhir</th>
-                <th>Applicant Valid</th>
-                <th>Buffer</th>
-              </tr>
-              </thead>
+            <table class="t-edu">
+              <thead><tr><th>Pendidikan Terakhir</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
               <tbody id="tbl-edu-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left">
-              <span class="status-dot"></span>
-              <span id="status-edu">Menunggu data...</span>
-            </div>
+            <div class="status-left"><span class="status-dot"></span><span id="status-edu">Menunggu data...</span></div>
             <div class="status-right">Sumber: kolom PENDIDIKAN TERAKHIR</div>
           </div>
         </article>
       </section>
 
-      <!-- TABEL 5 & 6 -->
       <section class="grid">
         <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Sourcing Job Portal</div>
-            <div class="card-tag">Per Portal</div>
-          </div>
+          <div class="card-title-row"><div class="card-title">Preview Sourcing Job Portal</div><div class="card-tag">Per Portal</div></div>
           <div class="table-wrap">
-            <table class="acm-3col">
-              <thead>
-              <tr>
-                <th>Job Portal</th>
-                <th>Applicant Valid</th>
-                <th>Buffer</th>
-              </tr>
-              </thead>
+            <table class="t-portal">
+              <thead><tr><th>Job Portal</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
               <tbody id="tbl-portal-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left">
-              <span class="status-dot"></span>
-              <span id="status-portal">Menunggu data...</span>
-            </div>
+            <div class="status-left"><span class="status-dot"></span><span id="status-portal">Menunggu data...</span></div>
             <div class="status-right">Baris: kategori ONLINE - JOB PORTAL</div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Sourcing Offline</div>
-            <div class="card-tag">Aktivitas Offline</div>
-          </div>
+          <div class="card-title-row"><div class="card-title">Preview Sourcing Offline</div><div class="card-tag">Aktivitas Offline</div></div>
           <div class="table-wrap">
-            <table class="acm-3col">
-              <thead>
-              <tr>
-                <th>Aktivitas Offline</th>
-                <th>Applicant Valid</th>
-                <th>Buffer</th>
-              </tr>
-              </thead>
+            <table class="t-offline">
+              <thead><tr><th>Aktivitas Offline</th><th>Applicant Valid</th><th>Buffer</th></tr></thead>
               <tbody id="tbl-offline-body"></tbody>
             </table>
           </div>
           <div class="status-bar">
-            <div class="status-left">
-              <span class="status-dot"></span>
-              <span id="status-offline">Menunggu data...</span>
-            </div>
+            <div class="status-left"><span class="status-dot"></span><span id="status-offline">Menunggu data...</span></div>
             <div class="status-right">Baris: kategori OFFLINE</div>
           </div>
         </article>
       </section>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- PAGE: SOURCING ANALYST -->
-    <!-- ========================================================= -->
+    <!-- ===================== PAGE: SOURCING ANALYST ===================== -->
     <section id="page-sa" class="page">
       <section class="card sa-filter-card">
         <div class="card-title-row">
           <div class="card-title">Filter Sourcing Analyst</div>
           <div class="header-right-flex">
             <button id="sa-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span>
-              <span>Filter</span>
+              <span class="hamburger-icon">☰</span><span>Filter</span>
             </button>
-            <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter Sourcing Analyst</button>
-            <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
+            <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter</button>
+            <div class="card-tag">Prov · Kota · Job Parent · Job Type</div>
           </div>
         </div>
 
@@ -1172,9 +815,7 @@
               <label class="filter-label">Provinsi</label>
               <div class="ms" id="sa-ms-prov">
                 <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Provinsi</span>
-                  <span class="ms-counter"></span>
-                  <span class="ms-arrow">▾</span>
+                  <span class="ms-placeholder">Semua Provinsi</span><span class="ms-counter"></span><span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari provinsi..." />
@@ -1188,9 +829,7 @@
               <label class="filter-label">Kota</label>
               <div class="ms ms-disabled" id="sa-ms-kota">
                 <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                  <span class="ms-counter"></span>
-                  <span class="ms-arrow">▾</span>
+                  <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span><span class="ms-counter"></span><span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari kota..." />
@@ -1204,9 +843,7 @@
               <label class="filter-label">Job Parent</label>
               <div class="ms" id="sa-ms-job-parent">
                 <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Job Parent</span>
-                  <span class="ms-counter"></span>
-                  <span class="ms-arrow">▾</span>
+                  <span class="ms-placeholder">Semua Job Parent</span><span class="ms-counter"></span><span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari job parent..." />
@@ -1220,9 +857,7 @@
               <label class="filter-label">Job Type</label>
               <div class="ms ms-disabled" id="sa-ms-job-type">
                 <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                  <span class="ms-counter"></span>
-                  <span class="ms-arrow">▾</span>
+                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span><span class="ms-counter"></span><span class="ms-arrow">▾</span>
                 </button>
                 <div class="ms-panel">
                   <input class="ms-search" type="text" placeholder="Cari job type..." />
@@ -1233,16 +868,14 @@
             </div>
           </div>
 
-          <div class="filter-hint">
-            * Pilih Provinsi terlebih dahulu.
-          </div>
+          <div class="filter-hint">* Pilih Provinsi terlebih dahulu (opsional), lalu detailkan sesuai kebutuhan.</div>
         </div>
       </section>
 
       <section class="card">
         <div class="card-title-row">
           <div class="card-title">Analisa Best Practice Sourcing</div>
-          <div class="card-tag">Auto generated insight</div>
+          <div class="card-tag">Auto insight</div>
         </div>
         <div id="sa-analysis-text" class="analysis-text">
           Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.
@@ -1250,255 +883,217 @@
       </section>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- PAGE: PERFORMANCE SOURCING CLIENT -->
-    <!-- ========================================================= -->
+    <!-- ===================== PAGE: PERFORMANCE CLIENT ===================== -->
     <section id="page-psc" class="page">
-      <section class="card">
+      <section class="card perf-filter-card">
         <div class="card-title-row">
-          <div class="card-title">Filter Performance Sourcing Client</div>
+          <div class="card-title">Performance Sourcing Client</div>
           <div class="header-right-flex">
-            <button id="psc-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
+            <button id="psc-filter-toggle-btn" class="filter-toggle-btn" type="button">
+              <span class="hamburger-icon">☰</span><span>Filter</span>
+            </button>
+            <button id="psc-clear" class="clear-btn" type="button">Hapus filter</button>
             <div class="card-tag">Industry → Client</div>
           </div>
         </div>
         <div class="card-subtext">
-          Pilih <b>Industry</b> dulu. Setelah itu <b>Client</b> akan muncul pilihannya
+          Pilih <strong>Industry</strong> (kolom B). Setelah itu dropdown <strong>Client</strong> (kolom A) akan muncul sesuai industry.
         </div>
 
-        <div class="perf-filters">
-          <div class="filter-group">
-            <label class="filter-label">Industry</label>
-            <select id="psc-industry" class="select-pill"></select>
+        <div class="perf-filter-body">
+          <div class="perf-filters">
+            <div class="filter-group">
+              <label class="filter-label">Industry (kolom B)</label>
+              <select id="psc-industry" class="select-pill"></select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Nama Klien (kolom A)</label>
+              <select id="psc-client" class="select-pill" disabled></select>
+              <div class="mini-note">Client akan aktif setelah Industry dipilih.</div>
+            </div>
           </div>
-          <div class="filter-group">
-            <label class="filter-label">Client</label>
-            <select id="psc-client" class="select-pill" disabled></select>
-          </div>
-        </div>
 
-        <div class="status-bar" style="margin-top:10px;">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="psc-status">Memuat data...</span>
+          <div id="psc-load" class="loading">
+            <div class="spinner"></div><span>Memuat data Performance Client...</span>
           </div>
-          <div class="status-right" id="psc-colhint"></div>
+          <div id="psc-err" class="error" style="display:none;"></div>
         </div>
       </section>
 
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achievement Rasio Submit</div>
-        </div>
-        <p class="card-subtext">Menampilkan % Achievement Submit per client untuk Jan–Des berdasarkan filter Industry & Client.</p>
-        <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
-            <tbody id="psc-submit-body"></tbody>
-          </table>
-        </div>
-      </section>
+      <section class="grid">
+        <article class="card">
+          <div class="card-title-row"><div class="card-title">Achievement Rasio Submit</div><div class="card-tag">Client × Bulan</div></div>
+          <div class="table-wrap">
+            <table class="matrix-table" id="psc-submit-table">
+              <thead id="psc-submit-head"></thead>
+              <tbody id="psc-submit-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left"><span class="status-dot"></span><span id="psc-status-1">Menunggu filter...</span></div>
+          </div>
+        </article>
 
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achievement Applicant Qualified</div>
-        </div>
-        <p class="card-subtext">Menampilkan % Applicant Qualified per client untuk Jan–Des berdasarkan filter Industry & Client.</p>
-        <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
-            <tbody id="psc-qual-body"></tbody>
-          </table>
-        </div>
+        <article class="card">
+          <div class="card-title-row"><div class="card-title">Achievement Applicant Qualified</div><div class="card-tag">Client × Bulan</div></div>
+          <div class="table-wrap">
+            <table class="matrix-table" id="psc-qual-table">
+              <thead id="psc-qual-head"></thead>
+              <tbody id="psc-qual-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left"><span class="status-dot"></span><span id="psc-status-2">Menunggu filter...</span></div>
+          </div>
+        </article>
       </section>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- PAGE: PERFORMANCE SOURCING AREA -->
-    <!-- ========================================================= -->
+    <!-- ===================== PAGE: PERFORMANCE AREA ===================== -->
     <section id="page-psa" class="page">
-      <section class="card">
+      <section class="card perf-filter-card">
         <div class="card-title-row">
-          <div class="card-title">Filter Performance Sourcing Area</div>
+          <div class="card-title">Performance Sourcing Area</div>
           <div class="header-right-flex">
-            <button id="psa-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
+            <button id="psa-filter-toggle-btn" class="filter-toggle-btn" type="button">
+              <span class="hamburger-icon">☰</span><span>Filter</span>
+            </button>
+            <button id="psa-clear" class="clear-btn" type="button">Hapus filter</button>
             <div class="card-tag">Group Client → Area</div>
           </div>
         </div>
         <div class="card-subtext">
-          Filter: <b>Group Client</b> dan <b>Area</b>. Area otomatis mengikuti Group Client
+          Pilih <strong>Group Client</strong> (kolom A), lalu pilih <strong>Area</strong> (kolom B).
         </div>
 
-        <div class="perf-filters">
-          <div class="filter-group">
-            <label class="filter-label">Group Client</label>
-            <select id="psa-group" class="select-pill"></select>
+        <div class="perf-filter-body">
+          <div class="perf-filters">
+            <div class="filter-group">
+              <label class="filter-label">Group Client (kolom A)</label>
+              <select id="psa-group" class="select-pill"></select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Area (kolom B)</label>
+              <select id="psa-area" class="select-pill" disabled></select>
+              <div class="mini-note">Area akan aktif setelah Group Client dipilih.</div>
+            </div>
           </div>
-          <div class="filter-group">
-            <label class="filter-label">Area</label>
-            <select id="psa-area" class="select-pill"></select>
-          </div>
-        </div>
 
-        <div class="status-bar" style="margin-top:10px;">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="psa-status">Memuat data...</span>
+          <div id="psa-load" class="loading">
+            <div class="spinner"></div><span>Memuat data Performance Area...</span>
           </div>
-          <div class="status-right" id="psa-colhint"></div>
+          <div id="psa-err" class="error" style="display:none;"></div>
         </div>
       </section>
 
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achievement Rasio Submit</div>
-          <div class="card-tag">Area (row) × Bulan (kolom)</div>
-        </div>
-        <p class="card-subtext">Menampilkan % Achievement Submit per Area untuk Jan–Des berdasarkan filter Group Client & Area.</p>
-        <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Area</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
-            <tbody id="psa-submit-body"></tbody>
-          </table>
-        </div>
-      </section>
+      <section class="grid">
+        <article class="card">
+          <div class="card-title-row"><div class="card-title">Achievement Rasio Submit</div><div class="card-tag">Area × Bulan</div></div>
+          <div class="table-wrap">
+            <table class="matrix-table">
+              <thead id="psa-submit-head"></thead>
+              <tbody id="psa-submit-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left"><span class="status-dot"></span><span id="psa-status-1">Menunggu filter...</span></div>
+          </div>
+        </article>
 
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achievement Qualified</div>
-          <div class="card-tag">Area (row) × Bulan (kolom)</div>
-        </div>
-        <p class="card-subtext">Menampilkan % Achievement Qualified per Area untuk Jan–Des berdasarkan filter Group Client & Area.</p>
-        <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Area</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
-            <tbody id="psa-qual-body"></tbody>
-          </table>
-        </div>
+        <article class="card">
+          <div class="card-title-row"><div class="card-title">Achievement Qualified</div><div class="card-tag">Area × Bulan</div></div>
+          <div class="table-wrap">
+            <table class="matrix-table">
+              <thead id="psa-qual-head"></thead>
+              <tbody id="psa-qual-body"></tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <div class="status-left"><span class="status-dot"></span><span id="psa-status-2">Menunggu filter...</span></div>
+          </div>
+        </article>
       </section>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- PAGE: PERFORMANCE JOBTYPE -->
-    <!-- ========================================================= -->
+    <!-- ===================== PAGE: PERFORMANCE JOBTYPE ===================== -->
     <section id="page-pjt" class="page">
-      <section class="card">
+      <section class="card perf-filter-card">
         <div class="card-title-row">
-          <div class="card-title">Filter Performance Jobtype</div>
+          <div class="card-title">Performance Jobtype</div>
           <div class="header-right-flex">
-            <button id="pjt-clear-btn" class="clear-btn" type="button">Hapus filter Performance</button>
-            <div class="card-tag">Job Parent → Job Type</div>
+            <button id="pjt-filter-toggle-btn" class="filter-toggle-btn" type="button">
+              <span class="hamburger-icon">☰</span><span>Filter</span>
+            </button>
+            <button id="pjt-clear" class="clear-btn" type="button">Hapus filter</button>
+            <div class="card-tag">Parent → Type + Area</div>
           </div>
         </div>
-
         <div class="card-subtext">
-          Pilih <b>Job Parent</b>, lalu <b>Job Type</b> akan menyesuaikan
+          Job Type akan mengikuti Job Parent. Area diambil dari Performance Area.
         </div>
 
-        <div class="perf-filters">
-          <div class="filter-group">
-            <label class="filter-label">Job Parent</label>
-            <select id="pjt-parent" class="select-pill"></select>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Job Type</label>
-            <select id="pjt-type" class="select-pill"></select>
-          </div>
-        </div>
+        <div class="perf-filter-body">
+          <div class="perf-filters perf-filters-3">
+            <div class="filter-group">
+              <label class="filter-label">Job Parent</label>
+              <select id="pjt-parent" class="select-pill"></select>
+            </div>
 
-        <div class="status-bar" style="margin-top:10px;">
-          <div class="status-left">
-            <span class="status-dot"></span>
-            <span id="pjt-status">Memuat data...</span>
+            <div class="filter-group">
+              <label class="filter-label">Job Type</label>
+              <select id="pjt-type" class="select-pill" disabled></select>
+              <div class="mini-note">Job Type aktif setelah Job Parent dipilih.</div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Area (dari Performance Area)</label>
+              <select id="pjt-area" class="select-pill" disabled></select>
+              <div class="mini-note">
+                <strong>Catatan:</strong> Area pada halaman ini adalah <strong>estimasi (weighting)</strong> dari Performance Area,
+                karena dataset Jobtype tidak memiliki kolom Area.
+              </div>
+            </div>
           </div>
-          <div class="status-right" id="pjt-colhint"></div>
+
+          <div id="pjt-load" class="loading">
+            <div class="spinner"></div><span>Memuat data Performance Jobtype...</span>
+          </div>
+          <div id="pjt-err" class="error" style="display:none;"></div>
         </div>
       </section>
 
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achiement Rasio Submit Job Parent</div>
-          <div class="card-tag">Job Parent (row) × Bulan (kolom)</div>
-        </div>
-        <p class="card-subtext">Achievement Submit per Job Parent untuk Jan–Des (mengikuti filter).</p>
+      <section class="grid">
+        <article class="card">
+          <div class="card-title-row"><div class="card-title">Achievement Rasio Submit Job Parent</div><div class="card-tag">Parent × Bulan</div></div>
+          <div class="table-wrap">
+            <table class="matrix-table">
+              <thead id="pjt-submit-parent-head"></thead>
+              <tbody id="pjt-submit-parent-body"></tbody>
+            </table>
+          </div>
+        </article>
 
-        <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Job Parent</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
-            <tbody id="pjt-submit-parent-body"></tbody>
-          </table>
-        </div>
+        <article class="card">
+          <div class="card-title-row"><div class="card-title">Achievement Rasio Submit</div><div class="card-tag">Job Type × Bulan</div></div>
+          <div class="table-wrap">
+            <table class="matrix-table">
+              <thead id="pjt-submit-type-head"></thead>
+              <tbody id="pjt-submit-type-body"></tbody>
+            </table>
+          </div>
+        </article>
       </section>
 
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achiement Rasio Submit</div>
-          <div class="card-tag">Job Type (row) × Bulan (kolom)</div>
-        </div>
-        <p class="card-subtext">Achievement Submit per Job Type untuk Jan–Des (mengikuti filter).</p>
-
+      <section class="card">
+        <div class="card-title-row"><div class="card-title">Achievement Qualified</div><div class="card-tag">Job Type × Bulan</div></div>
         <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Job Type</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
-            <tbody id="pjt-submit-type-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="card" style="margin-top:14px;">
-        <div class="card-title-row">
-          <div class="card-title">Achiement Qualified</div>
-          <div class="card-tag">Job Type (row) × Bulan (kolom)</div>
-        </div>
-        <p class="card-subtext">Achievement Qualified per Job Type untuk Jan–Des (mengikuti filter).</p>
-
-        <div class="table-wrap">
-          <table class="matrix-13">
-            <thead>
-              <tr>
-                <th>Job Type</th>
-                <th>Januari</th><th>Februari</th><th>Maret</th><th>April</th><th>Mei</th><th>Juni</th>
-                <th>Juli</th><th>Agustus</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th>
-              </tr>
-            </thead>
+          <table class="matrix-table">
+            <thead id="pjt-qual-type-head"></thead>
             <tbody id="pjt-qual-type-body"></tbody>
           </table>
+        </div>
+        <div class="status-bar">
+          <div class="status-left"><span class="status-dot"></span><span id="pjt-status">Menunggu data...</span></div>
         </div>
       </section>
     </section>
@@ -1506,13 +1101,233 @@
 </div>
 
 <script>
-  /********** KONFIGURASI URL CSV **********/
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
+  /******************************************************************
+   * ======================= GLOBAL HELPERS =========================
+   ******************************************************************/
+  const $ = (id) => document.getElementById(id);
 
-  // Performance URLs
-  const PSC_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
-  const PSA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=631317217&single=true&output=csv";
-  const PJT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1873604383&single=true&output=csv";
+  const numberFmt = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
+  // Percent format harus seperti 100.00% (dot, 2 desimal)
+  const percentFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const MONTHS = [
+    "Januari","Februari","Maret","April","Mei","Juni",
+    "Juli","Agustus","September","Oktober","November","Desember"
+  ];
+
+  function norm(v){ return String(v ?? "").trim().toUpperCase(); }
+
+  function uniqueSortedText(list){
+    return Array.from(new Set((list||[]).map(v=>String(v??"").trim()).filter(Boolean)))
+      .sort((a,b)=>a.localeCompare(b,'id'));
+  }
+
+  function setSelectOptions(selectEl, values, placeholder){
+    if(!selectEl) return;
+    selectEl.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = placeholder || "Semua";
+    selectEl.appendChild(opt0);
+
+    (values||[]).forEach(v=>{
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  function letterToIndex(colLetters){
+    let s = String(colLetters||"").trim().toUpperCase();
+    let n = 0;
+    for(let i=0;i<s.length;i++){
+      const code = s.charCodeAt(i);
+      if(code < 65 || code > 90) continue;
+      n = n*26 + (code - 64);
+    }
+    return n-1; // A=0
+  }
+
+  function getFieldByLetter(fields, letter){
+    const idx = letterToIndex(letter);
+    return (fields && idx >= 0 && idx < fields.length) ? fields[idx] : null;
+  }
+
+  // parse "100%", "100.000%", "1", "0.8", "80%" -> output number in range 0..100
+  function parsePercentCell(v){
+    if(v == null) return null;
+    let s = String(v).trim();
+    if(!s) return null;
+
+    // remove spaces
+    s = s.replace(/\s+/g,'');
+
+    // if contains % then treat as percentage value
+    const hasPct = s.includes('%');
+    s = s.replace('%','');
+
+    // normalize separators: if "100.000" (thousand) -> remove thousands
+    // approach: remove all commas, then if multiple dots -> keep last dot as decimal? but your data usually thousands with dot.
+    // safest: remove all non-digit and non-dot and non-comma, then:
+    s = s.replace(/[^0-9.,-]/g,'');
+
+    // if both comma and dot exist: assume dot = thousand, comma = decimal
+    if(s.includes('.') && s.includes(',')){
+      s = s.replace(/\./g,'').replace(',','.');
+    }else{
+      // if only comma: assume comma decimal
+      if(s.includes(',') && !s.includes('.')) s = s.replace(',','.');
+      // if only dot: could be decimal OR thousand. For your case "100.000" means 100000 (thousand).
+      // If there are 3 digits after dot repeatedly -> treat as thousand separators -> remove all dots.
+      const parts = s.split('.');
+      if(parts.length > 2){
+        s = parts.join(''); // multiple dots -> likely thousand
+      }else if(parts.length === 2){
+        const frac = parts[1];
+        if(frac.length === 3){ // like 100.000
+          s = parts[0] + parts[1];
+        }
+      }
+    }
+
+    let num = Number(s);
+    if(!isFinite(num)) return null;
+
+    // if it's a ratio (0..1) and no percent sign, convert to percent
+    if(!hasPct && num > 0 && num <= 1) num = num * 100;
+
+    // if > 100 and originally had pct? still keep but clamp to 100?
+    // better: clamp to 0..100 (achievement percent)
+    num = Math.max(0, Math.min(100, num));
+    return num;
+  }
+
+  function mean(arr){
+    const a = (arr||[]).filter(v=>v!=null && isFinite(v));
+    if(!a.length) return null;
+    return a.reduce((s,v)=>s+v,0) / a.length;
+  }
+
+  function clamp(x,min,max){ return Math.min(max, Math.max(min,x)); }
+
+  function computeMonthlyGlobalMean(rows, monthFields){
+    const buckets = Array.from({length:12},()=>[]);
+    (rows||[]).forEach(r=>{
+      for(let i=0;i<12;i++){
+        const v = parsePercentCell(r[monthFields[i]]);
+        if(v != null) buckets[i].push(v);
+      }
+    });
+    return buckets.map(b=>mean(b));
+  }
+
+  function computeKeyMonthlyMean(rows, keyCol, monthFields){
+    const map = new Map(); // key -> buckets[12]
+    (rows||[]).forEach(r=>{
+      const key = String(r[keyCol] ?? "").trim();
+      if(!key) return;
+      if(!map.has(key)) map.set(key, Array.from({length:12},()=>[]));
+      const buckets = map.get(key);
+      for(let i=0;i<12;i++){
+        const v = parsePercentCell(r[monthFields[i]]);
+        if(v != null) buckets[i].push(v);
+      }
+    });
+
+    const out = new Map(); // key -> months[12]
+    map.forEach((buckets,key)=>{
+      out.set(key, buckets.map(b=>mean(b)));
+    });
+    return out;
+  }
+
+  function buildScaleMonths(areaMonths, globalMonths){
+    const scales = Array.from({length:12},()=>1);
+    for(let i=0;i<12;i++){
+      const a = areaMonths ? areaMonths[i] : null;
+      const g = globalMonths ? globalMonths[i] : null;
+      if(a == null || g == null || !isFinite(a) || !isFinite(g) || g === 0){
+        scales[i] = 1;
+      }else{
+        scales[i] = a / g;
+      }
+    }
+    return scales;
+  }
+
+  function scaleMatrix(matrix, scales){
+    return (matrix||[]).map(row=>({
+      key: row.key,
+      months: row.months.map((v,i)=>{
+        if(v == null || !isFinite(v)) return null;
+        return clamp(v * (scales?.[i] ?? 1), 0, 100);
+      })
+    }));
+  }
+
+  function renderMatrixHead(theadEl, firstColLabel){
+    theadEl.innerHTML = "";
+    const tr = document.createElement("tr");
+    const th0 = document.createElement("th");
+    th0.textContent = firstColLabel || "Nama";
+    tr.appendChild(th0);
+
+    MONTHS.forEach(m=>{
+      const th = document.createElement("th");
+      th.textContent = m;
+      tr.appendChild(th);
+    });
+
+    theadEl.appendChild(tr);
+  }
+
+  function renderMatrixBody(tbodyEl, matrixRows){
+    tbodyEl.innerHTML = "";
+    (matrixRows||[]).forEach(r=>{
+      const tr = document.createElement("tr");
+      const td0 = document.createElement("td");
+      td0.textContent = r.key;
+      tr.appendChild(td0);
+
+      for(let i=0;i<12;i++){
+        const td = document.createElement("td");
+        const v = r.months?.[i];
+        td.textContent = (v == null) ? "-" : (percentFmt.format(v) + "%");
+        tr.appendChild(td);
+      }
+      tbodyEl.appendChild(tr);
+    });
+  }
+
+  function buildKeyMatrix(rows, keyCol, monthFields){
+    const map = new Map(); // key -> buckets[12]
+    (rows||[]).forEach(r=>{
+      const key = String(r[keyCol] ?? "").trim();
+      if(!key) return;
+      if(!map.has(key)) map.set(key, Array.from({length:12},()=>[]));
+      const buckets = map.get(key);
+      for(let i=0;i<12;i++){
+        const v = parsePercentCell(r[monthFields[i]]);
+        if(v != null) buckets[i].push(v);
+      }
+    });
+
+    const out = [];
+    map.forEach((buckets,key)=>{
+      out.push({ key, months: buckets.map(b=>mean(b)) });
+    });
+
+    out.sort((a,b)=>a.key.localeCompare(b.key,'id'));
+    return out;
+  }
+
+  /******************************************************************
+   * ========================= ACM + SA =============================
+   * (Ini adalah basis script kamu, disederhanakan tapi logika sama)
+   ******************************************************************/
+  const ACM_CSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
 
   const COL_PROV      = "PROVINSI MINAT PENEMPATAN";
   const COL_KOTA      = "KOTA MINAT PENEMPATAN";
@@ -1520,11 +1335,11 @@
   const COL_PERIODE   = "PERIODE PELAMAR";
   const COL_KATEGORI  = "KATEGORI APP";
   const COL_QUALIFIED = "QUALIFIED";
-  const COL_METODE    = "METODE SOURCING";     // kolom AF
-  const COL_MEDIA_PREF= "MEDIA SOURCING";      // kolom AG
+  const COL_METODE    = "METODE SOURCING";
+  const COL_MEDIA_PREF= "MEDIA SOURCING";
   const COL_EDU       = "PENDIDIKAN TERAKHIR";
   const COL_GENDER    = "JENIS KELAMIN";
-  const COL_COST_PER_APP = "Cost Per Applicant"; // kolom AJ (header di sheet)
+  const COL_COST_PER_APP = "Cost Per Applicant";
 
   let COL_JOB_PARENT = "JOB PARENT";
   let COL_JOB_TYPE   = "JOB TYPE";
@@ -1532,39 +1347,16 @@
   const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
   const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
 
-  const FIXED_PROV_LIST = [
-    "ACEH (NAD)","BALI","BANTEN","BENGKULU","DI YOGYAKARTA","DKI JAKARTA",
-    "GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR",
-    "KALIMANTAN BARAT","KALIMANTAN SELATAN","KALIMANTAN TENGAH",
-    "KALIMANTAN TIMUR","KALIMANTAN UTARA","KEPULAUAN BANGKA BELITUNG",
-    "KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA",
-    "NUSA TENGGARA BARAT (NTB)","NUSA TENGGARA TIMUR (NTT)",
-    "PAPUA","PAPUA BARAT DAYA","PAPUA SELATAN","PAPUA TENGAH",
-    "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGAH",
-    "SULAWESI TENGGARA","SULAWESI TIMUR","SULAWESI UTARA",
-    "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
-  ];
-
-  const FIXED_MEDIA_LIST = [
-    "Facebook","FLK","Instagram","Linkedin","SIM Talent Search",
-    "Telegram","Tiktok","Twitter","Whatsapp / Media Chat"
-  ];
-
-  const FIXED_PORTAL_LIST = [
-    "Glints","Hired Today","Indeed","JobStreet","Jobstreet Express",
-    "KarirHub","KitaLutus","KitaLulus","Lumina","Pintarnya"
-  ];
-
+  const FIXED_MEDIA_LIST = ["Facebook","FLK","Instagram","Linkedin","SIM Talent Search","Telegram","Tiktok","Twitter","Whatsapp / Media Chat"];
+  const FIXED_PORTAL_LIST = ["Glints","Hired Today","Indeed","JobStreet","Jobstreet Express","KarirHub","KitaLutus","KitaLulus","Lumina","Pintarnya"];
   const FIXED_OFFLINE_LIST = [
     "Academy/Training/Seminar","Balai Latian Kerja (BLK)","Brosur/Banner/Spanduk/Flyer",
-    "Campus Hiring","Disnaker","Drop CV","Freelance Recruiter","Job Fair",
-    "Komunitas Informal","Referensi Client","Referensi Teman/Keluarga/Komunitas",
-    "School Hiring","Walk In Interview (WI)"
+    "Campus Hiring","Disnaker","Drop CV","Freelance Recruiter","Job Fair","Komunitas Informal",
+    "Referensi Client","Referensi Teman/Keluarga/Komunitas","School Hiring","Walk In Interview (WI)"
   ];
-
   const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
 
-  const MONTHS = [
+  const MONTHS_OBJ = [
     {idx:1,label:"Januari"},{idx:2,label:"Februari"},{idx:3,label:"Maret"},{idx:4,label:"April"},
     {idx:5,label:"Mei"},{idx:6,label:"Juni"},{idx:7,label:"Juli"},{idx:8,label:"Agustus"},
     {idx:9,label:"September"},{idx:10,label:"Oktober"},{idx:11,label:"November"},{idx:12,label:"Desember"}
@@ -1572,163 +1364,12 @@
 
   let rawRows = [];
   let DETECTED_COL_MEDIA = COL_MEDIA_PREF;
-
   const provKotaMap = new Map();
   const jobParentTypeMap = new Map();
 
   let msProv, msKota, msCycle, msPeriode, msJobParent, msJobType;
   let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
 
-  const $ = id => document.getElementById(id);
-  const numberFmt = new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
-  const norm = v => String(v ?? "").trim().toUpperCase();
-
-  /* ===================== PERFORMANCE: column mapping by letter ===================== */
-  // Submit: E Jan, H Feb, K Mar, N Apr, Q Mei, T Jun, W Jul, Z Aug, AC Sep, AF Oct, AI Nov, AL Dec
-  // Qualified: F Jan, I Feb, L Mar, O Apr, R Mei, U Jun, X Jul, AA Aug, AD Sep, AF Oct, AJ Nov, AM Dec
-  const PSC_SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AF","AI","AL"];
-  const PSC_QUAL_COLS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
-
-  function colLetterToIndex(letter){
-    let s = String(letter||"").trim().toUpperCase();
-    if(!s) return -1;
-    let n = 0;
-    for(let i=0;i<s.length;i++){
-      const c = s.charCodeAt(i);
-      if(c < 65 || c > 90) return -1;
-      n = n*26 + (c - 64);
-    }
-    return n - 1; // 0-based
-  }
-
-  function getFieldByLetter(fields, letter){
-    const idx = colLetterToIndex(letter);
-    if(idx < 0 || idx >= (fields||[]).length) return null;
-    return fields[idx];
-  }
-
-  function uniqueSortedText(list){
-    const arr = Array.from(new Set((list||[]).map(v=>String(v??"").trim()).filter(Boolean)));
-    arr.sort((a,b)=>a.localeCompare(b,"id"));
-    return arr;
-  }
-
-  function setSelectOptions(selectEl, options, placeholder){
-    if(!selectEl) return;
-    selectEl.innerHTML = "";
-    const opt0 = document.createElement("option");
-    opt0.value = "";
-    opt0.textContent = placeholder || "Semua";
-    selectEl.appendChild(opt0);
-    (options||[]).forEach(v=>{
-      const o = document.createElement("option");
-      o.value = v;
-      o.textContent = v;
-      selectEl.appendChild(o);
-    });
-  }
-
-  function parsePercentCell(v){
-    if(v == null) return null;
-    let s = String(v).trim();
-    if(!s) return null;
-    // accept "-" as empty
-    if(s === "-") return null;
-
-    // keep only digits, dot, comma, percent
-    const hasPct = s.includes("%");
-    s = s.replace(/[^0-9.,%\-]/g,"");
-    s = s.replace("%","").trim();
-    if(!s) return null;
-
-    // normalize decimal point
-    // if value like "10.000" (meaning 10.000) -> Number ok
-    // if value like "10,50" -> to dot
-    if(s.includes(",") && !s.includes(".")){
-      s = s.replace(",",".");
-    }else if(s.includes(",") && s.includes(".")){
-      // remove thousand separators: keep last separator as decimal? simplest: remove commas
-      s = s.replace(/,/g,"");
-    }
-
-    let n = Number(s);
-    if(!isFinite(n)) return null;
-
-    // if it was 0-1 and not explicitly percent, treat as ratio
-    if(!hasPct && n > 0 && n <= 1) n = n * 100;
-
-    return n;
-  }
-
-  function formatPercent2(n){
-    if(n == null || !isFinite(n)) return "-";
-    return n.toFixed(2) + "%";
-  }
-
-  function mean(nums){
-    const arr = (nums||[]).filter(x=>x!=null && isFinite(x));
-    if(!arr.length) return null;
-    return arr.reduce((a,b)=>a+b,0) / arr.length;
-  }
-
-  // Build matrix: key (row) × 12 months
-  function buildKeyMatrix(rows, keyCol, monthFields){
-    const map = new Map(); // key -> array[12] of arrays(values)
-    (rows||[]).forEach(r=>{
-      const key = String(r[keyCol] ?? "").trim();
-      if(!key) return;
-      if(!map.has(key)){
-        map.set(key, Array.from({length:12},()=>[]));
-      }
-      const buckets = map.get(key);
-      for(let i=0;i<12;i++){
-        const f = monthFields[i];
-        const val = parsePercentCell(r[f]);
-        if(val != null) buckets[i].push(val);
-      }
-    });
-
-    const keys = Array.from(map.keys()).sort((a,b)=>a.localeCompare(b,"id"));
-    const out = keys.map(k=>{
-      const buckets = map.get(k);
-      const months = buckets.map(b=>mean(b));
-      return { key:k, months };
-    });
-    return out;
-  }
-
-  function renderMatrix(tbodyId, labelHeader, matrix){
-    const tbody = $(tbodyId);
-    tbody.innerHTML = "";
-    if(!matrix.length){
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = 13;
-      td.textContent = "Tidak ada data untuk filter ini.";
-      td.className = "muted-row";
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-      return;
-    }
-
-    matrix.forEach(row=>{
-      const tr = document.createElement("tr");
-      const td0 = document.createElement("td");
-      td0.textContent = row.key;
-      td0.className = "col-label";
-      tr.appendChild(td0);
-
-      for(let i=0;i<12;i++){
-        const td = document.createElement("td");
-        td.textContent = formatPercent2(row.months[i]);
-        td.className = "col-number";
-        tr.appendChild(td);
-      }
-      tbody.appendChild(tr);
-    });
-  }
-
-  /* ===================== ACM HELPERS (existing logic) ===================== */
   function parseCostValue(v){
     if(v == null) return 0;
     let s = String(v).trim();
@@ -1755,7 +1396,6 @@
   function createMultiSelect(rootId, options, placeholder, disabled, onChange){
     const root = $(rootId);
     const toggle = root.querySelector(".ms-toggle");
-    const panel = root.querySelector(".ms-panel");
     const searchInput = root.querySelector(".ms-search");
     const optsContainer = root.querySelector(".ms-options");
     const emptyEl = root.querySelector(".ms-empty");
@@ -1853,12 +1493,7 @@
     });
 
     searchInput.addEventListener("input",renderOptions);
-
-    document.addEventListener("click",(e)=>{
-      if(!root.contains(e.target)){
-        root.classList.remove("open");
-      }
-    });
+    document.addEventListener("click",(e)=>{ if(!root.contains(e.target)) root.classList.remove("open"); });
 
     setDisabled(!!disabled);
     renderOptions();
@@ -1872,7 +1507,6 @@
     const preferredNorm = norm(COL_MEDIA_PREF);
     let found = fields.find(f=>norm(f)===preferredNorm);
     if(found) return found;
-
     const candidates = fields.filter(f=>{
       const s = norm(f);
       return s.includes("MEDIA") || s.includes("SOURCING");
@@ -1882,15 +1516,12 @@
 
   function detectJobColumns(fields){
     if(!fields || !fields.length) return {parent:COL_JOB_PARENT,type:COL_JOB_TYPE};
-    let parent = null;
-    let type   = null;
-
+    let parent = null, type = null;
     for(const f of fields){
       const s = norm(f);
       if(!parent && s.includes("JOB") && s.includes("PARENT")) parent = f;
       if(!type && s.includes("JOB") && s.includes("TYPE")) type = f;
     }
-
     return { parent: parent || COL_JOB_PARENT, type: type || COL_JOB_TYPE };
   }
 
@@ -1996,8 +1627,8 @@
 
   function updateSaJobTypeOptions(){
     if(!saJobTypeMS) return;
-    const provSel   = saProvMS ? saProvMS.getSelected()      : [];
-    const kotaSel   = saKotaMS ? saKotaMS.getSelected()      : [];
+    const provSel   = saProvMS ? saProvMS.getSelected() : [];
+    const kotaSel   = saKotaMS ? saKotaMS.getSelected() : [];
     const parentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
 
     if(!parentSel.length){
@@ -2037,23 +1668,15 @@
       updateKotaOptionsByProv(sel);
       updateAllTables();
     });
-    msKota = createMultiSelect("ms-kota",[], "Semua kota di provinsi ini",true,()=>{
-      updateAllTables();
-    });
-    msCycle = createMultiSelect("ms-cycle",cycleVals,"Semua Cycle",false,()=>{
-      updateAllTables();
-    });
-    msPeriode = createMultiSelect("ms-periode",periodeVals,"Semua Periode",false,()=>{
-      updateAllTables();
-    });
+    msKota = createMultiSelect("ms-kota",[], "Semua kota di provinsi ini",true,()=>updateAllTables());
+    msCycle = createMultiSelect("ms-cycle",cycleVals,"Semua Cycle",false,()=>updateAllTables());
+    msPeriode = createMultiSelect("ms-periode",periodeVals,"Semua Periode",false,()=>updateAllTables());
 
     msJobParent = createMultiSelect("ms-job-parent",jobParentVals,"Semua Job Parent",false,(sel)=>{
       updateJobTypeOptionsByParent(sel);
       updateAllTables();
     });
-    msJobType = createMultiSelect("ms-job-type",[], "Semua Job Type",true,()=>{
-      updateAllTables();
-    });
+    msJobType = createMultiSelect("ms-job-type",[], "Semua Job Type",true,()=>updateAllTables());
   }
 
   function initSourcingAnalystFilters(){
@@ -2084,43 +1707,31 @@
   }
 
   function clearFilters(){
-    if(msProv)      msProv.clear();
-    if(msCycle)     msCycle.clear();
-    if(msPeriode)   msPeriode.clear();
-    if(msKota){
-      msKota.setOptions([]);
-      msKota.setDisabled(true);
-    }
+    if(msProv) msProv.clear();
+    if(msCycle) msCycle.clear();
+    if(msPeriode) msPeriode.clear();
+    if(msKota){ msKota.setOptions([]); msKota.setDisabled(true); }
     if(msJobParent) msJobParent.clear();
-    if(msJobType){
-      msJobType.setOptions([]);
-      msJobType.setDisabled(true);
-    }
+    if(msJobType){ msJobType.setOptions([]); msJobType.setDisabled(true); }
     updateAllTables();
   }
 
   function clearSaFilters(){
     if(saProvMS) saProvMS.clear();
-    if(saKotaMS){
-      saKotaMS.setOptions([]);
-      saKotaMS.setDisabled(true);
-    }
+    if(saKotaMS){ saKotaMS.setOptions([]); saKotaMS.setDisabled(true); }
     if(saJobParentMS) saJobParentMS.clear();
-    if(saJobTypeMS){
-      saJobTypeMS.setOptions([]);
-      saJobTypeMS.setDisabled(true);
-    }
+    if(saJobTypeMS){ saJobTypeMS.setOptions([]); saJobTypeMS.setDisabled(true); }
     updateSaJobParentOptions();
     updateSourcingAnalystAnalysis();
   }
 
   function getFilteredRows(){
-    const provSel      = new Set(msProv ? msProv.getSelected()      : []);
-    const kotaSel      = new Set(msKota ? msKota.getSelected()      : []);
-    const cycleSel     = new Set(msCycle ? msCycle.getSelected()    : []);
-    const periodeSel   = new Set(msPeriode ? msPeriode.getSelected():[]);
-    const jobParentSel = new Set(msJobParent ? msJobParent.getSelected():[]);
-    const jobTypeSel   = new Set(msJobType ? msJobType.getSelected():[]);
+    const provSel      = new Set(msProv ? msProv.getSelected() : []);
+    const kotaSel      = new Set(msKota ? msKota.getSelected() : []);
+    const cycleSel     = new Set(msCycle ? msCycle.getSelected() : []);
+    const periodeSel   = new Set(msPeriode ? msPeriode.getSelected() : []);
+    const jobParentSel = new Set(msJobParent ? msJobParent.getSelected() : []);
+    const jobTypeSel   = new Set(msJobType ? msJobType.getSelected() : []);
 
     return rawRows.filter(row=>{
       const rowProv      = String(row[COL_PROV] ?? "");
@@ -2141,10 +1752,10 @@
   }
 
   function getSourcingAnalystFilteredRows(){
-    const provSel      = new Set(saProvMS ? saProvMS.getSelected()      : []);
-    const kotaSel      = new Set(saKotaMS ? saKotaMS.getSelected()      : []);
+    const provSel      = new Set(saProvMS ? saProvMS.getSelected() : []);
+    const kotaSel      = new Set(saKotaMS ? saKotaMS.getSelected() : []);
     const jobParentSel = new Set(saJobParentMS ? saJobParentMS.getSelected() : []);
-    const jobTypeSel   = new Set(saJobTypeMS ? saJobTypeMS.getSelected()   : []);
+    const jobTypeSel   = new Set(saJobTypeMS ? saJobTypeMS.getSelected() : []);
 
     return rawRows.filter(row=>{
       const rowProv      = String(row[COL_PROV] ?? "");
@@ -2161,25 +1772,19 @@
   }
 
   function isNoFilterActive(){
-    const provSel      = msProv      ? msProv.getSelected()      : [];
-    const kotaSel      = msKota      ? msKota.getSelected()      : [];
-    const cycleSel     = msCycle     ? msCycle.getSelected()     : [];
-    const periodeSel   = msPeriode   ? msPeriode.getSelected()   : [];
+    const provSel      = msProv ? msProv.getSelected() : [];
+    const kotaSel      = msKota ? msKota.getSelected() : [];
+    const cycleSel     = msCycle ? msCycle.getSelected() : [];
+    const periodeSel   = msPeriode ? msPeriode.getSelected() : [];
     const jobParentSel = msJobParent ? msJobParent.getSelected() : [];
-    const jobTypeSel   = msJobType   ? msJobType.getSelected()   : [];
-    return (
-      provSel.length===0 && kotaSel.length===0 && cycleSel.length===0 &&
-      periodeSel.length===0 && jobParentSel.length===0 && jobTypeSel.length===0
-    );
+    const jobTypeSel   = msJobType ? msJobType.getSelected() : [];
+    return (!provSel.length && !kotaSel.length && !cycleSel.length && !periodeSel.length && !jobParentSel.length && !jobTypeSel.length);
   }
 
   function aggregateByFixedList(rows,dimCol,fixedList,withLainnya){
     const result = fixedList.map(name=>({name,valid:0,buffer:0}));
     const idxMap = new Map();
-    fixedList.forEach((name,i)=>{
-      idxMap.set(name,i);
-      idxMap.set(norm(name),i);
-    });
+    fixedList.forEach((name,i)=>{ idxMap.set(name,i); idxMap.set(norm(name),i); });
 
     let lainnya = {name:LABEL_LAINNYA,valid:0,buffer:0};
 
@@ -2196,13 +1801,9 @@
       if(!valid && !buffer) return;
 
       if(idx === undefined){
-        if(withLainnya){
-          lainnya.valid  += valid;
-          lainnya.buffer += buffer;
-        }
+        if(withLainnya){ lainnya.valid += valid; lainnya.buffer += buffer; }
         return;
       }
-
       result[idx].valid  += valid;
       result[idx].buffer += buffer;
     });
@@ -2220,13 +1821,10 @@
       const valid  = getApplicantValidValue(row[COL_KATEGORI]);
       const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
       if(!valid && !buffer) return;
-
       if(!map.has(key)) map.set(key,{name:key,valid:0,buffer:0});
       const obj = map.get(key);
-      obj.valid  += valid;
-      obj.buffer += buffer;
+      obj.valid += valid; obj.buffer += buffer;
     });
-
     const res = Array.from(map.values()).filter(r => (r.valid || r.buffer));
     res.sort((a,b)=>String(a.name).localeCompare(String(b.name),"id"));
     return res;
@@ -2235,23 +1833,19 @@
   function getMethodCategory(row){
     const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
     const metodeText = norm(row[COL_METODE] ?? "");
-    const combined   = (mediaText + " " + metodeText).trim();
+    const text = (mediaText + " " + metodeText).trim();
 
     if(mediaText.includes("OFFLINE")) return "OFFLINE";
-    if(mediaText.includes("ONLINE - JOB PORTAL")) return "ONLINE - JOB PORTAL";
-    if(mediaText.includes("ONLINE - MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
-    if(mediaText.includes("ONLINE JOB PORTAL")) return "ONLINE - JOB PORTAL";
-    if(mediaText.includes("ONLINE MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
+    if(mediaText.includes("ONLINE - JOB PORTAL") || mediaText.includes("ONLINE JOB PORTAL")) return "ONLINE - JOB PORTAL";
+    if(mediaText.includes("ONLINE - MEDIA SOSIAL") || mediaText.includes("ONLINE MEDIA SOSIAL")) return "ONLINE - MEDIA SOSIAL";
 
-    const text = combined;
-
-    const offlineTokens = ["OFFLINE","WALK IN","WALKIN","JOB FAIR","CAMPUS HIRING","CAMPUS","BLK","BROSUR","BANNER","SPANDUK","FLYER","DISNAKER","DROP CV","FREELANCE","KOMUNITAS","REFERENSI","SCHOOL"];
-    const portalTokens  = ["GLINTS","HIRED TODAY","INDEED","JOBSTREET EXPRESS","JOBSTREET","KARIRHUB","KITA LULUS","KITALULUS","LUMINA","PINTARNYA","PORTAL"];
-    const mediaTokens   = ["FACEBOOK","FLK","INSTAGRAM","LINKEDIN","TIKTOK","WHATSAPP","TELEGRAM","TWITTER","MEDSOS","MEDIA SOSIAL","SIM TALENT"];
+    const offlineTokens = ["OFFLINE","WALK IN","WALKIN","JOB FAIR","CAMPUS","BLK","BROSUR","BANNER","SPANDUK","FLYER","DISNAKER","DROP CV","FREELANCE","KOMUNITAS","REFERENSI","SCHOOL"];
+    const portalTokens = ["GLINTS","HIRED TODAY","INDEED","JOBSTREET","KARIRHUB","KITA LULUS","KITALULUS","LUMINA","PINTARNYA","PORTAL"];
+    const mediaTokens = ["FACEBOOK","FLK","INSTAGRAM","LINKEDIN","TIKTOK","WHATSAPP","TELEGRAM","TWITTER","MEDIA SOSIAL","MEDSOS","SIM TALENT"];
 
     if(offlineTokens.some(t=>text.includes(t))) return "OFFLINE";
-    if(portalTokens.some(t=>text.includes(t)))  return "ONLINE - JOB PORTAL";
-    if(mediaTokens.some(t=>text.includes(t)))   return "ONLINE - MEDIA SOSIAL";
+    if(portalTokens.some(t=>text.includes(t))) return "ONLINE - JOB PORTAL";
+    if(mediaTokens.some(t=>text.includes(t))) return "ONLINE - MEDIA SOSIAL";
     if(text.includes("ONLINE")) return "ONLINE - MEDIA SOSIAL";
     return "LAINNYA";
   }
@@ -2263,23 +1857,20 @@
       "ONLINE - JOB PORTAL": {name:"ONLINE - JOB PORTAL",valid:0,buffer:0},
       "LAINNYA": {name:LABEL_LAINNYA,valid:0,buffer:0}
     };
-
     rows.forEach(row=>{
       const valid  = getApplicantValidValue(row[COL_KATEGORI]);
       const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
       if(!valid && !buffer) return;
       const cat = getMethodCategory(row);
       const bucket = buckets[cat] || buckets["LAINNYA"];
-      bucket.valid  += valid;
-      bucket.buffer += buffer;
+      bucket.valid += valid; bucket.buffer += buffer;
     });
-
     return [buckets["OFFLINE"],buckets["ONLINE - MEDIA SOSIAL"],buckets["ONLINE - JOB PORTAL"],buckets["LAINNYA"]];
   }
 
   function aggregateMediaSocial(rows){
     const map = new Map();
-    FIXED_MEDIA_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
+    FIXED_MEDIA_LIST.forEach(name=>map.set(name,{name,valid:0,buffer:0,totalCost:0}));
 
     const tokenMap = [
       {token:"FACEBOOK",label:"Facebook"},
@@ -2291,12 +1882,12 @@
       {token:"TIKTOK",label:"Tiktok"},
       {token:"TWITTER",label:"Twitter"},
       {token:"WHATSAPP",label:"Whatsapp / Media Chat"},
-      {token:"MEDIA CHAT",label:"Whatsapp / Media Chat"}
+      {token:"MEDIA CHAT",label:"Whatsapp / Media Chat"},
+      {token:"CHAT WA",label:"Whatsapp / Media Chat"}
     ];
 
     rows.forEach(row=>{
       if(getMethodCategory(row) !== "ONLINE - MEDIA SOSIAL") return;
-
       const valid  = getApplicantValidValue(row[COL_KATEGORI]);
       const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
       if(!valid && !buffer) return;
@@ -2307,17 +1898,12 @@
       if(!text) return;
 
       let label = null;
-      for(const m of tokenMap){
-        if(text.includes(m.token)){
-          label = m.label;
-          break;
-        }
-      }
+      for(const m of tokenMap){ if(text.includes(m.token)){ label = m.label; break; } }
       if(!label) return;
 
       const item = map.get(label);
       if(!item) return;
-      item.valid  += valid;
+      item.valid += valid;
       item.buffer += buffer;
       item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
     });
@@ -2327,7 +1913,7 @@
 
   function aggregateJobPortal(rows){
     const map = new Map();
-    FIXED_PORTAL_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
+    FIXED_PORTAL_LIST.forEach(name=>map.set(name,{name,valid:0,buffer:0,totalCost:0}));
 
     const tokenMap = [
       {token:"GLINTS",label:"Glints"},
@@ -2344,7 +1930,6 @@
 
     rows.forEach(row=>{
       if(getMethodCategory(row) !== "ONLINE - JOB PORTAL") return;
-
       const valid  = getApplicantValidValue(row[COL_KATEGORI]);
       const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
       if(!valid && !buffer) return;
@@ -2355,17 +1940,12 @@
       if(!text) return;
 
       let label = null;
-      for(const m of tokenMap){
-        if(text.includes(m.token)){
-          label = m.label;
-          break;
-        }
-      }
+      for(const m of tokenMap){ if(text.includes(m.token)){ label = m.label; break; } }
       if(!label) return;
 
       const item = map.get(label);
       if(!item) return;
-      item.valid  += valid;
+      item.valid += valid;
       item.buffer += buffer;
       item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
     });
@@ -2375,7 +1955,7 @@
 
   function aggregateOffline(rows){
     const map = new Map();
-    FIXED_OFFLINE_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
+    FIXED_OFFLINE_LIST.forEach(name=>map.set(name,{name,valid:0,buffer:0,totalCost:0}));
 
     const tokenMap = [
       {token:"ACADEMY",label:"Academy/Training/Seminar"},
@@ -2393,6 +1973,7 @@
       {token:"JOB FAIR",label:"Job Fair"},
       {token:"KOMUNITAS",label:"Komunitas Informal"},
       {token:"REFERENSI CLIENT",label:"Referensi Client"},
+      {token:"REFERENSI",label:"Referensi Teman/Keluarga/Komunitas"},
       {token:"SCHOOL",label:"School Hiring"},
       {token:"WALK IN",label:"Walk In Interview (WI)"},
       {token:"WALKIN",label:"Walk In Interview (WI)"}
@@ -2400,7 +1981,6 @@
 
     rows.forEach(row=>{
       if(getMethodCategory(row) !== "OFFLINE") return;
-
       const valid  = getApplicantValidValue(row[COL_KATEGORI]);
       const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
       if(!valid && !buffer) return;
@@ -2411,17 +1991,12 @@
       if(!text) return;
 
       let label = null;
-      for(const m of tokenMap){
-        if(text.includes(m.token)){
-          label = m.label;
-          break;
-        }
-      }
+      for(const m of tokenMap){ if(text.includes(m.token)){ label = m.label; break; } }
       if(!label) return;
 
       const item = map.get(label);
       if(!item) return;
-      item.valid  += valid;
+      item.valid += valid;
       item.buffer += buffer;
       item.totalCost += parseCostValue(row[COL_COST_PER_APP]);
     });
@@ -2432,7 +2007,6 @@
   function parseMonthIndex(str){
     if(!str) return null;
     const s = String(str).toLowerCase();
-
     const monthNames = [
       {idx:1,keys:["jan","januari"]},
       {idx:2,keys:["feb","peb","febuari","februari"]},
@@ -2447,15 +2021,24 @@
       {idx:11,keys:["nov","november"]},
       {idx:12,keys:["des","dec","desember","december"]}
     ];
-
-    for(const m of monthNames){
-      if(m.keys.some(k=>s.includes(k))) return m.idx;
+    for(const m of monthNames){ if(m.keys.some(k=>s.includes(k))) return m.idx; }
+    const m1 = s.match(/(\d{4})[-/](\d{1,2})(?:[-/]\d{1,2})?/);
+    if(m1){ const month = Number(m1[2]); if(month>=1 && month<=12) return month; }
+    const m2 = s.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+    if(m2){
+      const a = Number(m2[1]), b = Number(m2[2]);
+      let month = null;
+      if(a>12 && b>=1 && b<=12) month = b;
+      else if(b>12 && a>=1 && a<=12) month = a;
+      else if(a>=1 && a<=12) month = a;
+      else if(b>=1 && b<=12) month = b;
+      if(month && month>=1 && month<=12) return month;
     }
     return null;
   }
 
   function aggregateMonthly(rows){
-    const arr = MONTHS.map(m=>({idx:m.idx,name:m.label,valid:0,buffer:0}));
+    const arr = MONTHS_OBJ.map(m=>({idx:m.idx,name:m.label,valid:0,buffer:0}));
     const idxMap = new Map();
     arr.forEach((m,i)=>idxMap.set(m.idx,i));
 
@@ -2470,21 +2053,16 @@
       arr[i].valid  += valid;
       arr[i].buffer += buffer;
     });
-
     return arr;
   }
 
   function updateChart(rows){
     const container = $("chart-body");
-    if(!container) return;
     container.innerHTML = "";
 
     const monthly = aggregateMonthly(rows);
-    let maxVal = 0;
-    monthly.forEach(m=>{
-      maxVal = Math.max(maxVal,m.valid,m.buffer);
-    });
-    if(maxVal === 0) maxVal = 1;
+    let maxVal = 1;
+    monthly.forEach(m=>{ maxVal = Math.max(maxVal,m.valid,m.buffer); });
 
     monthly.forEach(m=>{
       const col = document.createElement("div");
@@ -2506,8 +2084,7 @@
 
       const valuesBox = document.createElement("div");
       valuesBox.className = "chart-col-values";
-      valuesBox.innerHTML =
-        `<div>${numberFmt.format(m.valid)}</div><div>${numberFmt.format(m.buffer)}</div>`;
+      valuesBox.innerHTML = `<div>${numberFmt.format(m.valid)}</div><div>${numberFmt.format(m.buffer)}</div>`;
 
       const label = document.createElement("div");
       label.className = "chart-col-label";
@@ -2522,21 +2099,17 @@
     const totalValid = monthly.reduce((s,m)=>s+m.valid,0);
     const totalBuffer = monthly.reduce((s,m)=>s+m.buffer,0);
     $("chart-summary-text").textContent =
-      `Total Valid: ${numberFmt.format(totalValid)} · Total Buffer: ${numberFmt.format(totalBuffer)} (berdasarkan PERIODE PELAMAR & filter aktif)`;
+      `Total Valid: ${numberFmt.format(totalValid)} · Total Buffer: ${numberFmt.format(totalBuffer)} (PERIODE PELAMAR & filter aktif)`;
   }
 
   function renderTable(tbodyId,rows,totalLabel){
     const tbody = $(tbodyId);
     tbody.innerHTML = "";
-
-    let grandValid = 0;
-    let grandBuffer = 0;
+    let grandValid = 0, grandBuffer = 0;
 
     rows.forEach(r=>{
       const tr = document.createElement("tr");
-      if(r.valid === 0 && r.buffer === 0){
-        tr.classList.add("muted-row");
-      }
+      if(r.valid === 0 && r.buffer === 0) tr.classList.add("muted-row");
 
       const tdLabel = document.createElement("td");
       tdLabel.textContent = r.name;
@@ -2583,24 +2156,18 @@
   }
 
   function updateSummary(filtered){
-    let totalValid = 0;
-    let totalBuffer = 0;
-    let maleValid = 0, maleBuffer = 0;
-    let femaleValid = 0, femaleBuffer = 0;
-
+    let totalValid=0,totalBuffer=0,maleValid=0,maleBuffer=0,femaleValid=0,femaleBuffer=0;
     filtered.forEach(row=>{
       const valid = getApplicantValidValue(row[COL_KATEGORI]);
       const buffer = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
-      if(valid) totalValid += valid;
-      if(buffer) totalBuffer += buffer;
+      totalValid += valid;
+      totalBuffer += buffer;
 
       const g = norm(row[COL_GENDER]);
       if(g.includes("LAKI") || g === "L" || g === "LAKI-LAKI"){
-        maleValid  += valid;
-        maleBuffer += buffer;
-      }else if(g.includes("PEREMPUAN") || g === "P" || g === "PEREMPUAN"){
-        femaleValid  += valid;
-        femaleBuffer += buffer;
+        maleValid += valid; maleBuffer += buffer;
+      }else if(g.includes("PEREMPUAN") || g === "P"){
+        femaleValid += valid; femaleBuffer += buffer;
       }
     });
 
@@ -2620,71 +2187,55 @@
     updateSummary(filtered);
     updateChart(filtered);
 
-    const provAgg = noFilter ? aggregateByFixedList(filtered,COL_PROV,FIXED_PROV_LIST,false) : aggregateProvDynamic(filtered);
+    const provAgg = noFilter ? aggregateByFixedList(filtered,COL_PROV,uniqueSorted(filtered.map(r=>r[COL_PROV])),false) : aggregateProvDynamic(filtered);
     const totalProv = renderTable("tbl-prov-body",provAgg,"GRAND TOTAL PROVINSI");
     $("status-prov").textContent =
-      `Ditampilkan ${provAgg.length} provinsi · ${numberFmt.format(totalRows)} baris terfilter · ` +
-      `Grand Total Valid: ${numberFmt.format(totalProv.grandValid)}, Buffer: ${numberFmt.format(totalProv.grandBuffer)}`;
+      `Ditampilkan ${provAgg.length} provinsi · ${numberFmt.format(totalRows)} baris · Total Valid ${numberFmt.format(totalProv.grandValid)} · Buffer ${numberFmt.format(totalProv.grandBuffer)}`;
 
     const metodeAgg = aggregateMetodeSmart(filtered);
     const totalMetode = renderTable("tbl-metode-body",metodeAgg,"GRAND TOTAL METODE");
     $("status-metode").textContent =
-      `Ditampilkan ${metodeAgg.length} metode · ${numberFmt.format(totalRows)} baris terfilter · ` +
-      `Grand Total Valid: ${numberFmt.format(totalMetode.grandValid)}, Buffer: ${numberFmt.format(totalMetode.grandBuffer)}`;
+      `Ditampilkan ${metodeAgg.length} metode · ${numberFmt.format(totalRows)} baris · Total Valid ${numberFmt.format(totalMetode.grandValid)} · Buffer ${numberFmt.format(totalMetode.grandBuffer)}`;
 
     const mediaAgg = aggregateMediaSocial(filtered);
     const totalMedia = renderTable("tbl-media-body",mediaAgg,"GRAND TOTAL MEDIA SOSIAL");
     $("status-media").textContent =
-      `Ditampilkan ${mediaAgg.length} media · ${numberFmt.format(totalRows)} baris terfilter · ` +
-      `Grand Total Valid: ${numberFmt.format(totalMedia.grandValid)}, Buffer: ${numberFmt.format(totalMedia.grandBuffer)}`;
+      `Ditampilkan ${mediaAgg.length} media · ${numberFmt.format(totalRows)} baris · Total Valid ${numberFmt.format(totalMedia.grandValid)} · Buffer ${numberFmt.format(totalMedia.grandBuffer)}`;
 
     const eduAgg = aggregateByFixedList(filtered,COL_EDU,FIXED_EDU_LIST,false);
     const totalEdu = renderTable("tbl-edu-body",eduAgg,"GRAND TOTAL PENDIDIKAN");
     $("status-edu").textContent =
-      `Ditampilkan ${eduAgg.length} level pendidikan · ${numberFmt.format(totalRows)} baris terfilter · ` +
-      `Grand Total Valid: ${numberFmt.format(totalEdu.grandValid)}, Buffer: ${numberFmt.format(totalEdu.grandBuffer)}`;
+      `Ditampilkan ${eduAgg.length} level · ${numberFmt.format(totalRows)} baris · Total Valid ${numberFmt.format(totalEdu.grandValid)} · Buffer ${numberFmt.format(totalEdu.grandBuffer)}`;
 
     const portalAgg = aggregateJobPortal(filtered);
     const totalPortal = renderTable("tbl-portal-body",portalAgg,"GRAND TOTAL JOB PORTAL");
     $("status-portal").textContent =
-      `Ditampilkan ${portalAgg.length} portal · ${numberFmt.format(totalRows)} baris terfilter · ` +
-      `Grand Total Valid: ${numberFmt.format(totalPortal.grandValid)}, Buffer: ${numberFmt.format(totalPortal.grandBuffer)}`;
+      `Ditampilkan ${portalAgg.length} portal · ${numberFmt.format(totalRows)} baris · Total Valid ${numberFmt.format(totalPortal.grandValid)} · Buffer ${numberFmt.format(totalPortal.grandBuffer)}`;
 
     const offlineAgg = aggregateOffline(filtered);
     const totalOffline = renderTable("tbl-offline-body",offlineAgg,"GRAND TOTAL OFFLINE");
     $("status-offline").textContent =
-      `Ditampilkan ${offlineAgg.length} aktivitas · ${numberFmt.format(totalRows)} baris terfilter · ` +
-      `Grand Total Valid: ${numberFmt.format(totalOffline.grandValid)}, Buffer: ${numberFmt.format(totalOffline.grandBuffer)}`;
+      `Ditampilkan ${offlineAgg.length} aktivitas · ${numberFmt.format(totalRows)} baris · Total Valid ${numberFmt.format(totalOffline.grandValid)} · Buffer ${numberFmt.format(totalOffline.grandBuffer)}`;
   }
 
-  /* ===================== SA ANALYSIS ===================== */
   function computeSaMethod3MonthSummary(rows, methodCategory){
-    let valid = 0;
-    let buffer = 0;
+    let valid = 0, buffer = 0;
     const monthSet = new Set();
-
     rows.forEach(row=>{
       if(getMethodCategory(row) !== methodCategory) return;
       const v = getApplicantValidValue(row[COL_KATEGORI]);
       const b = isQualifiedYes(row[COL_QUALIFIED]) ? 1 : 0;
       if(!v && !b) return;
-      valid += v;
-      buffer += b;
+      valid += v; buffer += b;
       const mIdx = parseMonthIndex(row[COL_PERIODE]);
       if(mIdx) monthSet.add(mIdx);
     });
 
-    if(valid === 0 && buffer === 0){
-      return {totalValid:0,totalBuffer:0,estValid3:0,estBuffer3:0};
-    }
+    if(valid === 0 && buffer === 0) return {totalValid:0,totalBuffer:0,estValid3:0,estBuffer3:0};
 
     const monthCount = monthSet.size || 1;
-    const avgValidPerMonth = valid / monthCount;
-    const avgBufferPerMonth = buffer / monthCount;
-
-    const estValid3 = Math.round(avgValidPerMonth * 3);
-    const estBuffer3 = Math.round(avgBufferPerMonth * 3);
-
+    const estValid3 = Math.round((valid / monthCount) * 3);
+    const estBuffer3 = Math.round((buffer / monthCount) * 3);
     return {totalValid:valid,totalBuffer:buffer,estValid3,estBuffer3};
   }
 
@@ -2698,9 +2249,8 @@
   const currencyFmt = new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0});
   function formatChannelList(channels){
     return channels.map(ch=>{
-      const totalCost = ch.totalCost ? ch.totalCost : 0;
-      const costText = currencyFmt.format(totalCost);
-      return `${ch.name} (Biaya Sourcing Per Applicant ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
+      const costText = currencyFmt.format(ch.totalCost || 0);
+      return `${ch.name} (Biaya ${costText}, valid ${numberFmt.format(ch.valid||0)}, buffer ${numberFmt.format(ch.buffer||0)})`;
     }).join("; ");
   }
 
@@ -2708,19 +2258,19 @@
     const container = $("sa-analysis-text");
     if(!container) return;
 
-    const provSel      = saProvMS ? saProvMS.getSelected()      : [];
-    const kotaSel      = saKotaMS ? saKotaMS.getSelected()      : [];
+    const provSel      = saProvMS ? saProvMS.getSelected() : [];
+    const kotaSel      = saKotaMS ? saKotaMS.getSelected() : [];
     const jobParentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
-    const jobTypeSel   = saJobTypeMS ? saJobTypeMS.getSelected()   : [];
+    const jobTypeSel   = saJobTypeMS ? saJobTypeMS.getSelected() : [];
 
-    if(provSel.length === 0 && kotaSel.length === 0 && jobParentSel.length === 0 && jobTypeSel.length === 0){
+    if(!provSel.length && !kotaSel.length && !jobParentSel.length && !jobTypeSel.length){
       container.innerHTML = "Pilih Provinsi, Kota, Job Parent, dan Job Type untuk melihat analisa best practice sourcing.";
       return;
     }
 
     const rows = getSourcingAnalystFilteredRows();
     if(!rows.length){
-      container.innerHTML = "Belum ada analisa untuk area dan job parent ini (data tidak ditemukan untuk kombinasi filter saat ini).";
+      container.innerHTML = "Belum ada analisa untuk kombinasi filter saat ini (data tidak ditemukan).";
       return;
     }
 
@@ -2732,21 +2282,16 @@
     let headerLine = "Untuk ";
     if(jtName){
       headerLine += `Job <strong>${jtName}</strong>`;
-      if(jpName && jpName !== jtName){
-        headerLine += ` (Job Parent <strong>${jpName}</strong>)`;
-      }
+      if(jpName && jpName !== jtName) headerLine += ` (Job Parent <strong>${jpName}</strong>)`;
     }else if(jpName){
       headerLine += `Job Parent <strong>${jpName}</strong>`;
     }else{
       headerLine += "kombinasi job";
     }
 
-    if(kotaName){
-      headerLine += ` di <strong>${kotaName}</strong>, <strong>${provName}</strong>,`;
-    }else{
-      headerLine += ` di <strong>${provName}</strong>,`;
-    }
-    headerLine += " pola sourcing yang terlihat paling efektif berdasarkan data Applicant Valid &amp; Buffer adalah:";
+    if(kotaName) headerLine += ` di <strong>${kotaName}</strong>, <strong>${provName}</strong>,`;
+    else headerLine += ` di <strong>${provName}</strong>,`;
+    headerLine += " pola sourcing yang terlihat paling efektif adalah:";
 
     const portalAgg  = aggregateJobPortal(rows);
     const mediaAgg   = aggregateMediaSocial(rows);
@@ -2763,69 +2308,61 @@
     const parts = [];
     parts.push(`<p class="analysis-intro">${headerLine}</p>`);
 
-    if(topPortal.length && (portalSummary.totalValid || portalSummary.totalBuffer)){
-      const chText = formatChannelList(topPortal);
+    if(topPortal.length){
       parts.push(
         `<div class="analysis-section">
           <div class="analysis-icon">🌐</div>
           <div class="analysis-body">
             <div class="analysis-title">Job Portal</div>
-            <div class="analysis-summary">Sourcing menggunakan Job Portal didominasi oleh: ${chText}.</div>
-            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~<strong>${numberFmt.format(portalSummary.estValid3)}</strong> valid & <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</div>
+            <div class="analysis-summary">Dominan: ${formatChannelList(topPortal)}.</div>
+            <div class="analysis-detail">Estimasi 3 bulan: <strong>${numberFmt.format(portalSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(portalSummary.estBuffer3)}</strong> buffer.</div>
           </div>
         </div>`
       );
     }
 
-    if(topMedia.length && (mediaSummary.totalValid || mediaSummary.totalBuffer)){
-      const chText = formatChannelList(topMedia);
+    if(topMedia.length){
       parts.push(
         `<div class="analysis-section">
           <div class="analysis-icon">📱</div>
           <div class="analysis-body">
             <div class="analysis-title">Online - Media Sosial</div>
-            <div class="analysis-summary">Platform paling efektif: ${chText}.</div>
-            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~<strong>${numberFmt.format(mediaSummary.estValid3)}</strong> valid & <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</div>
+            <div class="analysis-summary">Efektif: ${formatChannelList(topMedia)}.</div>
+            <div class="analysis-detail">Estimasi 3 bulan: <strong>${numberFmt.format(mediaSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(mediaSummary.estBuffer3)}</strong> buffer.</div>
           </div>
         </div>`
       );
     }
 
-    if(topOffline.length && (offSummary.totalValid || offSummary.totalBuffer)){
-      const chText = formatChannelList(topOffline);
+    if(topOffline.length){
       parts.push(
         `<div class="analysis-section">
           <div class="analysis-icon">👣</div>
           <div class="analysis-body">
             <div class="analysis-title">Sourcing Offline</div>
-            <div class="analysis-summary">Aktivitas offline paling kuat: ${chText}.</div>
-            <div class="analysis-detail">Estimasi <strong>3 bulan</strong>: ~<strong>${numberFmt.format(offSummary.estValid3)}</strong> valid & <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</div>
+            <div class="analysis-summary">Aktivitas: ${formatChannelList(topOffline)}.</div>
+            <div class="analysis-detail">Estimasi 3 bulan: <strong>${numberFmt.format(offSummary.estValid3)}</strong> valid &amp; <strong>${numberFmt.format(offSummary.estBuffer3)}</strong> buffer.</div>
           </div>
         </div>`
       );
     }
 
-    if(parts.length === 1){
-      parts.push(`<p>Belum ada analisa yang cukup untuk area dan job parent ini.</p>`);
-    }
-
     container.innerHTML = parts.join("");
   }
 
-  /* ===================== LOAD ACM CSV ===================== */
-  function loadCsv(){
+  function loadACM(){
     const errBox = $("error-state");
     errBox.style.display = "none";
     $("load-state").style.display = "flex";
 
-    Papa.parse(CSV_URL,{
+    Papa.parse(ACM_CSV_URL,{
       download:true,
       header:true,
       skipEmptyLines:true,
       complete:(parsed)=>{
         try{
           rawRows = parsed.data || [];
-          const fields = parsed.meta && parsed.meta.fields ? parsed.meta.fields : [];
+          const fields = parsed.meta?.fields || [];
 
           DETECTED_COL_MEDIA = detectMediaColumn(fields);
           const jobCols = detectJobColumns(fields);
@@ -2835,7 +2372,7 @@
           $("load-state").style.display = "none";
 
           if(!rawRows.length){
-            errBox.textContent = "Data kosong atau header kolom belum sesuai dengan konfigurasi.";
+            errBox.textContent = "Data ACM kosong atau header belum sesuai.";
             errBox.style.display = "block";
             return;
           }
@@ -2848,325 +2385,434 @@
         }catch(e){
           console.error(e);
           $("load-state").style.display = "none";
-          errBox.textContent = "Terjadi kesalahan saat memproses data: " + e.message;
+          errBox.textContent = "ACM: error proses data: " + e.message;
           errBox.style.display = "block";
         }
       },
       error:(err)=>{
         console.error(err);
         $("load-state").style.display = "none";
-        errBox.textContent =
-          "Terjadi kesalahan saat memuat data CSV: " + err.message +
-          ". Pastikan link ini bisa dibuka di tab incognito tanpa login.";
+        errBox.textContent = "ACM: gagal load CSV: " + err.message + " (cek akses link).";
         errBox.style.display = "block";
       }
     });
   }
 
-  /* ===================== PERFORMANCE: CLIENT ===================== */
+  /******************************************************************
+   * ===================== PERFORMANCE DATASETS =====================
+   ******************************************************************/
+  const PSC_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
+  const PSA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=631317217&single=true&output=csv";
+  const PJT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1873604383&single=true&output=csv";
+
+  // Letters mapping (sesuai revisi)
+  const SUBMIT_COLS = ["E","H","K","N","Q","T","W","Z","AC","AE","AI","AL"];
+  const QUAL_COLS   = ["F","I","L","O","R","U","X","AA","AD","AF","AJ","AM"];
+
   const psc = { rows:[], fields:[], colClient:null, colIndustry:null, submitFields:[], qualFields:[] };
+  const psa = { rows:[], fields:[], colGroup:null, colArea:null, submitFields:[], qualFields:[],
+                _submitGlobalMonths:null, _qualGlobalMonths:null, _areaSubmitMonthsMap:null, _areaQualMonthsMap:null };
+  const pjt = { rows:[], fields:[], colParent:null, colType:null, submitFields:[], qualFields:[] };
+
+  function loadPerformanceClient(){
+    const err = $("psc-err");
+    err.style.display = "none";
+    $("psc-load").style.display = "flex";
+
+    Papa.parse(PSC_URL,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
+      complete:(parsed)=>{
+        try{
+          psc.rows = parsed.data || [];
+          psc.fields = parsed.meta?.fields || [];
+          $("psc-load").style.display = "none";
+
+          if(!psc.rows.length){
+            err.textContent = "Performance Client: data kosong.";
+            err.style.display = "block";
+            return;
+          }
+
+          // col A = client, col B = industry (berdasarkan permintaan)
+          psc.colClient = getFieldByLetter(psc.fields,"A");
+          psc.colIndustry = getFieldByLetter(psc.fields,"B");
+
+          psc.submitFields = SUBMIT_COLS.map(L=>getFieldByLetter(psc.fields,L));
+          psc.qualFields   = QUAL_COLS.map(L=>getFieldByLetter(psc.fields,L));
+
+          const industries = uniqueSortedText(psc.rows.map(r=>r[psc.colIndustry]));
+          setSelectOptions($("psc-industry"), industries, "Pilih Industry");
+          setSelectOptions($("psc-client"), [], "Pilih Industry dulu");
+          $("psc-client").disabled = true;
+
+          renderMatrixHead($("psc-submit-head"), "Nama Klien");
+          renderMatrixHead($("psc-qual-head"), "Nama Klien");
+
+          pscApply(); // initial empty state
+        }catch(e){
+          console.error(e);
+          $("psc-load").style.display = "none";
+          err.textContent = "Performance Client: error proses: " + e.message;
+          err.style.display = "block";
+        }
+      },
+      error:(e)=>{
+        console.error(e);
+        $("psc-load").style.display = "none";
+        err.textContent = "Performance Client: gagal load CSV: " + e.message;
+        err.style.display = "block";
+      }
+    });
+  }
+
+  function pscSyncClientOptions(){
+    const ind = $("psc-industry").value;
+    if(!ind){
+      setSelectOptions($("psc-client"), [], "Pilih Industry dulu");
+      $("psc-client").disabled = true;
+      return;
+    }
+    const clients = uniqueSortedText(psc.rows
+      .filter(r=>String(r[psc.colIndustry]??"").trim() === ind)
+      .map(r=>r[psc.colClient]));
+    setSelectOptions($("psc-client"), clients, "Semua Client (di Industry ini)");
+    $("psc-client").disabled = false;
+  }
 
   function pscApply(){
-    const industry = $("psc-industry").value;
+    const ind = $("psc-industry").value;
     const client = $("psc-client").value;
 
-    let filtered = psc.rows.slice();
-    if(industry) filtered = filtered.filter(r => String(r[psc.colIndustry] ?? "").trim() === industry);
-    if(client)   filtered = filtered.filter(r => String(r[psc.colClient] ?? "").trim() === client);
+    if(!ind){
+      $("psc-status-1").textContent = "Pilih Industry untuk menampilkan tabel.";
+      $("psc-status-2").textContent = "Pilih Industry untuk menampilkan tabel.";
+      renderMatrixBody($("psc-submit-body"), []);
+      renderMatrixBody($("psc-qual-body"), []);
+      return;
+    }
+
+    let filtered = psc.rows.filter(r=>String(r[psc.colIndustry]??"").trim() === ind);
+    if(client) filtered = filtered.filter(r=>String(r[psc.colClient]??"").trim() === client);
 
     const submitMatrix = buildKeyMatrix(filtered, psc.colClient, psc.submitFields);
     const qualMatrix   = buildKeyMatrix(filtered, psc.colClient, psc.qualFields);
 
-    renderMatrix("psc-submit-body", "Client", submitMatrix);
-    renderMatrix("psc-qual-body", "Client", qualMatrix);
-  }
+    renderMatrixBody($("psc-submit-body"), submitMatrix);
+    renderMatrixBody($("psc-qual-body"), qualMatrix);
 
-  function pscSyncClientsByIndustry(){
-    const industry = $("psc-industry").value;
-    const clientSel = $("psc-client");
-
-    if(!industry){
-      clientSel.disabled = true;
-      setSelectOptions(clientSel, [], "Pilih Industry dulu");
-      $("psc-client").value = "";
-      pscApply();
-      return;
-    }
-
-    const clients = uniqueSortedText(
-      psc.rows
-        .filter(r => String(r[psc.colIndustry] ?? "").trim() === industry)
-        .map(r => r[psc.colClient])
-    );
-
-    clientSel.disabled = false;
-    setSelectOptions(clientSel, clients, "Semua Client");
-    pscApply();
+    $("psc-status-1").textContent = `Industry: ${ind} · Client: ${client || "Semua"} · Baris: ${filtered.length}`;
+    $("psc-status-2").textContent = `Industry: ${ind} · Client: ${client || "Semua"} · Baris: ${filtered.length}`;
   }
 
   function pscClear(){
     $("psc-industry").value = "";
+    pscSyncClientOptions();
     $("psc-client").value = "";
-    $("psc-client").disabled = true;
-    setSelectOptions($("psc-client"), [], "Pilih Industry dulu");
     pscApply();
   }
 
-  function loadPerformanceClient(){
-    $("psc-status").textContent = "Memuat data Performance Client...";
-    Papa.parse(PSC_URL,{
-      download:true, header:true, skipEmptyLines:true,
+  function loadPerformanceArea(){
+    const err = $("psa-err");
+    err.style.display = "none";
+    $("psa-load").style.display = "flex";
+
+    Papa.parse(PSA_URL,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
       complete:(parsed)=>{
-        psc.rows = parsed.data || [];
-        psc.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
-        if(!psc.rows.length){
-          $("psc-status").textContent = "Data Performance Client kosong / gagal dibaca.";
-          return;
+        try{
+          psa.rows = parsed.data || [];
+          psa.fields = parsed.meta?.fields || [];
+          $("psa-load").style.display = "none";
+
+          if(!psa.rows.length){
+            err.textContent = "Performance Area: data kosong.";
+            err.style.display = "block";
+            return;
+          }
+
+          // col A = group client, col B = area
+          psa.colGroup = getFieldByLetter(psa.fields,"A");
+          psa.colArea  = getFieldByLetter(psa.fields,"B");
+
+          psa.submitFields = SUBMIT_COLS.map(L=>getFieldByLetter(psa.fields,L));
+          psa.qualFields   = QUAL_COLS.map(L=>getFieldByLetter(psa.fields,L));
+
+          const groups = uniqueSortedText(psa.rows.map(r=>r[psa.colGroup]));
+          setSelectOptions($("psa-group"), groups, "Pilih Group Client");
+          setSelectOptions($("psa-area"), [], "Pilih Group dulu");
+          $("psa-area").disabled = true;
+
+          renderMatrixHead($("psa-submit-head"), "Area");
+          renderMatrixHead($("psa-qual-head"), "Area");
+
+          // ===== PRECOMPUTE untuk weighting jobtype =====
+          psa._submitGlobalMonths = computeMonthlyGlobalMean(psa.rows, psa.submitFields);
+          psa._qualGlobalMonths   = computeMonthlyGlobalMean(psa.rows, psa.qualFields);
+
+          psa._areaSubmitMonthsMap = computeKeyMonthlyMean(psa.rows, psa.colArea, psa.submitFields);
+          psa._areaQualMonthsMap   = computeKeyMonthlyMean(psa.rows, psa.colArea, psa.qualFields);
+
+          // isi dropdown Area di page Jobtype
+          const pjtAreaEl = $("pjt-area");
+          if(pjtAreaEl){
+            const allAreas = uniqueSortedText(psa.rows.map(r=>r[psa.colArea]));
+            setSelectOptions(pjtAreaEl, allAreas, "Semua Area (estimasi)");
+            pjtAreaEl.disabled = false;
+          }
+
+          psaApply(); // initial
+        }catch(e){
+          console.error(e);
+          $("psa-load").style.display = "none";
+          err.textContent = "Performance Area: error proses: " + e.message;
+          err.style.display = "block";
         }
-
-        // Client = col A, Industry = col B
-        psc.colClient = getFieldByLetter(psc.fields,"A");
-        psc.colIndustry = getFieldByLetter(psc.fields,"B");
-
-        psc.submitFields = PSC_SUBMIT_COLS.map(L=>getFieldByLetter(psc.fields,L));
-        psc.qualFields   = PSC_QUAL_COLS.map(L=>getFieldByLetter(psc.fields,L));
-
-        const industries = uniqueSortedText(psc.rows.map(r=>r[psc.colIndustry]));
-        setSelectOptions($("psc-industry"), industries, "Pilih Industry");
-
-        setSelectOptions($("psc-client"), [], "Pilih Industry dulu");
-        $("psc-client").disabled = true;
-
-        $("psc-industry").addEventListener("change", pscSyncClientsByIndustry);
-        $("psc-client").addEventListener("change", pscApply);
-        $("psc-clear-btn").addEventListener("click", pscClear);
-
-        pscApply();
       },
-      error:(err)=>{
-        $("psc-status").textContent = "Gagal load Performance Client: " + (err?.message || "Unknown error");
+      error:(e)=>{
+        console.error(e);
+        $("psa-load").style.display = "none";
+        err.textContent = "Performance Area: gagal load CSV: " + e.message;
+        err.style.display = "block";
       }
     });
   }
 
-  /* ===================== PERFORMANCE: AREA ===================== */
-  const psa = { rows:[], fields:[], colGroup:null, colArea:null, submitFields:[], qualFields:[] };
-
-  function psaSyncAreaByGroup(){
-    const group = $("psa-group").value;
-    const areaSel = $("psa-area");
-
-    let areas = [];
-    if(group){
-      areas = uniqueSortedText(
-        psa.rows
-          .filter(r => String(r[psa.colGroup] ?? "").trim() === group)
-          .map(r => r[psa.colArea])
-      );
-    }else{
-      areas = uniqueSortedText(psa.rows.map(r=>r[psa.colArea]));
+  function psaSyncAreaOptions(){
+    const grp = $("psa-group").value;
+    if(!grp){
+      setSelectOptions($("psa-area"), [], "Pilih Group dulu");
+      $("psa-area").disabled = true;
+      return;
     }
-    setSelectOptions(areaSel, areas, "Semua Area");
+    const areas = uniqueSortedText(psa.rows
+      .filter(r=>String(r[psa.colGroup]??"").trim() === grp)
+      .map(r=>r[psa.colArea]));
+    setSelectOptions($("psa-area"), areas, "Semua Area (di Group ini)");
+    $("psa-area").disabled = false;
   }
 
   function psaApply(){
-    const group = $("psa-group").value;
+    const grp = $("psa-group").value;
     const area = $("psa-area").value;
 
-    let filtered = psa.rows.slice();
-    if(group) filtered = filtered.filter(r => String(r[psa.colGroup] ?? "").trim() === group);
-    if(area)  filtered = filtered.filter(r => String(r[psa.colArea] ?? "").trim() === area);
+    if(!grp){
+      $("psa-status-1").textContent = "Pilih Group Client untuk menampilkan tabel.";
+      $("psa-status-2").textContent = "Pilih Group Client untuk menampilkan tabel.";
+      renderMatrixBody($("psa-submit-body"), []);
+      renderMatrixBody($("psa-qual-body"), []);
+      return;
+    }
 
-    $("psa-status").textContent = `Filter: ${group || "Semua Group"} · ${area || "Semua Area"} · Baris data: ${filtered.length}`;
+    let filtered = psa.rows.filter(r=>String(r[psa.colGroup]??"").trim() === grp);
+    if(area) filtered = filtered.filter(r=>String(r[psa.colArea]??"").trim() === area);
 
     const submitMatrix = buildKeyMatrix(filtered, psa.colArea, psa.submitFields);
     const qualMatrix   = buildKeyMatrix(filtered, psa.colArea, psa.qualFields);
 
-    renderMatrix("psa-submit-body", "Area", submitMatrix);
-    renderMatrix("psa-qual-body", "Area", qualMatrix);
+    renderMatrixBody($("psa-submit-body"), submitMatrix);
+    renderMatrixBody($("psa-qual-body"), qualMatrix);
+
+    $("psa-status-1").textContent = `Group: ${grp} · Area: ${area || "Semua"} · Baris: ${filtered.length}`;
+    $("psa-status-2").textContent = `Group: ${grp} · Area: ${area || "Semua"} · Baris: ${filtered.length}`;
   }
 
   function psaClear(){
     $("psa-group").value = "";
-    psaSyncAreaByGroup();
+    psaSyncAreaOptions();
     $("psa-area").value = "";
     psaApply();
   }
 
-  function loadPerformanceArea(){
-    $("psa-status").textContent = "Memuat data Performance Area...";
-    Papa.parse(PSA_URL,{
-      download:true, header:true, skipEmptyLines:true,
+  function loadPerformanceJobtype(){
+    const err = $("pjt-err");
+    err.style.display = "none";
+    $("pjt-load").style.display = "flex";
+
+    Papa.parse(PJT_URL,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
       complete:(parsed)=>{
-        psa.rows = parsed.data || [];
-        psa.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
-        if(!psa.rows.length){
-          $("psa-status").textContent = "Data Performance Area kosong / gagal dibaca.";
-          return;
+        try{
+          pjt.rows = parsed.data || [];
+          pjt.fields = parsed.meta?.fields || [];
+          $("pjt-load").style.display = "none";
+
+          if(!pjt.rows.length){
+            err.textContent = "Performance Jobtype: data kosong.";
+            err.style.display = "block";
+            return;
+          }
+
+          // asumsi: col A = Job Parent, col B = Job Type
+          pjt.colParent = getFieldByLetter(pjt.fields,"A");
+          pjt.colType   = getFieldByLetter(pjt.fields,"B");
+
+          pjt.submitFields = SUBMIT_COLS.map(L=>getFieldByLetter(pjt.fields,L));
+          pjt.qualFields   = QUAL_COLS.map(L=>getFieldByLetter(pjt.fields,L));
+
+          const parents = uniqueSortedText(pjt.rows.map(r=>r[pjt.colParent]));
+          setSelectOptions($("pjt-parent"), parents, "Semua Job Parent");
+          setSelectOptions($("pjt-type"), [], "Pilih Job Parent dulu");
+          $("pjt-type").disabled = true;
+
+          renderMatrixHead($("pjt-submit-parent-head"), "Job Parent");
+          renderMatrixHead($("pjt-submit-type-head"), "Job Type");
+          renderMatrixHead($("pjt-qual-type-head"), "Job Type");
+
+          pjtApply();
+        }catch(e){
+          console.error(e);
+          $("pjt-load").style.display = "none";
+          err.textContent = "Performance Jobtype: error proses: " + e.message;
+          err.style.display = "block";
         }
-
-        // Group Client = col A, Area = col B
-        psa.colGroup = getFieldByLetter(psa.fields,"A");
-        psa.colArea  = getFieldByLetter(psa.fields,"B");
-
-        psa.submitFields = PSC_SUBMIT_COLS.map(L=>getFieldByLetter(psa.fields,L));
-        psa.qualFields   = PSC_QUAL_COLS.map(L=>getFieldByLetter(psa.fields,L));
-
-        const groups = uniqueSortedText(psa.rows.map(r=>r[psa.colGroup]));
-        setSelectOptions($("psa-group"), groups, "Semua Group Client");
-
-        psaSyncAreaByGroup();
-
-        $("psa-group").addEventListener("change", ()=>{
-          psaSyncAreaByGroup();
-          $("psa-area").value = "";
-          psaApply();
-        });
-        $("psa-area").addEventListener("change", psaApply);
-        $("psa-clear-btn").addEventListener("click", psaClear);
-
-        psaApply();
       },
-      error:(err)=>{
-        $("psa-status").textContent = "Gagal load Performance Area: " + (err?.message || "Unknown error");
+      error:(e)=>{
+        console.error(e);
+        $("pjt-load").style.display = "none";
+        err.textContent = "Performance Jobtype: gagal load CSV: " + e.message;
+        err.style.display = "block";
       }
     });
   }
 
-  /* ===================== PERFORMANCE: JOBTYPE ===================== */
-  const pjt = { rows:[], fields:[], colParent:null, colType:null, submitFields:[], qualFields:[] };
-
   function pjtSyncTypeOptionsByParent(){
     const parent = $("pjt-parent").value;
-    const typeSel = $("pjt-type");
-
-    let types = [];
-    if(parent){
-      types = uniqueSortedText(
-        pjt.rows
-          .filter(r => String(r[pjt.colParent] ?? "").trim() === parent)
-          .map(r => r[pjt.colType])
-      );
-    }else{
-      types = uniqueSortedText(pjt.rows.map(r=>r[pjt.colType]));
+    if(!parent){
+      setSelectOptions($("pjt-type"), [], "Pilih Job Parent dulu");
+      $("pjt-type").disabled = true;
+      return;
     }
-    setSelectOptions(typeSel, types, "Semua Job Type");
+    const types = uniqueSortedText(pjt.rows
+      .filter(r=>String(r[pjt.colParent]??"").trim() === parent)
+      .map(r=>r[pjt.colType]));
+    setSelectOptions($("pjt-type"), types, "Semua Job Type (Parent ini)");
+    $("pjt-type").disabled = false;
   }
 
   function pjtApply(){
     const parent = $("pjt-parent").value;
-    const type = $("pjt-type").value;
+    const type   = $("pjt-type").value;
+    const area   = $("pjt-area") ? $("pjt-area").value : "";
 
     let filtered = pjt.rows.slice();
     if(parent) filtered = filtered.filter(r => String(r[pjt.colParent] ?? "").trim() === parent);
     if(type)   filtered = filtered.filter(r => String(r[pjt.colType] ?? "").trim() === type);
 
-    $("pjt-status").textContent = `Filter: ${parent || "Semua Parent"} · ${type || "Semua Type"} · Baris data: ${filtered.length}`;
+    // Build matrix normal (global)
+    let submitParentMatrix = buildKeyMatrix(filtered, pjt.colParent, pjt.submitFields);
+    let submitTypeMatrix   = buildKeyMatrix(filtered, pjt.colType,   pjt.submitFields);
+    let qualTypeMatrix     = buildKeyMatrix(filtered, pjt.colType,   pjt.qualFields);
 
-    const submitParentMatrix = buildKeyMatrix(filtered, pjt.colParent, pjt.submitFields);
-    const submitTypeMatrix   = buildKeyMatrix(filtered, pjt.colType,   pjt.submitFields);
-    const qualTypeMatrix     = buildKeyMatrix(filtered, pjt.colType,   pjt.qualFields);
+    // Apply area weighting (estimasi) jika area dipilih dan PSA sudah siap
+    let areaNote = "";
+    if(area && psa && psa._areaSubmitMonthsMap && psa._areaQualMonthsMap){
+      const aSubmit = psa._areaSubmitMonthsMap.get(area);
+      const aQual   = psa._areaQualMonthsMap.get(area);
+      const gSubmit = psa._submitGlobalMonths;
+      const gQual   = psa._qualGlobalMonths;
 
-    renderMatrix("pjt-submit-parent-body", "Job Parent", submitParentMatrix);
-    renderMatrix("pjt-submit-type-body",   "Job Type",   submitTypeMatrix);
-    renderMatrix("pjt-qual-type-body",     "Job Type",   qualTypeMatrix);
+      if(aSubmit && gSubmit){
+        const submitScales = buildScaleMonths(aSubmit, gSubmit);
+        submitParentMatrix = scaleMatrix(submitParentMatrix, submitScales);
+        submitTypeMatrix   = scaleMatrix(submitTypeMatrix,   submitScales);
+      }
+      if(aQual && gQual){
+        const qualScales = buildScaleMonths(aQual, gQual);
+        qualTypeMatrix   = scaleMatrix(qualTypeMatrix, qualScales);
+      }
+      areaNote = ` · Area: ${area} (estimasi weighting)`;
+    }else if(area){
+      areaNote = ` · Area: ${area} (data area belum siap/tidak ditemukan)`;
+    }
+
+    renderMatrixBody($("pjt-submit-parent-body"), submitParentMatrix);
+    renderMatrixBody($("pjt-submit-type-body"), submitTypeMatrix);
+    renderMatrixBody($("pjt-qual-type-body"), qualTypeMatrix);
+
+    $("pjt-status").textContent =
+      `Filter: ${parent || "Semua Parent"} · ${type || "Semua Type"}${areaNote} · Baris data: ${filtered.length}`;
   }
 
   function pjtClear(){
     $("pjt-parent").value = "";
     pjtSyncTypeOptionsByParent();
     $("pjt-type").value = "";
+    if($("pjt-area")) $("pjt-area").value = "";
     pjtApply();
   }
 
-  function loadPerformanceJobType(){
-    $("pjt-status").textContent = "Memuat data Performance Jobtype...";
-    Papa.parse(PJT_URL,{
-      download:true, header:true, skipEmptyLines:true,
-      complete:(parsed)=>{
-        pjt.rows = parsed.data || [];
-        pjt.fields = (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : [];
-        if(!pjt.rows.length){
-          $("pjt-status").textContent = "Data Performance Jobtype kosong / gagal dibaca.";
-          return;
-        }
-
-        // Job Parent = col A, Job Type = col B
-        pjt.colParent = getFieldByLetter(pjt.fields,"A");
-        pjt.colType   = getFieldByLetter(pjt.fields,"B");
-
-        pjt.submitFields = PSC_SUBMIT_COLS.map(L=>getFieldByLetter(pjt.fields,L));
-        pjt.qualFields   = PSC_QUAL_COLS.map(L=>getFieldByLetter(pjt.fields,L));
-
-        const parents = uniqueSortedText(pjt.rows.map(r=>r[pjt.colParent]));
-        setSelectOptions($("pjt-parent"), parents, "Semua Job Parent");
-
-        pjtSyncTypeOptionsByParent();
-
-        $("pjt-parent").addEventListener("change", ()=>{
-          pjtSyncTypeOptionsByParent();
-          $("pjt-type").value = "";
-          pjtApply();
-        });
-        $("pjt-type").addEventListener("change", pjtApply);
-        $("pjt-clear-btn").addEventListener("click", pjtClear);
-
-        pjtApply();
-      },
-      error:(err)=>{
-        $("pjt-status").textContent = "Gagal load Performance Jobtype: " + (err?.message || "Unknown error");
-      }
+  /******************************************************************
+   * ========================= UI / TABS ============================
+   ******************************************************************/
+  function setPage(pageKey){
+    const pages = ["ACM","sa","psc","psa","pjt"];
+    pages.forEach(k=>{
+      const pageEl = $("page-"+k);
+      const tabEl  = $("tab-"+k);
+      if(pageEl) pageEl.classList.toggle("active", k === pageKey);
+      if(tabEl) tabEl.classList.toggle("active", k === pageKey);
     });
   }
 
-  /* ===================== DOM READY ===================== */
   document.addEventListener("DOMContentLoaded",()=>{
-    // ACM buttons
+    // ACM clear
     $("clear-filters-btn")?.addEventListener("click", clearFilters);
-
-    // SA buttons
     $("sa-clear-filters-btn")?.addEventListener("click", clearSaFilters);
 
-    // Toggle hamburger filter ACM
-    const filterCard = document.querySelector(".filter-card");
-    $("filter-toggle-btn")?.addEventListener("click",()=> filterCard?.classList.toggle("open"));
-
-    // Toggle hamburger filter SA
-    const saFilterCard = document.querySelector(".sa-filter-card");
-    $("sa-filter-toggle-btn")?.addEventListener("click",()=> saFilterCard?.classList.toggle("open"));
+    // Toggle hamburger
+    document.querySelector(".filter-card")?.classList.remove("open");
+    $("filter-toggle-btn")?.addEventListener("click",()=>document.querySelector(".filter-card")?.classList.toggle("open"));
+    $("sa-filter-toggle-btn")?.addEventListener("click",()=>document.querySelector(".sa-filter-card")?.classList.toggle("open"));
+    $("psc-filter-toggle-btn")?.addEventListener("click",()=>document.querySelector("#page-psc .perf-filter-card")?.classList.toggle("open"));
+    $("psa-filter-toggle-btn")?.addEventListener("click",()=>document.querySelector("#page-psa .perf-filter-card")?.classList.toggle("open"));
+    $("pjt-filter-toggle-btn")?.addEventListener("click",()=>document.querySelector("#page-pjt .perf-filter-card")?.classList.toggle("open"));
 
     // Tabs
-    const tabs = {
-      ACM: {btn:$("tab-ACM"), page:$("page-ACM")},
-      sa:  {btn:$("tab-sa"),  page:$("page-sa")},
-      psc: {btn:$("tab-psc"), page:$("page-psc")},
-      psa: {btn:$("tab-psa"), page:$("page-psa")},
-      pjt: {btn:$("tab-pjt"), page:$("page-pjt")}
-    };
+    $("tab-ACM")?.addEventListener("click",()=>setPage("ACM"));
+    $("tab-sa")?.addEventListener("click",()=>setPage("sa"));
+    $("tab-psc")?.addEventListener("click",()=>setPage("psc"));
+    $("tab-psa")?.addEventListener("click",()=>setPage("psa"));
+    $("tab-pjt")?.addEventListener("click",()=>setPage("pjt"));
 
-    function setPage(key){
-      Object.keys(tabs).forEach(k=>{
-        const isActive = (k === key);
-        tabs[k].btn?.classList.toggle("active", isActive);
-        tabs[k].page?.classList.toggle("active", isActive);
-      });
-    }
+    // Performance events
+    $("psc-industry")?.addEventListener("change", ()=>{
+      pscSyncClientOptions();
+      $("psc-client").value = "";
+      pscApply();
+    });
+    $("psc-client")?.addEventListener("change", pscApply);
+    $("psc-clear")?.addEventListener("click", pscClear);
 
-    tabs.ACM.btn?.addEventListener("click",()=>setPage("ACM"));
-    tabs.sa.btn?.addEventListener("click",()=>setPage("sa"));
-    tabs.psc.btn?.addEventListener("click",()=>setPage("psc"));
-    tabs.psa.btn?.addEventListener("click",()=>setPage("psa"));
-    tabs.pjt.btn?.addEventListener("click",()=>setPage("pjt"));
+    $("psa-group")?.addEventListener("change", ()=>{
+      psaSyncAreaOptions();
+      $("psa-area").value = "";
+      psaApply();
+    });
+    $("psa-area")?.addEventListener("change", psaApply);
+    $("psa-clear")?.addEventListener("click", psaClear);
 
+    $("pjt-parent")?.addEventListener("change", ()=>{
+      pjtSyncTypeOptionsByParent();
+      $("pjt-type").value = "";
+      pjtApply();
+    });
+    $("pjt-type")?.addEventListener("change", pjtApply);
+    $("pjt-area")?.addEventListener("change", pjtApply);
+    $("pjt-clear")?.addEventListener("click", pjtClear);
+
+    // Initial load
     setPage("ACM");
-
-    // Load all datasets
-    loadCsv();
+    loadACM();
     loadPerformanceClient();
-    loadPerformanceArea();
-    loadPerformanceJobType();
+    loadPerformanceArea();   // penting: ini juga menyiapkan dropdown area untuk Jobtype
+    loadPerformanceJobtype();
   });
 </script>
-
 </body>
 </html>
