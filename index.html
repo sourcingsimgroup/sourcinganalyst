@@ -986,7 +986,7 @@
         </div>
 
         <div class="card-subtext">
-          <strong>Revisi sesuai request:</strong> pada dataset Jobtype, <strong>Job Type = kolom A</strong> dan <strong>Job Parent = kolom B</strong>.
+          <strong>Berikut adalah summary performance sourcing untuk submmit kandidat dan performance qualified atas kandidat yang disubmit.
         </div>
 
         <div class="perf-filter-body">
@@ -1000,14 +1000,14 @@
             </div>
 
             <div class="filter-group">
-              <label class="filter-label">Job Parent (Kolom B)</label>
+              <label class="filter-label">Job Parent</label>
               <select id="pj-parent" class="perf-select">
                 <option value="">Pilih Job Parent...</option>
               </select>
             </div>
 
             <div class="filter-group">
-              <label class="filter-label">Job Type (Kolom A)</label>
+              <label class="filter-label">Job Type</label>
               <select id="pj-type" class="perf-select" disabled>
                 <option value="">Pilih Job Type...</option>
               </select>
@@ -2230,7 +2230,6 @@ function initPerformanceClient(){
     sel.innerHTML = `<option value="">Pilih Industry...</option>` + industryVals.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
 
     $("pc-load-state").style.display = "none";
-    $("pc-status-text").textContent = `Data siap. Kolom: Industry="${perfClient.industryField}", Client="${perfClient.clientField}".`;
     $("pc-col-note").textContent = "Jika header bulan tidak terbaca, sistem otomatis pakai urutan kolom setelah ID.";
 
     $("pc-submit-empty").style.display = "block";
