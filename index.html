@@ -1106,7 +1106,32 @@ const MONTHS = [
   {idx:11,label:"November", tokens:["NOVEMBER","NOV"]},
   {idx:12,label:"Desember", tokens:["DESEMBER","DES","DEC"]},
 ];
+/* =========================================================
+   FIXED COLUMN MAPPING (Query Report Client / Area)
+========================================================= */
+const FIX_SUBMIT_LETTERS = ["E","H","K","N","Q","T","W","Z","AC","AF","AI","AL"];
+const FIX_QUAL_LETTERS   = ["F","I","L","O","R","U","X","AA","AD","AE","AJ","AM"];
 
+function colLetterToIndex(letter){
+  const s = String(letter || "").trim().toUpperCase();
+  if(!s) return null;
+  let n = 0;
+  for(let i=0;i<s.length;i++){
+    const code = s.charCodeAt(i);
+    if(code < 65 || code > 90) return null; // A-Z
+    n = n * 26 + (code - 64);
+  }
+  return n - 1; // A=0
+}
+
+function fieldsByLetters(fields, letters){
+  return (letters || []).map(L=>{
+    const idx = colLetterToIndex(L);
+    return (idx!=null && fields[idx]) ? fields[idx] : null;
+  });
+}
+
+  
 function uniqueSorted(arr){
   return Array.from(new Set((arr||[]).map(v=>String(v??"").trim()).filter(v=>v!=="")))
     .sort((a,b)=>a.localeCompare(b,"id"));
@@ -2213,13 +2238,25 @@ function initPerformanceClient(){
     perfClient.clientField = client || fields[1] || null;
 
     // detect month cols
-    const submitDetect = detectMonthCols(fields, "SUBMIT");
-    const qualDetect = detectMonthCols(fields, "QUALIFIED");
-    if(submitDetect.okCount >= 6) perfClient.submitCols = submitDetect.cols;
-    else perfClient.submitCols = fallbackMonthColsByIndex(fields, 2);
-
-    if(qualDetect.okCount >= 6) perfClient.qualCols = qualDetect.cols;
-    else perfClient.qualCols = fallbackMonthColsByIndex(fields, 14);
+    // ✅ FIXED: Query Report Client mapping by column letters
+    const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
+    const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
+    
+    const okSubmit = fixedSubmit.filter(Boolean).length;
+    const okQual   = fixedQual.filter(Boolean).length;
+    
+    // Kalau mapping kolom tersedia, pakai itu. Kalau tidak, fallback ke auto-detect lama.
+    if(okSubmit >= 8) perfClient.submitCols = fixedSubmit;
+    else{
+      const submitDetect = detectMonthCols(fields, "SUBMIT");
+      perfClient.submitCols = (submitDetect.okCount >= 6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
+    }
+    
+    if(okQual >= 8) perfClient.qualCols = fixedQual;
+    else{
+      const qualDetect = detectMonthCols(fields, "QUALIFIED");
+      perfClient.qualCols = (qualDetect.okCount >= 6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
+    }
 
     renderMatrixHead($("pc-submit-head"), "Client");
     renderMatrixHead($("pc-qual-head"), "Client");
@@ -2299,10 +2336,25 @@ function initPerformanceArea(){
     perfArea.groupField = group || fields[0] || null;
     perfArea.areaField = area || fields[1] || null;
 
-    const submitDetect = detectMonthCols(fields, "SUBMIT");
-    const qualDetect = detectMonthCols(fields, "QUALIFIED");
-    perfArea.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
-    perfArea.qualCols   = (qualDetect.okCount>=6)   ? qualDetect.cols   : fallbackMonthColsByIndex(fields, 14);
+    // ✅ FIXED: Query Report Area mapping by column letters (sama seperti Client)
+    const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
+    const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
+    
+    const okSubmit = fixedSubmit.filter(Boolean).length;
+    const okQual   = fixedQual.filter(Boolean).length;
+    
+    if(okSubmit >= 8) perfArea.submitCols = fixedSubmit;
+    else{
+      const submitDetect = detectMonthCols(fields, "SUBMIT");
+      perfArea.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
+    }
+    
+    if(okQual >= 8) perfArea.qualCols = fixedQual;
+    else{
+      const qualDetect = detectMonthCols(fields, "QUALIFIED");
+      perfArea.qualCols = (qualDetect.okCount>=6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
+    }
+
 
     renderMatrixHead($("pa-submit-head"), "Area");
     renderMatrixHead($("pa-qual-head"), "Area");
