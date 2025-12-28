@@ -846,20 +846,20 @@
 
         <div class="perf-filter-body">
           <div class="perf-filters">
-          <div class="filter-group">
-            <label class="filter-label">Industry</label>
-            <select id="pc-industry" class="perf-select">
-              <option value="">Pilih Industry...</option>
-            </select>
+            <div class="filter-group">
+              <label class="filter-label">Industry</label>
+              <select id="pc-industry" class="perf-select">
+                <option value="">Pilih Industry...</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Client</label>
+              <select id="pc-client" class="perf-select" disabled>
+                <option value="">Semua Client</option>
+              </select>
+            </div>
           </div>
-        
-          <div class="filter-group">
-            <label class="filter-label">Client</label>
-            <select id="pc-client" class="perf-select" disabled>
-              <option value="">Semua Client</option>
-            </select>
-          </div>
-        </div>
 
           <div id="pc-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Client...</span></div>
           <div id="pc-error-state" class="error" style="display:none;"></div>
@@ -993,7 +993,7 @@
         </div>
 
         <div class="card-subtext">
-          <strong>Berikut adalah summary performance sourcing untuk submmit kandidat dan performance qualified atas kandidat yang disubmit.
+          <strong>Berikut adalah summary performance sourcing untuk submit kandidat dan performance qualified atas kandidat yang disubmit.</strong>
         </div>
 
         <div class="perf-filter-body">
@@ -1085,7 +1085,7 @@
 ========================================================= */
 const CSV_URL_ACM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
 
-/* Performance: Jika URL kamu berbeda, ganti 3 baris ini */
+/* Performance */
 const CSV_URL_CLIENT  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
 const CSV_URL_AREA    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=631317217&single=true&output=csv";
 const CSV_URL_JOBTYPE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1873604383&single=true&output=csv";
@@ -1113,6 +1113,7 @@ const MONTHS = [
   {idx:11,label:"November", tokens:["NOVEMBER","NOV"]},
   {idx:12,label:"Desember", tokens:["DESEMBER","DES","DEC"]},
 ];
+
 /* =========================================================
    FIXED COLUMN MAPPING (Query Report Client / Area)
 ========================================================= */
@@ -1125,12 +1126,11 @@ function colLetterToIndex(letter){
   let n = 0;
   for(let i=0;i<s.length;i++){
     const code = s.charCodeAt(i);
-    if(code < 65 || code > 90) return null; // A-Z
+    if(code < 65 || code > 90) return null;
     n = n * 26 + (code - 64);
   }
-  return n - 1; // A=0
+  return n - 1;
 }
-
 function fieldsByLetters(fields, letters){
   return (letters || []).map(L=>{
     const idx = colLetterToIndex(L);
@@ -1138,7 +1138,6 @@ function fieldsByLetters(fields, letters){
   });
 }
 
-  
 function uniqueSorted(arr){
   return Array.from(new Set((arr||[]).map(v=>String(v??"").trim()).filter(v=>v!=="")))
     .sort((a,b)=>a.localeCompare(b,"id"));
@@ -1184,25 +1183,20 @@ function fmtPercent(v){
 }
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
 
-/* parse month index from PERIODE (robust) */
+/* parse month index from PERIODE */
 function parseMonthIndex(periodStr){
   const s = norm(periodStr);
   if(!s) return null;
 
-  // if contains number month like "2025-02" or "02/2025"
-  const m1 = s.match(/\b(0?[1-9]|1[0-2])\b/);
-  // do NOT take year like 2025; prefer token-based if possible
-  // We'll search month names first:
   for(const m of MONTHS){
     if(m.tokens.some(t=>s.includes(t))) return m.idx;
   }
-  // then try patterns YYYY-MM or MM-YYYY
   const mIso = s.match(/(\d{4})[-/](0?[1-9]|1[0-2])\b/);
   if(mIso) return Number(mIso[2]);
   const mIso2 = s.match(/\b(0?[1-9]|1[0-2])[-/](\d{4})/);
   if(mIso2) return Number(mIso2[1]);
 
-  // fallback: standalone small number (avoid year)
+  const m1 = s.match(/\b(0?[1-9]|1[0-2])\b/);
   if(m1){
     const n = Number(m1[1]);
     if(n>=1 && n<=12) return n;
@@ -1324,7 +1318,6 @@ function createMultiSelect(rootId, options, placeholder, disabled, onChange){
 /* =========================================================
    ACM CONFIG & DATA
 ========================================================= */
-/* Column names (ACM) */
 let COL_PROV      = "PROVINSI MINAT PENEMPATAN";
 let COL_KOTA      = "KOTA MINAT PENEMPATAN";
 let COL_PERIODE   = "PERIODE PELAMAR";
@@ -1340,7 +1333,6 @@ let COL_JOB_TYPE  = "JOB TYPE";
 const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
 const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
 
-/* Fixed lists */
 const FIXED_PROV_LIST = [
   "ACEH (NAD)","BALI","BANTEN","BENGKULU","DI YOGYAKARTA","DKI JAKARTA",
   "GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR",
@@ -1366,19 +1358,16 @@ const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
 /* State */
 let acmRows = [];
 let acmFields = [];
-
 let msProv, msKota, msPeriode, msJobParent, msJobType;
 let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
 
 const provKotaMap = new Map();
 const jobParentTypeMap = new Map();
 
-/* Detect columns by header similarity */
 function findField(fields, candidates){
   const set = candidates.map(norm);
   const exact = fields.find(f=>set.includes(norm(f)));
   if(exact) return exact;
-  // fallback by includes
   for(const f of fields){
     const s = norm(f);
     for(const c of candidates){
@@ -1415,20 +1404,14 @@ function detectACMColumns(fields){
   if(jt) COL_JOB_TYPE = jt;
 }
 
-function isKategoriValid(row){
-  return norm(row[COL_KATEGORI]) === norm(KATEGORI_VALID_TARGET);
-}
+function isKategoriValid(row){ return norm(row[COL_KATEGORI]) === norm(KATEGORI_VALID_TARGET); }
 function isQualifiedYes(row){
   const s = norm(row[COL_QUALIFIED]);
   return s === "YES" || s === "YA";
 }
-// ✅ Revisi: VALID dari KATEGORI APP (AC), BUFFER dari QUALIFIED (AD)
-function getValidFlag(row){
-  return isKategoriValid(row) ? 1 : 0;
-}
-function getBufferFlag(row){
-  return isQualifiedYes(row) ? 1 : 0;
-}
+function getValidFlag(row){ return isKategoriValid(row) ? 1 : 0; }
+function getBufferFlag(row){ return isQualifiedYes(row) ? 1 : 0; }
+
 function genderBucket(row){
   const s = norm(row[COL_GENDER]);
   if(!s) return "UNK";
@@ -1437,7 +1420,6 @@ function genderBucket(row){
   return "UNK";
 }
 
-/* Build dependency maps */
 function buildProvKotaMap(){
   provKotaMap.clear();
   acmRows.forEach(r=>{
@@ -1459,7 +1441,6 @@ function buildJobParentTypeMap(){
   });
 }
 
-/* Filter helpers */
 function getFilteredACMRows(){
   const provSel = new Set(msProv ? msProv.getSelected() : []);
   const kotaSel = new Set(msKota ? msKota.getSelected() : []);
@@ -1514,7 +1495,6 @@ function updateJobTypeOptionsByParent(selParents){
   msJobType.setDisabled(false);
 }
 
-/* Init ACM filters */
 function initACMFilters(){
   buildProvKotaMap();
   buildJobParentTypeMap();
@@ -1557,9 +1537,6 @@ function clearACMFilters(){
   updateACMAll();
 }
 
-/* =========================================================
-   ACM RENDER: tables + summary + chart
-========================================================= */
 function renderRowsToTbody(tbodyId, rows){
   const tb = $(tbodyId);
   tb.innerHTML = "";
@@ -1584,7 +1561,6 @@ function renderRowsToTbody(tbodyId, rows){
     tb.appendChild(tr);
   });
 }
-
 function addTotalRow(tbodyId, totalLabel, valid, buffer){
   const tb = $(tbodyId);
   const tr = document.createElement("tr");
@@ -1621,7 +1597,6 @@ function aggregateByKey(rows, keyFn){
   return map;
 }
 
-/* Provinces table: include others row to keep total match */
 function buildProvTable(rows){
   const map = aggregateByKey(rows, r=>r[COL_PROV]);
 
@@ -1630,14 +1605,13 @@ function buildProvTable(rows){
   const fixedSet = new Set(FIXED_PROV_LIST.map(norm));
 
   FIXED_PROV_LIST.forEach(name=>{
-    const obj = map.get(name) || map.get(trimStr(name)) || map.get(name.toUpperCase()) || null;
+    const obj = map.get(name) || null;
     const v = obj ? obj.valid : 0;
     const b = obj ? obj.buffer : 0;
     if(v+b>0) out.push({label:name, valid:v, buffer:b});
     validSum += v; bufferSum += b;
   });
 
-  // compute other provinces
   let otherV = 0, otherB = 0;
   for(const [k,obj] of map.entries()){
     const kk = norm(k);
@@ -1652,9 +1626,7 @@ function buildProvTable(rows){
     validSum += otherV; bufferSum += otherB;
   }
 
-  // if filters narrow and no row appears, show selected ones
   if(out.length===0){
-    // show at least total 0 row
     out.push({label:"(Tidak ada data)", valid:0, buffer:0});
   }
 
@@ -1663,7 +1635,6 @@ function buildProvTable(rows){
   $("status-prov").textContent = `Menampilkan ${rows.length} baris (filter aktif).`;
 }
 
-/* Metode table by MEDIA SOURCING (3 bucket + others) */
 function buildMetodeTable(rows){
   const map = aggregateByKey(rows, r=>r[COL_MEDIA]);
   const buckets = ["OFFLINE","ONLINE - JOB PORTAL","ONLINE - MEDIA SOSIAL"];
@@ -1672,7 +1643,7 @@ function buildMetodeTable(rows){
 
   const used = new Set();
   buckets.forEach(b=>{
-    const obj = map.get(b) || map.get(buckets.find(x=>norm(x)===norm(b))) || null;
+    const obj = map.get(b) || null;
     const v = obj ? obj.valid : 0;
     const bu= obj ? obj.buffer : 0;
     out.push({label:b, valid:v, buffer:bu});
@@ -1680,7 +1651,6 @@ function buildMetodeTable(rows){
     validSum += v; bufferSum += bu;
   });
 
-  // others
   let otherV=0, otherB=0;
   for(const [k,obj] of map.entries()){
     const kk = norm(k);
@@ -1700,7 +1670,6 @@ function buildMetodeTable(rows){
   $("status-metode").textContent = `Menampilkan ${rows.length} baris (filter aktif).`;
 }
 
-/* Media Sosial breakdown by METODE SOURCING within ONLINE - MEDIA SOSIAL */
 function buildMediaSosialTable(rows){
   const subset = rows.filter(r=>norm(r[COL_MEDIA])===norm("ONLINE - MEDIA SOSIAL"));
   const map = aggregateByKey(subset, r=>r[COL_METODE]);
@@ -1720,7 +1689,6 @@ function buildMediaSosialTable(rows){
   $("status-media").textContent = `Subset Media Sosial: ${subset.length} baris.`;
 }
 
-/* Education table */
 function buildEduTable(rows){
   const map = aggregateByKey(rows, r=>r[COL_EDU]);
   const out = [];
@@ -1739,7 +1707,6 @@ function buildEduTable(rows){
   $("status-edu").textContent = `Menampilkan ${rows.length} baris (filter aktif).`;
 }
 
-/* Job Portal breakdown */
 function buildPortalTable(rows){
   const subset = rows.filter(r=>norm(r[COL_MEDIA])===norm("ONLINE - JOB PORTAL"));
   const map = aggregateByKey(subset, r=>r[COL_METODE]);
@@ -1759,7 +1726,6 @@ function buildPortalTable(rows){
   $("status-portal").textContent = `Subset Job Portal: ${subset.length} baris.`;
 }
 
-/* Offline breakdown */
 function buildOfflineTable(rows){
   const subset = rows.filter(r=>norm(r[COL_MEDIA])===norm("OFFLINE"));
   const map = aggregateByKey(subset, r=>r[COL_METODE]);
@@ -1779,7 +1745,6 @@ function buildOfflineTable(rows){
   $("status-offline").textContent = `Subset Offline: ${subset.length} baris.`;
 }
 
-/* Summary cards */
 function updateSummary(rows){
   let mv=0, mb=0, fv=0, fb=0, tv=0, tb=0;
 
@@ -1800,23 +1765,16 @@ function updateSummary(rows){
   $("sum-total-buffer").textContent = numberFmt.format(tb);
 }
 
-/* Chart monthly */
 function updateMonthlyChart(rows){
   const bucket = new Map();
   MONTHS.forEach(m=>bucket.set(m.idx, {valid:0, buffer:0}));
 
   let skipped=0;
   rows.forEach(r=>{
-    // ambil bulan dari PERIODE PELAMAR
     const mi = parseMonthIndex(r[COL_PERIODE]);
     if(!mi){ skipped++; return; }
-
     const obj = bucket.get(mi);
     if(!obj) return;
-
-    // ✅ Revisi definisi:
-    // valid = KATEGORI APP "APLIKAN VALID - CTC 1"
-    // buffer = QUALIFIED "YES"
     obj.valid  += getValidFlag(r);
     obj.buffer += getBufferFlag(r);
   });
@@ -1871,8 +1829,7 @@ function updateMonthlyChart(rows){
       ? `Catatan: ${skipped} baris dilewati karena PERIODE PELAMAR tidak terbaca bulan-nya.`
       : `Periode terbaca dengan baik untuk seluruh data.`;
 }
-  
-/* Master update ACM */
+
 function updateACMAll(){
   const filtered = getFilteredACMRows();
   updateSummary(filtered);
@@ -1885,12 +1842,11 @@ function updateACMAll(){
   buildPortalTable(filtered);
   buildOfflineTable(filtered);
 
-  // Update SA insight too
   updateSourcingAnalystAnalysis();
 }
 
 /* =========================================================
-   SOURCING ANALYST (insight sederhana tapi berguna)
+   SOURCING ANALYST
 ========================================================= */
 function initSourcingAnalystFilters(){
   const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
@@ -2022,7 +1978,6 @@ function updateSourcingAnalystAnalysis(){
     return;
   }
 
-  // Top MEDIA SOURCING by Valid
   const mediaMap = new Map();
   const metodeMap = new Map();
   const msosMap = new Map();
@@ -2108,7 +2063,7 @@ function updateSourcingAnalystAnalysis(){
 }
 
 /* =========================================================
-   PERFORMANCE: generic matrix builder (flexible headers)
+   PERFORMANCE: generic matrix builder
 ========================================================= */
 function renderMatrixHead(theadEl, leftTitle){
   const tr = document.createElement("tr");
@@ -2125,7 +2080,6 @@ function renderMatrixHead(theadEl, leftTitle){
 }
 
 function detectMonthCols(fields, metricToken){
-  // find 12 columns matching month token & metric token (submit/qualified)
   const cols = [];
   const fNorm = fields.map(f=>({f, n:norm(f)}));
 
@@ -2151,8 +2105,7 @@ function fallbackMonthColsByIndex(fields, startIndex){
 }
 
 function buildMatrixRows(rows, rowKeyField, monthCols){
-  // monthCols: array length 12 of field names
-  const map = new Map(); // key -> {idx -> formatted}
+  const map = new Map();
   rows.forEach(r=>{
     const k = trimStr(r[rowKeyField]) || "(Kosong)";
     if(!map.has(k)) map.set(k, {});
@@ -2167,9 +2120,8 @@ function buildMatrixRows(rows, rowKeyField, monthCols){
 }
 
 function buildAvgMatrixForGroup(rows, groupKeyField, monthCols){
-  // average percentage per month for group
-  const result = new Map(); // group -> {idx -> fmt}
-  const tmp = new Map(); // group -> {idx -> {sum,count}}
+  const result = new Map();
+  const tmp = new Map();
   rows.forEach(r=>{
     const g = trimStr(r[groupKeyField]) || "(Kosong)";
     if(!tmp.has(g)) tmp.set(g, {});
@@ -2229,6 +2181,7 @@ function detectClientFields(fields){
   const client = findField(fields, ["CLIENT"]);
   return {industry, client};
 }
+
 function updateClientDropdown(){
   const ind = $("pc-industry").value;
   const selC = $("pc-client");
@@ -2248,7 +2201,7 @@ function updateClientDropdown(){
 
   selC.disabled = false;
 }
-  
+
 function initPerformanceClient(){
   $("pc-error-state").style.display = "none";
   $("pc-load-state").style.display = "flex";
@@ -2263,21 +2216,18 @@ function initPerformanceClient(){
     perfClient.industryField = industry || fields[0] || null;
     perfClient.clientField = client || fields[1] || null;
 
-    // detect month cols
-    // ✅ FIXED: Query Report Client mapping by column letters
     const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
     const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
-    
+
     const okSubmit = fixedSubmit.filter(Boolean).length;
     const okQual   = fixedQual.filter(Boolean).length;
-    
-    // Kalau mapping kolom tersedia, pakai itu. Kalau tidak, fallback ke auto-detect lama.
+
     if(okSubmit >= 8) perfClient.submitCols = fixedSubmit;
     else{
       const submitDetect = detectMonthCols(fields, "SUBMIT");
       perfClient.submitCols = (submitDetect.okCount >= 6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
     }
-    
+
     if(okQual >= 8) perfClient.qualCols = fixedQual;
     else{
       const qualDetect = detectMonthCols(fields, "QUALIFIED");
@@ -2287,7 +2237,6 @@ function initPerformanceClient(){
     renderMatrixHead($("pc-submit-head"), "Client");
     renderMatrixHead($("pc-qual-head"), "Client");
 
-    // populate industry dropdown
     const industryVals = uniqueSorted(rows.map(r=>r[perfClient.industryField]));
     const sel = $("pc-industry");
     sel.innerHTML = `<option value="">Pilih Industry...</option>` + industryVals.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
@@ -2305,6 +2254,7 @@ function initPerformanceClient(){
   });
 }
 
+/* ✅ FIX: fungsi ini dibersihkan (tidak ada kode nyasar lagi) */
 function updatePerformanceClientView(){
   const ind = $("pc-industry").value;
   const client = $("pc-client").value;
@@ -2341,19 +2291,6 @@ function updatePerformanceClientView(){
     (client ? ` · Client "${client}"` : ` · ${clients.length} client`);
 }
 
-  const rows = perfClient.rows.filter(r=>trimStr(r[perfClient.industryField])===ind);
-  const clients = uniqueSorted(rows.map(r=>r[perfClient.clientField]));
-  const submitMap = buildMatrixRows(rows, perfClient.clientField, perfClient.submitCols);
-  const qualMap = buildMatrixRows(rows, perfClient.clientField, perfClient.qualCols);
-
-  renderMatrixBody($("pc-submit-body"), clients, submitMap);
-  renderMatrixBody($("pc-qual-body"), clients, qualMap);
-
-  emptySubmit.style.display = clients.length ? "none" : "block";
-  emptyQual.style.display = clients.length ? "none" : "block";
-  $("pc-status-text").textContent = `Industry "${ind}" · ${clients.length} client.`;
-}
-
 function clearPC(){
   $("pc-industry").value = "";
   $("pc-client").innerHTML = `<option value="">Semua Client</option>`;
@@ -2386,25 +2323,23 @@ function initPerformanceArea(){
     perfArea.groupField = group || fields[0] || null;
     perfArea.areaField = area || fields[1] || null;
 
-    // ✅ FIXED: Query Report Area mapping by column letters (sama seperti Client)
     const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
     const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
-    
+
     const okSubmit = fixedSubmit.filter(Boolean).length;
     const okQual   = fixedQual.filter(Boolean).length;
-    
+
     if(okSubmit >= 8) perfArea.submitCols = fixedSubmit;
     else{
       const submitDetect = detectMonthCols(fields, "SUBMIT");
       perfArea.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
     }
-    
+
     if(okQual >= 8) perfArea.qualCols = fixedQual;
     else{
       const qualDetect = detectMonthCols(fields, "QUALIFIED");
       perfArea.qualCols = (qualDetect.okCount>=6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
     }
-
 
     renderMatrixHead($("pa-submit-head"), "Area");
     renderMatrixHead($("pa-qual-head"), "Area");
@@ -2483,7 +2418,7 @@ function clearPA(){
 }
 
 /* =========================================================
-   PERFORMANCE JOBTYPE (✅ Job Type = kolom A, Job Parent = kolom B)
+   PERFORMANCE JOBTYPE (Job Type = kolom A, Job Parent = kolom B)
 ========================================================= */
 let perfJob = {
   rows:[], fields:[],
@@ -2504,11 +2439,8 @@ function initPerformanceJobtype(){
     perfJob.rows = rows;
     perfJob.fields = fields;
 
-    // ✅ Hard rule: kolom A & B by position, not by header name
     perfJob.jobTypeField = fields[0] || null;   // A
     perfJob.jobParentField = fields[1] || null; // B
-
-    // optional area column if exists by header
     perfJob.areaField = findField(fields, ["AREA"]);
 
     const submitDetect = detectMonthCols(fields, "SUBMIT");
@@ -2521,17 +2453,14 @@ function initPerformanceJobtype(){
     renderMatrixHead($("pj-submit-head"), "Job Type");
     renderMatrixHead($("pj-qual-head"), "Job Type");
 
-    // Parent dropdown
     const parents = uniqueSorted(rows.map(r=>r[perfJob.jobParentField]));
     const selP = $("pj-parent");
     selP.innerHTML = `<option value="">Pilih Job Parent...</option>` + parents.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
 
-    // Type dropdown initial
     const selT = $("pj-type");
     selT.innerHTML = `<option value="">Pilih Job Type...</option>`;
     selT.disabled = true;
 
-    // Area dropdown from perfArea rows (if already loaded), else from perfArea later
     refreshPJAreaOptions();
 
     $("pj-load-state").style.display = "none";
@@ -2550,7 +2479,6 @@ function initPerformanceJobtype(){
 }
 
 function refreshPJAreaOptions(){
-  // Prefer from Performance Area data if available
   let areas = [];
   if(perfArea.rows && perfArea.rows.length && perfArea.areaField){
     areas = uniqueSorted(perfArea.rows.map(r=>r[perfArea.areaField]));
@@ -2572,7 +2500,6 @@ function updatePJTypeOptions(){
 
   let rows = perfJob.rows.filter(r=>trimStr(r[perfJob.jobParentField])===parent);
 
-  // optional: filter by area if exists in jobtype dataset
   const area = $("pj-area").value;
   if(area && perfJob.areaField){
     rows = rows.filter(r=>trimStr(r[perfJob.areaField])===area);
@@ -2599,18 +2526,15 @@ function updatePerformanceJobtypeView(){
     return;
   }
 
-  // Filter base rows
   let rows = perfJob.rows.filter(r=>trimStr(r[perfJob.jobParentField])===parent);
   if(area && perfJob.areaField){
     rows = rows.filter(r=>trimStr(r[perfJob.areaField])===area);
   }
 
-  // Parent aggregate (average of job types under parent)
   const parentAvgSubmit = buildAvgMatrixForGroup(rows, perfJob.jobParentField, perfJob.submitCols);
   renderMatrixBody($("pj-parent-submit-body"), [parent], parentAvgSubmit);
   $("pj-parent-empty").style.display = "none";
 
-  // Job type matrices
   let rowsType = rows;
   if(type){
     rowsType = rowsType.filter(r=>trimStr(r[perfJob.jobTypeField])===type);
@@ -2683,7 +2607,6 @@ async function loadAll(){
 
     setPill("Loaded");
 
-    // Performance loads (non-blocking sequence)
     initPerformanceClient();
     initPerformanceArea();
     initPerformanceJobtype();
@@ -2722,16 +2645,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   // Perf events
   $("pc-industry").addEventListener("change", ()=>{
-    updateClientDropdown();       // refresh pilihan client sesuai industry
-    updatePerformanceClientView(); // render tabel
+    updateClientDropdown();
+    updatePerformanceClientView();
   });
-  
   $("pc-client").addEventListener("change", updatePerformanceClientView);
 
   $("pa-group").addEventListener("change", ()=>{
     updateAreaDropdown();
     updatePerformanceAreaView();
-    // refresh jobtype area options too (if jobtype already loaded)
     refreshPJAreaOptions();
   });
   $("pa-area").addEventListener("change", updatePerformanceAreaView);
