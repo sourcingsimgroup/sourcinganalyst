@@ -2443,11 +2443,25 @@ function initPerformanceJobtype(){
     perfJob.jobParentField = fields[1] || null; // B
     perfJob.areaField = findField(fields, ["AREA"]);
 
-    const submitDetect = detectMonthCols(fields, "SUBMIT");
-    const qualDetect = detectMonthCols(fields, "QUALIFIED");
-
-    perfJob.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
-    perfJob.qualCols   = (qualDetect.okCount>=6)   ? qualDetect.cols   : fallbackMonthColsByIndex(fields, 14);
+    // ✅ FIXED: Query Report Jobtype mapping by column letters
+    const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
+    const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
+    
+    const okSubmit = fixedSubmit.filter(Boolean).length;
+    const okQual   = fixedQual.filter(Boolean).length;
+    
+    // Kalau mapping kolom tersedia, pakai itu. Kalau tidak, fallback ke auto-detect lama.
+    if(okSubmit >= 8) perfJob.submitCols = fixedSubmit;
+    else{
+      const submitDetect = detectMonthCols(fields, "SUBMIT");
+      perfJob.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
+    }
+    
+    if(okQual >= 8) perfJob.qualCols = fixedQual;
+    else{
+      const qualDetect = detectMonthCols(fields, "QUALIFIED");
+      perfJob.qualCols = (qualDetect.okCount>=6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
+    }
 
     renderMatrixHead($("pj-parent-submit-head"), "Job Parent");
     renderMatrixHead($("pj-submit-head"), "Job Type");
