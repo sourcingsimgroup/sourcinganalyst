@@ -632,7 +632,7 @@
           </div>
           <div class="status-bar">
             <div class="status-left"><span class="status-dot"></span><span id="status-prov">Menunggu data...</span></div>
-            <div class="status-right">Valid = (KATEGORI APP = "APLIKAN VALID - CTC 1") & QUALIFIED = YES</div>
+            <div class="status-right">Valid = KATEGORI APP "APLIKAN VALID - CTC 1" · Buffer = QUALIFIED "YES"</div>
           </div>
         </article>
 
@@ -1390,11 +1390,12 @@ function isQualifiedYes(row){
   const s = norm(row[COL_QUALIFIED]);
   return s === "YES" || s === "YA";
 }
+// ✅ Revisi: VALID dari KATEGORI APP (AC), BUFFER dari QUALIFIED (AD)
 function getValidFlag(row){
-  return isKategoriValid(row) && isQualifiedYes(row) ? 1 : 0;
+  return isKategoriValid(row) ? 1 : 0;
 }
 function getBufferFlag(row){
-  return isKategoriValid(row) && !isQualifiedYes(row) ? 1 : 0;
+  return isQualifiedYes(row) ? 1 : 0;
 }
 function genderBucket(row){
   const s = norm(row[COL_GENDER]);
@@ -1774,13 +1775,18 @@ function updateMonthlyChart(rows){
 
   let skipped=0;
   rows.forEach(r=>{
-    if(!isKategoriValid(r)) return;
+    // ambil bulan dari PERIODE PELAMAR
     const mi = parseMonthIndex(r[COL_PERIODE]);
     if(!mi){ skipped++; return; }
+
     const obj = bucket.get(mi);
     if(!obj) return;
-    obj.valid += isQualifiedYes(r) ? 1 : 0;
-    obj.buffer += isQualifiedYes(r) ? 0 : 1;
+
+    // ✅ Revisi definisi:
+    // valid = KATEGORI APP "APLIKAN VALID - CTC 1"
+    // buffer = QUALIFIED "YES"
+    obj.valid  += getValidFlag(r);
+    obj.buffer += getBufferFlag(r);
   });
 
   let maxV=1;
@@ -1831,9 +1837,9 @@ function updateMonthlyChart(rows){
   $("chart-summary-text").textContent =
     skipped>0
       ? `Catatan: ${skipped} baris dilewati karena PERIODE PELAMAR tidak terbaca bulan-nya.`
-      : `Periode terbaca dengan baik untuk seluruh data yang relevan.`;
+      : `Periode terbaca dengan baik untuk seluruh data.`;
 }
-
+  
 /* Master update ACM */
 function updateACMAll(){
   const filtered = getFilteredACMRows();
