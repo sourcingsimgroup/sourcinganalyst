@@ -125,23 +125,9 @@
     .page{display:none;}
     .page.active{display:block;}
 
-    /* FILTER – STICKY (ACM) */
-    .filter-card{
-      margin-bottom:14px;
-      position:sticky;
-      top:0;
-      z-index:30;
-    }
-
-    /* FILTER – STICKY (Sourcing Analyst) */
-    .sa-filter-card{
-      margin-bottom:14px;
-      position:sticky;
-      top:0;
-      z-index:30;
-    }
-
-    /* FILTER – (Performance pages) */
+    /* FILTER – STICKY */
+    .filter-card,
+    .sa-filter-card,
     .perf-filter-card{
       margin-bottom:14px;
       position:sticky;
@@ -800,6 +786,22 @@
             </div>
 
             <div class="filter-group">
+              <label class="filter-label">Cycle Hired</label>
+              <div class="ms" id="ms-cycle">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Cycle</span>
+                  <span class="ms-counter"></span>
+                  <span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari cycle..." />
+                  <div class="ms-options"></div>
+                  <div class="ms-empty">Tidak ada cycle</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
               <label class="filter-label">Periode Pelamar</label>
               <div class="ms" id="ms-periode">
                 <button type="button" class="ms-toggle">
@@ -832,6 +834,7 @@
                   </div>
                 </div>
               </div>
+              
               <div>
                 <label class="filter-label">Job Type</label>
                 <div class="ms ms-disabled" id="ms-job-type">
@@ -1302,7 +1305,7 @@
         </div>
         <div class="card-subtext">
           Filter pilihan: <strong>Group Client</strong> dan <strong>Area</strong>.
-          Tabel menampilkan <strong>Area)</strong> dan <strong>Bulan</strong>.
+          Tabel menampilkan <strong>Area</strong> dan <strong>Bulan</strong>.
           Nilai tampil dalam format <strong>xx.xx%</strong>.
         </div>
 
@@ -1403,14 +1406,14 @@
             </div>
 
             <div class="filter-group">
-              <label class="filter-label">Job Parent</label>
+              <label class="filter-label">Job Parent (kolom AH)</label>
               <select id="pj-parent" class="perf-select">
                 <option value="">Pilih Job Parent...</option>
               </select>
             </div>
 
             <div class="filter-group">
-              <label class="filter-label">Job Type</label>
+              <label class="filter-label">Job Type (kolom AI)</label>
               <select id="pj-type" class="perf-select" disabled>
                 <option value="">Pilih Job Type...</option>
               </select>
@@ -1495,6 +1498,7 @@ const CSV_URL_JOBTYPE= "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogpp
 ========================== */
 const $ = id => document.getElementById(id);
 const norm = v => String(v ?? "").trim().toUpperCase();
+const trimStr = v => String(v ?? "").trim();
 
 const numberFmt = new Intl.NumberFormat("id-ID", { maximumFractionDigits:0 });
 const currencyFmt = new Intl.NumberFormat("id-ID", { style:"currency", currency:"IDR", maximumFractionDigits:0 });
@@ -1519,24 +1523,18 @@ function toFloat(v){
   if(v == null) return null;
   let s = String(v).trim();
   if(!s) return null;
-  // remove percent sign
   s = s.replace("%","").trim();
-  // keep numbers, commas, dots
   s = s.replace(/[^0-9.,-]/g,"");
   if(!s) return null;
-  // normalize: Indonesian could be 10,5 or 10.5
-  // if both exist, assume dot = thousands, comma = decimal
   if(s.includes(",") && s.includes(".")){
     s = s.replace(/\./g,"").replace(",",".");
   }else{
-    // if only comma -> decimal
     if(s.includes(",")) s = s.replace(",",".");
   }
   const n = Number(s);
   return isNaN(n) ? null : n;
 }
 
-/* value might be 0-1 or 0-100. Output "xx.xx%" or "-" */
 function fmtPercent(val){
   const n = toFloat(val);
   if(n == null) return "-";
@@ -1568,29 +1566,24 @@ function uniqueSorted(arr){
     .sort((a,b)=>String(a).localeCompare(String(b),"id"));
 }
 
-/* render matrix header with months */
 function renderMatrixHead(theadEl, leftTitle){
   const tr = document.createElement("tr");
   const th0 = document.createElement("th");
   th0.textContent = leftTitle;
   tr.appendChild(th0);
-
   MONTHS.forEach(m=>{
     const th = document.createElement("th");
     th.textContent = m.label;
     tr.appendChild(th);
   });
-
   theadEl.innerHTML = "";
   theadEl.appendChild(tr);
 }
 
-/* Build matrix: rowsKeyList = [{key,label}], valueGetter(row, monthIndex) -> percent string */
 function renderMatrixBody(tbodyEl, rowsKeyList, valueMapByRowKey){
   tbodyEl.innerHTML = "";
   rowsKeyList.forEach(({key,label})=>{
     const tr = document.createElement("tr");
-
     const td0 = document.createElement("td");
     td0.textContent = label;
     td0.className = "col-label";
@@ -1603,7 +1596,6 @@ function renderMatrixBody(tbodyEl, rowsKeyList, valueMapByRowKey){
       td.textContent = v == null ? "-" : v;
       tr.appendChild(td);
     });
-
     tbodyEl.appendChild(tr);
   });
 }
@@ -1613,6 +1605,7 @@ function renderMatrixBody(tbodyEl, rowsKeyList, valueMapByRowKey){
 ========================== */
 const COL_PROV      = "PROVINSI MINAT PENEMPATAN";
 const COL_KOTA      = "KOTA MINAT PENEMPATAN";
+const COL_CYCLE     = "CYCLE HIRED";
 const COL_PERIODE   = "PERIODE PELAMAR";
 const COL_KATEGORI  = "KATEGORI APP";
 const COL_QUALIFIED = "QUALIFIED";
@@ -1696,7 +1689,6 @@ function isQualifiedYes(raw){
 function createMultiSelect(rootId, options, placeholder, disabled, onChange){
   const root = $(rootId);
   const toggle = root.querySelector(".ms-toggle");
-  const panel = root.querySelector(".ms-panel");
   const searchInput = root.querySelector(".ms-search");
   const optsContainer = root.querySelector(".ms-options");
   const emptyEl = root.querySelector(".ms-empty");
@@ -2172,7 +2164,6 @@ function aggregateProvDynamic(rows){
   return res;
 }
 
-/* categorize methods */
 function getMethodCategory(row){
   const mediaText  = norm(row[DETECTED_COL_MEDIA] ?? "");
   const metodeText = norm(row[COL_METODE] ?? "");
@@ -2219,7 +2210,6 @@ function aggregateMetodeSmart(rows){
   return [buckets["OFFLINE"], buckets["ONLINE - MEDIA SOSIAL"], buckets["ONLINE - JOB PORTAL"], buckets["LAINNYA"]];
 }
 
-/* media social table */
 function aggregateMediaSocial(rows){
   const map = new Map();
   FIXED_MEDIA_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
@@ -2264,7 +2254,6 @@ function aggregateMediaSocial(rows){
   return FIXED_MEDIA_LIST.map(name=>map.get(name));
 }
 
-/* job portal table */
 function aggregateJobPortal(rows){
   const map = new Map();
   FIXED_PORTAL_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
@@ -2312,7 +2301,6 @@ function aggregateJobPortal(rows){
   return FIXED_PORTAL_LIST.map(name=>map.get(name));
 }
 
-/* offline table */
 function aggregateOffline(rows){
   const map = new Map();
   FIXED_OFFLINE_LIST.forEach(name=> map.set(name,{name,valid:0,buffer:0,totalCost:0}) );
@@ -2376,7 +2364,6 @@ function aggregateOffline(rows){
   return FIXED_OFFLINE_LIST.map(name=>map.get(name));
 }
 
-/* month parsing for ACM chart */
 function parseMonthIndex(str){
   if(!str) return null;
   const s = String(str).toLowerCase();
@@ -2803,13 +2790,11 @@ function updatePerfClientTables(){
   const colClient = perfClientFields[0]; // column A
   const colIndustry = perfClientFields[1]; // column B
 
-  const rows = perfClientRows.filter(r => String(r[colIndustry] ?? "") === industry);
+  const rows = perfClientRows.filter(r => trimStr(r[colIndustry]) === trimStr(industry));
 
-  // Build list of clients (rows)
   const clients = uniqueSorted(rows.map(r => r[colClient]));
   const rowKeys = clients.map(c => ({key:c, label:c}));
 
-  // Build value maps
   const submitMap = new Map();
   const qualMap   = new Map();
 
@@ -2817,13 +2802,12 @@ function updatePerfClientTables(){
   const qualFields   = QUAL_COLS.map(l => getFieldByLetter(perfClientFields, l));
 
   rows.forEach(r=>{
-    const client = String(r[colClient] ?? "").trim();
+    const client = trimStr(r[colClient]);
     if(!client) return;
 
     if(!submitMap.has(client)) submitMap.set(client, {});
     if(!qualMap.has(client)) qualMap.set(client, {});
 
-    // take latest non-empty value if duplicate rows exist
     MONTHS.forEach((m, i)=>{
       const fS = submitFields[i];
       const fQ = qualFields[i];
@@ -2876,7 +2860,6 @@ function initPerfArea(){
     groupSelect.appendChild(opt);
   });
 
-  // collect all areas globally for Jobtype filter (dropdown label)
   perfAreaAreasForJobtype = uniqueSorted(perfAreaRows.map(r => r[colArea]).filter(Boolean));
   syncAreaToJobtypeDropdown();
 
@@ -2888,7 +2871,7 @@ function initPerfArea(){
       updatePerfAreaTables();
       return;
     }
-    const areas = uniqueSorted(perfAreaRows.filter(r=>String(r[colGroup]??"")===g).map(r=>r[colArea]));
+    const areas = uniqueSorted(perfAreaRows.filter(r=>trimStr(r[colGroup])===trimStr(g)).map(r=>r[colArea]));
     areas.forEach(a=>{
       const opt = document.createElement("option");
       opt.value = a;
@@ -2934,8 +2917,8 @@ function updatePerfAreaTables(){
   const colGroup = perfAreaFields[0]; // A
   const colArea  = perfAreaFields[1]; // B
 
-  let rows = perfAreaRows.filter(r => String(r[colGroup] ?? "") === group);
-  if(area) rows = rows.filter(r => String(r[colArea] ?? "") === area);
+  let rows = perfAreaRows.filter(r => trimStr(r[colGroup]) === trimStr(group));
+  if(area) rows = rows.filter(r => trimStr(r[colArea]) === trimStr(area));
 
   const areas = uniqueSorted(rows.map(r => r[colArea]));
   const rowKeys = areas.map(a => ({key:a, label:a}));
@@ -2947,7 +2930,7 @@ function updatePerfAreaTables(){
   const qualFields   = QUAL_COLS.map(l => getFieldByLetter(perfAreaFields, l));
 
   rows.forEach(r=>{
-    const areaName = String(r[colArea] ?? "").trim();
+    const areaName = trimStr(r[colArea]);
     if(!areaName) return;
 
     if(!submitMap.has(areaName)) submitMap.set(areaName, {});
@@ -2976,15 +2959,18 @@ function updatePerfAreaTables(){
 }
 
 /* ==========================
-   PERFORMANCE JOBTYPE
+   PERFORMANCE JOBTYPE (FIX AH/AI)
 ========================== */
 let perfJobRows = [];
 let perfJobFields = [];
 
+// ✅ Mapping kolom untuk Performance Jobtype
+let PJ_COL_PARENT = null; // harus AH
+let PJ_COL_TYPE   = null; // harus AI
+
 function syncAreaToJobtypeDropdown(){
   const sel = $("pj-area");
   if(!sel) return;
-  // keep current selection
   const cur = sel.value;
   sel.innerHTML = `<option value="">Semua Area</option>`;
   (perfAreaAreasForJobtype || []).forEach(a=>{
@@ -3007,15 +2993,20 @@ function initPerfJobtype(){
   const parentSel = $("pj-parent");
   const typeSel = $("pj-type");
 
-  // Assume: Job Parent = column A, Job Type = column B
-  const colParent = perfJobFields[0];
-  const colType   = perfJobFields[1];
+  // ✅ FIX: Job Parent dari kolom AH, Job Type dari kolom AI
+  const colParent = PJ_COL_PARENT;
+  const colType   = PJ_COL_TYPE;
+
+  // info kolom yang dipakai
+  const note = $("pj-col-note");
+  if(note) note.textContent = `Kolom dipakai: Parent=${colParent} (AH) · Type=${colType} (AI)`;
 
   parentSel.innerHTML = `<option value="">Pilih Job Parent</option>`;
   typeSel.innerHTML = `<option value="">Pilih Job Type</option>`;
   typeSel.disabled = true;
 
-  const parents = uniqueSorted(perfJobRows.map(r=>r[colParent]));
+  // ✅ Dropdown Parent hanya dari AH
+  const parents = uniqueSorted(perfJobRows.map(r=>trimStr(r[colParent])).filter(Boolean));
   parents.forEach(p=>{
     const opt = document.createElement("option");
     opt.value = p;
@@ -3025,6 +3016,7 @@ function initPerfJobtype(){
 
   parentSel.addEventListener("change", ()=>{
     const p = parentSel.value;
+
     typeSel.innerHTML = `<option value="">Semua Job Type</option>`;
     if(!p){
       typeSel.disabled = true;
@@ -3032,13 +3024,22 @@ function initPerfJobtype(){
       updatePerfJobtypeTables();
       return;
     }
-    const types = uniqueSorted(perfJobRows.filter(r=>String(r[colParent]??"")===p).map(r=>r[colType]).filter(Boolean));
+
+    // ✅ Cascade: Job Type hanya yang termasuk parent terpilih (AI)
+    const types = uniqueSorted(
+      perfJobRows
+        .filter(r=>trimStr(r[colParent])===trimStr(p))
+        .map(r=>trimStr(r[colType]))
+        .filter(Boolean)
+    );
+
     types.forEach(t=>{
       const opt = document.createElement("option");
       opt.value = t;
       opt.textContent = t;
       typeSel.appendChild(opt);
     });
+
     typeSel.disabled = false;
     typeSel.value = "";
     updatePerfJobtypeTables();
@@ -3047,7 +3048,6 @@ function initPerfJobtype(){
   typeSel.addEventListener("change", updatePerfJobtypeTables);
 
   $("pj-area").addEventListener("change", ()=>{
-    // label-only, still refresh status text
     updatePerfJobtypeTables();
   });
 
@@ -3063,15 +3063,14 @@ function initPerfJobtype(){
 }
 
 function groupAvgMatrix(rows, keyCol, submitOrQual){
-  // submitOrQual: "submit"|"qual"
   const submitFields = SUBMIT_COLS.map(l => getFieldByLetter(perfJobFields, l));
   const qualFields   = QUAL_COLS.map(l => getFieldByLetter(perfJobFields, l));
-
   const fields = submitOrQual === "submit" ? submitFields : qualFields;
+
   const groups = new Map(); // key -> {sumPct[idx], cnt[idx]}
 
   rows.forEach(r=>{
-    const key = String(r[keyCol] ?? "").trim();
+    const key = trimStr(r[keyCol]);
     if(!key) return;
     if(!groups.has(key)){
       groups.set(key, {sum:{}, cnt:{}});
@@ -3114,7 +3113,6 @@ function updatePerfJobtypeTables(){
   const emptySubmit = $("pj-submit-empty");
   const emptyQual = $("pj-qual-empty");
 
-  // without parent: show empty
   if(!parent){
     emptyParent.style.display = "block";
     emptySubmit.style.display = "block";
@@ -3130,27 +3128,22 @@ function updatePerfJobtypeTables(){
   emptySubmit.style.display = "none";
   emptyQual.style.display = "none";
 
-  // Assume: A=Job Parent, B=Job Type
-  const colParent = perfJobFields[0];
-  const colType   = perfJobFields[1];
+  // ✅ FIX: pakai AH/AI
+  const colParent = PJ_COL_PARENT;
+  const colType   = PJ_COL_TYPE;
 
-  let rows = perfJobRows.filter(r => String(r[colParent] ?? "") === parent);
-  if(type) rows = rows.filter(r => String(r[colType] ?? "") === type);
+  let rows = perfJobRows.filter(r => trimStr(r[colParent]) === trimStr(parent));
+  if(type) rows = rows.filter(r => trimStr(r[colType]) === trimStr(type));
 
-  // Table 1: Job Parent submit (rows = job parent, but only selected parent -> one row)
-  // Use average across job types within selected parent (if type selected, still show parent row average of filtered type only)
-  const parentRows = rows; // already filtered by parent, maybe type
-  const parentMapSubmit = groupAvgMatrix(parentRows, colParent, "submit");
-  const parentKeys = [{key: parent, label: parent}];
+  const parentMapSubmit = groupAvgMatrix(rows, colParent, "submit");
+  const parentKeys = [{key: trimStr(parent), label: trimStr(parent)}];
   renderMatrixBody($("pj-parent-submit-body"), parentKeys, parentMapSubmit);
 
-  // Table 2: Job Type submit (rows = job type)
   const typeMapSubmit = groupAvgMatrix(rows, colType, "submit");
-  const typesShown = uniqueSorted(rows.map(r=>r[colType]).filter(Boolean));
+  const typesShown = uniqueSorted(rows.map(r=>trimStr(r[colType])).filter(Boolean));
   const typeKeys = typesShown.map(t=>({key:t,label:t}));
   renderMatrixBody($("pj-submit-body"), typeKeys, typeMapSubmit);
 
-  // Table 3: Job Type qualified (rows = job type)
   const typeMapQual = groupAvgMatrix(rows, colType, "qual");
   renderMatrixBody($("pj-qual-body"), typeKeys, typeMapQual);
 
@@ -3276,6 +3269,25 @@ function loadPerfJobtype(){
       $("pj-error-state").style.display = "block";
       return;
     }
+
+    // ✅ FIX: pakai kolom AH (Job Parent) & AI (Job Type)
+    PJ_COL_PARENT = getFieldByLetter(perfJobFields, "AH")
+      || perfJobFields.find(f => norm(f).includes("JOB") && norm(f).includes("PARENT"))
+      || null;
+
+    PJ_COL_TYPE = getFieldByLetter(perfJobFields, "AI")
+      || perfJobFields.find(f => norm(f).includes("JOB") && norm(f).includes("TYPE"))
+      || null;
+
+    if(!PJ_COL_PARENT || !PJ_COL_TYPE){
+      $("pj-load-state").style.display = "none";
+      $("pj-error-state").textContent =
+        "Kolom Job Parent/Job Type tidak ditemukan. Pastikan sheet Jobtype memiliki kolom sampai AH & AI (atau header mengandung 'Job Parent' dan 'Job Type').";
+      $("pj-error-state").style.display = "block";
+      return;
+    }
+
+    $("pj-load-state").style.display = "none";
     initPerfJobtype();
   }, (err)=>{
     console.error(err);
@@ -3312,7 +3324,6 @@ function setActiveTab(tabId){
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  /* ACM: clear & hamburger */
   $("clear-filters-btn").addEventListener("click", clearFilters);
   $("sa-clear-filters-btn").addEventListener("click", clearSaFilters);
 
@@ -3331,7 +3342,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const pjFilterCard = $("pj-filter-card");
   $("pj-filter-toggle-btn").addEventListener("click", ()=> pjFilterCard.classList.toggle("open"));
 
-  /* Tabs */
   $("tab-acm").addEventListener("click", ()=>setActiveTab("tab-acm"));
   $("tab-sa").addEventListener("click",  ()=>setActiveTab("tab-sa"));
   $("tab-pc").addEventListener("click",  ()=>setActiveTab("tab-pc"));
@@ -3340,7 +3350,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   setActiveTab("tab-acm");
 
-  /* Load all data sources */
   loadACM();
   loadPerfClient();
   loadPerfArea();
