@@ -8,27 +8,52 @@
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
     :root{
-      --bg:#f5f7fb;
-      --card:#ffffff;
-      --ink:#111827;
+      /* Executive Modern Gold */
+      --bg:#ffffff;
+      --card:rgba(255,255,255,0.78);
+      --card-solid:#ffffff;
+
+      --ink:#0b1220;
       --muted:#6b7280;
-      --brand:#2563eb;
-      --brand-soft:#e0edff;
-      --line:#e5e7eb;
-      --radius:18px;
-      --shadow:0 18px 40px rgba(15,23,42,0.08);
+
+      /* Gold accent (20% feel) */
+      --gold:#d4af37;
+      --gold-soft:rgba(212,175,55,0.20);
+      --gold-10:rgba(212,175,55,0.10);
+      --gold-06:rgba(212,175,55,0.06);
+
+      /* Primary (navy-black executive) */
+      --brand:#111827;
+      --brand-2:#0b1220;
+
+      --line:rgba(17,24,39,0.10);
+      --line-strong:rgba(17,24,39,0.16);
+
+      --radius:20px;
+      --radius-lg:26px;
+
+      --shadow:0 22px 60px rgba(2,6,23,0.08);
+      --shadow-soft:0 14px 30px rgba(2,6,23,0.06);
+
       --warn:#b91c1c;
       --male:#1d4ed8;
       --female:#db2777;
       --total:#059669;
       --orange:#f97316;
+
+      --blur:14px;
+
+      /* skeleton */
+      --sk-base:rgba(17,24,39,0.06);
+      --sk-hi:rgba(212,175,55,0.14);
+      --sk-hi2:rgba(255,255,255,0.72);
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -36,72 +61,223 @@
       width:100%;
       min-height:100%;
       font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background: radial-gradient(circle at top left,#e0edff 0,#f5f7fb 40%,#f5f7fb 100%);
       color:var(--ink);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(212,175,55,0.20) 0%, rgba(212,175,55,0.00) 60%),
+        radial-gradient(900px 600px at 85% 30%, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.00) 55%),
+        linear-gradient(180deg, #ffffff 0%, #fbfbfd 38%, #ffffff 100%);
     }
-    body{ display:flex; justify-content:center; padding:16px; }
-    .app-shell{ width:100%; max-width:1240px; }
+    body{ display:flex; justify-content:center; padding:18px; }
+    .app-shell{ width:100%; max-width:1240px; position:relative; z-index:1; }
 
-    header{
-      display:flex; flex-wrap:wrap; gap:12px;
-      justify-content:space-between; align-items:flex-start;
-      margin-bottom:12px;
+    /* Background ornaments */
+    .bg-ornaments{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
     }
-    .title-block h1{ font-size:1.65rem; font-weight:800; letter-spacing:0.01em; }
-    .title-block p{ margin-top:6px; font-size:0.9rem; color:var(--muted); line-height:1.4; }
-
-    .pill{
-      padding:8px 14px;
-      background:rgba(37,99,235,0.06);
+    .orb{
+      position:absolute;
       border-radius:999px;
-      font-size:0.8rem;
-      color:var(--brand);
-      font-weight:700;
+      filter:blur(22px);
+      opacity:.9;
+    }
+    .orb-a{
+      width:520px; height:520px;
+      left:-140px; top:-170px;
+      background:radial-gradient(circle at 30% 30%, rgba(212,175,55,.28), rgba(212,175,55,0) 60%);
+    }
+    .orb-b{
+      width:460px; height:460px;
+      right:-160px; top:120px;
+      background:radial-gradient(circle at 40% 40%, rgba(212,175,55,.22), rgba(212,175,55,0) 62%);
+    }
+    .grid-sheen{
+      position:absolute;
+      inset:-40px;
+      background:
+        linear-gradient(to right, rgba(17,24,39,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(17,24,39,0.04) 1px, transparent 1px);
+      background-size:64px 64px;
+      opacity:.35;
+      mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,0.9), rgba(0,0,0,0) 68%);
+    }
+
+    /* =========================
+       STICKY TOP BAR (SaaS mahal)
+    ========================= */
+    .topbar{
+      position:sticky;
+      top:10px;
+      z-index:80;
+      margin-bottom:14px;
+      border-radius:22px;
+      background:rgba(255,255,255,0.62);
+      border:1px solid rgba(17,24,39,0.10);
+      box-shadow:0 22px 60px rgba(2,6,23,0.10);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      overflow:hidden;
+    }
+    .topbar::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.12));
+      opacity:.35;
+    }
+    .topbar-inner{
+      position:relative;
+      padding:14px 16px 12px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      min-width:240px;
+    }
+    .brand-badge{
+      width:38px; height:38px;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(17,24,39,0.95), rgba(17,24,39,0.80));
+      position:relative;
+      box-shadow:0 14px 30px rgba(2,6,23,0.14);
+      border:1px solid rgba(212,175,55,0.25);
+      flex:0 0 auto;
+    }
+    .brand-badge::after{
+      content:"";
+      position:absolute; inset:8px;
+      border-radius:11px;
+      background:radial-gradient(circle at 30% 30%, rgba(212,175,55,0.85), rgba(212,175,55,0.15));
+      opacity:.95;
+      mix-blend-mode:screen;
+    }
+    .brand-text h1{
+      font-size:1.25rem;
+      font-weight:900;
+      letter-spacing:0.01em;
+      background:linear-gradient(90deg, var(--brand-2), rgba(212,175,55,.85));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      line-height:1.15;
+    }
+    .brand-text p{
+      margin-top:6px;
+      font-size:0.85rem;
+      color:rgba(17,24,39,0.70);
+      line-height:1.35;
+    }
+
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      padding:9px 14px;
+      background:rgba(255,255,255,0.65);
+      border:1px solid var(--line);
+      border-radius:999px;
+      font-size:0.78rem;
+      color:rgba(17,24,39,0.78);
+      font-weight:900;
       display:inline-flex;
       align-items:center;
       gap:8px;
       white-space:nowrap;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter: blur(var(--blur));
     }
     .pill-dot{
       width:8px; height:8px; border-radius:999px;
-      background:var(--brand);
-      box-shadow:0 0 0 4px rgba(37,99,235,0.18);
+      background:rgba(212,175,55,0.95);
+      box-shadow:0 0 0 4px rgba(212,175,55,0.16);
     }
 
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px 18px 16px;
-      border:1px solid rgba(148,163,184,0.18);
+    /* Tabs inside topbar */
+    .tab-row{
+      position:relative;
+      padding:0 16px 14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
-
-    /* Tabs */
-    .tab-row{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
     .tab-btn{
       border-radius:999px;
       border:1px solid var(--line);
-      background:#f9fafb;
-      font-size:0.8rem;
-      padding:6px 14px;
+      background:rgba(255,255,255,0.65);
+      font-size:0.78rem;
+      padding:7px 14px;
       cursor:pointer;
-      color:var(--muted);
-      font-weight:800;
+      color:rgba(17,24,39,0.70);
+      font-weight:900;
       white-space:nowrap;
+      box-shadow:0 10px 24px rgba(2,6,23,0.05);
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      backdrop-filter: blur(var(--blur));
+    }
+    .tab-btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(212,175,55,0.32);
+      box-shadow:0 16px 30px rgba(2,6,23,0.08);
     }
     .tab-btn.active{
-      background:var(--brand);
+      background:linear-gradient(135deg, rgba(17,24,39,0.96), rgba(17,24,39,0.86));
       color:#ffffff;
-      border-color:var(--brand);
+      border-color:rgba(212,175,55,0.30);
+      box-shadow:0 18px 40px rgba(2,6,23,0.18);
+      position:relative;
     }
+    .tab-btn.active::after{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:999px;
+      border:1px solid rgba(212,175,55,0.35);
+      pointer-events:none;
+    }
+
+    /* Cards */
+    .card{
+      background:var(--card);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow);
+      padding:18px 18px 16px;
+      border:1px solid rgba(17,24,39,0.10);
+      backdrop-filter: blur(var(--blur));
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+      background:linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.08));
+      opacity:.35;
+    }
+
+    /* Pages */
     .page{ display:none; }
     .page.active{ display:block; }
 
-    /* Filter card sticky */
+    /* Sticky filter cards */
     .filter-card, .sa-filter-card, .perf-filter-card{
       margin-bottom:14px;
       position:sticky;
-      top:0;
+      top:110px;  /* because topbar sticky */
       z-index:40;
     }
 
@@ -111,23 +287,28 @@
       align-items:center;
       gap:8px;
       flex-wrap:wrap;
-      margin-bottom:8px;
+      margin-bottom:10px;
+      position:relative;
+      z-index:1;
     }
-    .card-title{ font-size:0.95rem; font-weight:800; }
+    .card-title{ font-size:0.95rem; font-weight:900; letter-spacing:.01em; }
     .card-tag{
       font-size:0.7rem;
-      padding:4px 10px;
+      padding:5px 10px;
       border-radius:999px;
-      background:var(--brand-soft);
-      color:var(--brand);
-      font-weight:800;
+      background:rgba(212,175,55,0.12);
+      color:rgba(17,24,39,0.78);
+      border:1px solid rgba(212,175,55,0.18);
+      font-weight:900;
       white-space:nowrap;
     }
     .card-subtext{
       font-size:0.75rem;
-      color:var(--muted);
+      color:rgba(17,24,39,0.70);
       line-height:1.45;
       margin-bottom:8px;
+      position:relative;
+      z-index:1;
     }
 
     .header-right-flex{
@@ -141,32 +322,40 @@
     .clear-btn{
       border-radius:999px;
       border:1px solid var(--line);
-      background:#f9fafb;
+      background:rgba(255,255,255,0.70);
       font-size:0.75rem;
-      padding:5px 10px;
+      padding:6px 11px;
       cursor:pointer;
-      color:var(--muted);
-      font-weight:800;
+      color:rgba(17,24,39,0.72);
+      font-weight:900;
+      box-shadow:0 10px 24px rgba(2,6,23,0.05);
+      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      backdrop-filter: blur(var(--blur));
     }
-    .clear-btn:hover{ background:#eef2ff; border-color:var(--brand); color:var(--brand); }
+    .clear-btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(212,175,55,0.32);
+      box-shadow:0 16px 30px rgba(2,6,23,0.08);
+    }
 
     .filter-toggle-btn{
       display:none;
       border-radius:999px;
       border:1px solid var(--line);
-      background:#ffffff;
+      background:rgba(255,255,255,0.70);
       font-size:0.75rem;
-      padding:5px 10px;
+      padding:6px 11px;
       cursor:pointer;
-      color:var(--muted);
+      color:rgba(17,24,39,0.72);
       align-items:center;
       gap:6px;
-      box-shadow:0 6px 16px rgba(15,23,42,0.06);
+      box-shadow:0 10px 24px rgba(2,6,23,0.05);
       font-weight:900;
+      backdrop-filter: blur(var(--blur));
     }
     .filter-toggle-btn .hamburger-icon{ font-size:0.9rem; line-height:1; }
 
-    .filter-body,.sa-filter-body,.perf-filter-body{ margin-top:6px; }
+    .filter-body,.sa-filter-body,.perf-filter-body{ margin-top:6px; position:relative; z-index:1; }
 
     @media (max-width:1024px){
       .filter-toggle-btn{ display:inline-flex; }
@@ -175,12 +364,13 @@
       .sa-filter-card.open .sa-filter-body,
       .perf-filter-card.open .perf-filter-body{ display:block; }
       .filter-card,.sa-filter-card,.perf-filter-card{
-        box-shadow:0 18px 40px rgba(15,23,42,0.12);
-        border-color:rgba(148,163,184,0.4);
+        box-shadow:0 22px 60px rgba(2,6,23,0.14);
+        border-color:rgba(17,24,39,0.16);
       }
+      .filter-card, .sa-filter-card, .perf-filter-card{ top:120px; }
     }
 
-    /* ✅ ACM Filters: 5 sejajar */
+    /* Filters layout */
     .filters{
       display:grid;
       grid-template-columns:repeat(5,minmax(0,1fr));
@@ -192,7 +382,6 @@
     }
     @media (max-width:640px){
       .filters{ grid-template-columns:1fr; }
-      .title-block h1{ font-size:1.35rem; }
     }
 
     .sa-filters{
@@ -213,84 +402,174 @@
     @media (max-width:1024px){ .perf-filters{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:640px){ .perf-filters{ grid-template-columns:1fr; } }
 
-    .filter-group{ display:flex; flex-direction:column; gap:4px; font-size:0.8rem; }
-    .filter-label{ font-weight:900; color:var(--muted); font-size:0.78rem; }
+    .filter-group{ display:flex; flex-direction:column; gap:6px; font-size:0.8rem; }
+    .filter-label{ font-weight:900; color:rgba(17,24,39,0.62); font-size:0.78rem; }
 
     /* Multi select */
     .ms{ position:relative; }
     .ms-toggle{
       width:100%;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#f9fafb;
-      padding:7px 9px;
+      border-radius:14px;
+      border:1px solid rgba(17,24,39,0.12);
+      background:rgba(255,255,255,0.72);
+      padding:8px 10px;
       font-size:0.78rem;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:6px;
       cursor:pointer;
+      box-shadow:0 12px 26px rgba(2,6,23,0.05);
+      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      backdrop-filter: blur(var(--blur));
+    }
+    .ms-toggle:hover{
+      transform:translateY(-1px);
+      border-color:rgba(212,175,55,0.30);
+      box-shadow:0 16px 34px rgba(2,6,23,0.08);
     }
     .ms-placeholder{ flex:1; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .ms-counter{ font-size:0.68rem; color:var(--muted); white-space:nowrap; }
-    .ms-arrow{ font-size:0.68rem; }
+    .ms-counter{ font-size:0.68rem; color:rgba(17,24,39,0.55); white-space:nowrap; }
+    .ms-arrow{ font-size:0.68rem; color:rgba(17,24,39,0.55); }
     .ms-panel{
       position:absolute;
       left:0; right:0; top:100%;
-      margin-top:4px;
-      background:#ffffff;
-      border-radius:14px;
-      box-shadow:0 12px 30px rgba(15,23,42,0.12);
-      border:1px solid rgba(148,163,184,0.4);
-      padding:8px;
+      margin-top:6px;
+      background:rgba(255,255,255,0.90);
+      border-radius:16px;
+      box-shadow:0 22px 48px rgba(2,6,23,0.12);
+      border:1px solid rgba(17,24,39,0.12);
+      padding:10px;
       z-index:60;
       display:none;
+      backdrop-filter: blur(var(--blur));
     }
     .ms.open .ms-panel{ display:block; }
     .ms-search{
       width:100%;
-      padding:6px 8px;
-      border-radius:999px;
-      border:1px solid var(--line);
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(17,24,39,0.12);
       font-size:0.75rem;
-      margin-bottom:6px;
+      margin-bottom:8px;
       outline:none;
+      background:rgba(255,255,255,0.85);
     }
-    .ms-options{ max-height:220px; overflow-y:auto; }
+    .ms-search:focus{
+      border-color:rgba(212,175,55,0.40);
+      box-shadow:0 0 0 4px rgba(212,175,55,0.14);
+    }
+    .ms-options{ max-height:240px; overflow-y:auto; }
     .ms-option{
-      display:flex; align-items:center; gap:6px;
-      padding:3px 4px;
+      display:flex; align-items:center; gap:8px;
+      padding:7px 8px;
       font-size:0.76rem;
       cursor:pointer;
+      border-radius:10px;
+      transition:background .12s ease;
     }
-    .ms-option input{ accent-color:var(--brand); }
-    .ms-empty{ font-size:0.74rem; color:var(--muted); padding:4px 2px; display:none; }
-    .ms-disabled .ms-toggle{ background:#e5e7eb; color:#9ca3af; cursor:not-allowed; }
-    .filter-hint{ margin-top:8px; font-size:0.75rem; color:var(--muted); }
+    .ms-option:hover{ background:rgba(212,175,55,0.08); }
+    .ms-option input{ accent-color:rgba(17,24,39,0.88); }
+    .ms-empty{ font-size:0.74rem; color:rgba(17,24,39,0.60); padding:6px 2px; display:none; }
+    .ms-disabled .ms-toggle{ background:rgba(17,24,39,0.06); color:#9ca3af; cursor:not-allowed; box-shadow:none; }
+    .filter-hint{ margin-top:10px; font-size:0.75rem; color:rgba(17,24,39,0.60); }
 
     /* Perf select native */
     .perf-select{
       width:100%;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#ffffff;
-      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(17,24,39,0.12);
+      background:rgba(255,255,255,0.78);
+      padding:10px 12px;
       font-size:0.8rem;
       outline:none;
       cursor:pointer;
+      box-shadow:0 12px 26px rgba(2,6,23,0.05);
+      backdrop-filter: blur(var(--blur));
     }
-    .perf-select:disabled{ background:#e5e7eb; color:#9ca3af; cursor:not-allowed; }
+    .perf-select:focus{
+      border-color:rgba(212,175,55,0.40);
+      box-shadow:0 0 0 4px rgba(212,175,55,0.14), 0 12px 26px rgba(2,6,23,0.06);
+    }
+    .perf-select:disabled{ background:rgba(17,24,39,0.06); color:#9ca3af; cursor:not-allowed; box-shadow:none; }
 
-    /* Loading & errors */
-    .loading{ display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--muted); margin-top:6px; }
-    .spinner{
-      width:14px; height:14px; border-radius:999px;
-      border:2px solid rgba(37,99,235,0.18);
-      border-top-color:var(--brand);
-      animation:spin 0.7s linear infinite;
+    /* Loading (spinner kept but hidden; skeleton used instead) */
+    .loading{ display:none; align-items:center; gap:8px; font-size:0.8rem; color:rgba(17,24,39,0.60); margin-top:10px; }
+    .spinner{ display:none; }
+    .error{ margin-top:10px; font-size:0.8rem; color:var(--warn); font-weight:800; line-height:1.4; }
+
+    /* Skeleton system */
+    .skeleton{ display:none; position:relative; z-index:1; }
+    .skeleton.show{ display:block; }
+    .sk-card{
+      border-radius:18px;
+      border:1px solid rgba(17,24,39,0.10);
+      background:rgba(255,255,255,0.62);
+      box-shadow:0 14px 30px rgba(2,6,23,0.06);
+      padding:14px;
+      overflow:hidden;
+      position:relative;
+      backdrop-filter: blur(var(--blur));
     }
-    @keyframes spin{ to{transform:rotate(360deg);} }
-    .error{ margin-top:8px; font-size:0.8rem; color:var(--warn); font-weight:700; line-height:1.4; }
+    .sk-card + .sk-card{ margin-top:10px; }
+    .sk-line{
+      height:12px;
+      border-radius:999px;
+      background:var(--sk-base);
+      position:relative;
+      overflow:hidden;
+    }
+    .sk-line.sm{ height:10px; opacity:.9; }
+    .sk-line.lg{ height:14px; }
+    .sk-w-20{ width:20%; }
+    .sk-w-35{ width:35%; }
+    .sk-w-55{ width:55%; }
+    .sk-w-70{ width:70%; }
+    .sk-w-85{ width:85%; }
+    .sk-gap-10{ height:10px; }
+    .sk-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width:900px){ .sk-grid{ grid-template-columns:1fr; } }
+    .sk-metric{
+      border-radius:16px;
+      border:1px solid rgba(17,24,39,0.08);
+      background:rgba(255,255,255,0.55);
+      padding:12px;
+      overflow:hidden;
+      position:relative;
+    }
+    .sk-shimmer::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(212,175,55,0.14) 50%, rgba(255,255,255,0) 100%);
+      transform:translateX(-60%);
+      animation:shimmer 1.1s ease-in-out infinite;
+      opacity:.9;
+    }
+    @keyframes shimmer{
+      0%{ transform:translateX(-60%); }
+      100%{ transform:translateX(160%); }
+    }
+    .sk-table{
+      margin-top:12px;
+      border-radius:16px;
+      border:1px solid rgba(17,24,39,0.08);
+      background:rgba(255,255,255,0.55);
+      padding:12px;
+      overflow:hidden;
+      position:relative;
+    }
+    .sk-row{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
+    .sk-cell{ height:12px; border-radius:999px; background:var(--sk-base); flex:1; overflow:hidden; position:relative; }
 
     /* Summary cards */
     .summary-row{
@@ -301,23 +580,29 @@
     }
     @media (max-width:900px){ .summary-row{ grid-template-columns:1fr; } }
     .summary-card{
-      border-radius:16px;
+      border-radius:18px;
       padding:12px 14px;
-      background:#ffffff;
-      box-shadow:0 14px 30px rgba(15,23,42,0.06);
-      border:1px solid rgba(148,163,184,0.2);
+      background:rgba(255,255,255,0.72);
+      box-shadow:0 18px 40px rgba(2,6,23,0.07);
+      border:1px solid rgba(17,24,39,0.10);
       display:flex; flex-direction:column; gap:6px;
+      backdrop-filter: blur(var(--blur));
+      position:relative;
+      overflow:hidden;
     }
     .summary-header{ display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; }
     .summary-title{ font-weight:900; }
     .summary-tag{
-      font-size:0.7rem; padding:3px 8px; border-radius:999px;
-      background:#f3f4f6; font-weight:800;
+      font-size:0.7rem; padding:4px 9px; border-radius:999px;
+      background:rgba(212,175,55,0.12);
+      border:1px solid rgba(212,175,55,0.18);
+      font-weight:900;
+      color:rgba(17,24,39,0.78);
     }
     .summary-body{ display:flex; justify-content:space-between; gap:8px; font-size:0.8rem; margin-top:4px; }
     .summary-metric{ flex:1; }
-    .summary-label{ color:var(--muted); font-size:0.73rem; }
-    .summary-value{ font-weight:900; font-size:0.95rem; font-variant-numeric:tabular-nums; }
+    .summary-label{ color:rgba(17,24,39,0.60); font-size:0.73rem; }
+    .summary-value{ font-weight:900; font-size:1.02rem; font-variant-numeric:tabular-nums; }
 
     .summary-card.male .summary-title{ color:var(--male); }
     .summary-card.female .summary-title{ color:var(--female); }
@@ -336,18 +621,29 @@
     .table-wrap{
       width:100%;
       overflow-x:auto;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#f9fafb;
+      border-radius:16px;
+      border:1px solid rgba(17,24,39,0.10);
+      background:rgba(255,255,255,0.65);
+      box-shadow:0 14px 30px rgba(2,6,23,0.06);
+      backdrop-filter: blur(var(--blur));
+      position:relative;
+      z-index:1;
     }
     table{ width:100%; border-collapse:collapse; font-size:0.78rem; min-width:360px; }
-    thead{ background:#111827; color:#f9fafb; }
-    th,td{ padding:7px 10px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap; }
-    thead th{ position:sticky; top:0; z-index:1; }
-    tbody tr:nth-child(even){ background:#f3f4f6; }
+    thead{
+      background:linear-gradient(135deg, rgba(17,24,39,0.98), rgba(17,24,39,0.90));
+      color:#f9fafb;
+    }
+    th,td{ padding:9px 10px; text-align:left; border-bottom:1px solid rgba(17,24,39,0.08); white-space:nowrap; }
+    thead th{ position:sticky; top:0; z-index:1; border-bottom:1px solid rgba(212,175,55,0.18); }
+    tbody tr:nth-child(even){ background:rgba(17,24,39,0.035); }
     .col-label{ font-weight:900; color:#111827; }
     .col-number{ text-align:right; font-variant-numeric:tabular-nums; }
-    .total-row{ background:#e5e7eb; color:#111827; font-weight:900; }
+    .total-row{
+      background:rgba(212,175,55,0.14);
+      color:#111827;
+      font-weight:900;
+    }
     table.acm-table{ table-layout:fixed; min-width:560px; }
     table.acm-table th:nth-child(1), table.acm-table td:nth-child(1){
       width:58%; max-width:58%; overflow:hidden; text-overflow:ellipsis;
@@ -357,14 +653,17 @@
 
     .status-bar{
       display:flex; align-items:center; justify-content:space-between;
-      margin:4px 2px 0;
-      font-size:0.72rem; color:var(--muted);
+      margin:8px 2px 0;
+      font-size:0.72rem; color:rgba(17,24,39,0.60);
       gap:10px; flex-wrap:wrap;
+      position:relative;
+      z-index:1;
     }
     .status-left{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .status-dot{
       width:8px; height:8px; border-radius:999px;
-      background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,0.3);
+      background:rgba(17,24,39,0.85);
+      box-shadow:0 0 0 3px rgba(212,175,55,0.16);
     }
     .status-right{ font-style:italic; }
 
@@ -372,712 +671,855 @@
     .chart-card{ margin-bottom:14px; }
     .chart-legend{
       display:flex; align-items:center; gap:16px;
-      font-size:0.75rem; color:var(--muted);
-      margin-bottom:6px; flex-wrap:wrap;
+      font-size:0.75rem; color:rgba(17,24,39,0.60);
+      margin-bottom:8px; flex-wrap:wrap;
+      position:relative; z-index:1;
     }
     .legend-item{ display:flex; align-items:center; gap:6px; }
     .legend-dot{ width:14px; height:8px; border-radius:999px; }
-    .legend-valid{ background:var(--brand); }
-    .legend-buffer{ background:var(--orange); }
+    .legend-valid{ background:rgba(17,24,39,0.85); }
+    .legend-buffer{ background:rgba(212,175,55,0.85); }
 
     .chart-body{
       display:flex; align-items:flex-end; gap:10px;
       height:260px;
-      padding:8px 8px 4px;
-      border-radius:16px;
-      background:linear-gradient(to top,#f9fafb,#ffffff);
-      border:1px solid var(--line);
+      padding:10px 10px 6px;
+      border-radius:18px;
+      background:linear-gradient(to top, rgba(255,255,255,0.65), rgba(255,255,255,0.92));
+      border:1px solid rgba(17,24,39,0.10);
+      box-shadow:0 14px 30px rgba(2,6,23,0.06);
       overflow-x:auto;
+      position:relative;
+      z-index:1;
     }
     .chart-col{
       flex:1; min-width:48px; height:100%;
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px;
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px;
     }
     .chart-col-bars{ flex:1; display:flex; align-items:flex-end; justify-content:center; gap:4px; width:100%; }
-    .chart-bar-vert{ width:14px; border-radius:6px 6px 0 0; background:#e5e7eb; transition:height .25s ease-out; }
-    .bar-valid{ background:var(--brand); }
-    .bar-buffer{ background:var(--orange); }
+    .chart-bar-vert{ width:14px; border-radius:10px 10px 0 0; background:#e5e7eb; transition:height .25s ease-out; }
+    .bar-valid{ background:linear-gradient(180deg, rgba(17,24,39,0.95), rgba(17,24,39,0.72)); }
+    .bar-buffer{ background:linear-gradient(180deg, rgba(212,175,55,0.90), rgba(212,175,55,0.55)); }
     .chart-col-values{ font-size:0.7rem; text-align:center; font-variant-numeric:tabular-nums; color:#111827; line-height:1.2; }
-    .chart-col-label{ font-size:0.7rem; text-align:center; color:var(--muted); white-space:nowrap; }
-    .chart-footer{ margin-top:6px; font-size:0.72rem; color:var(--muted); font-style:italic; }
+    .chart-col-label{ font-size:0.7rem; text-align:center; color:rgba(17,24,39,0.55); white-space:nowrap; }
+    .chart-footer{ margin-top:8px; font-size:0.72rem; color:rgba(17,24,39,0.60); font-style:italic; position:relative; z-index:1; }
 
     /* Performance stacked */
     .stack-col{ display:flex; flex-direction:column; gap:16px; margin-bottom:16px; width:100%; }
     table.matrix-table{ min-width:920px; table-layout:auto; }
-    .matrix-empty{ margin-top:8px; font-size:0.78rem; color:var(--muted); font-weight:800; display:none; }
-    .tiny-note{ margin-top:6px; font-size:0.72rem; color:var(--muted); font-style:italic; line-height:1.45; white-space:pre-wrap; }
+    .matrix-empty{ margin-top:10px; font-size:0.78rem; color:rgba(17,24,39,0.60); font-weight:900; display:none; position:relative; z-index:1; }
+    .tiny-note{ margin-top:6px; font-size:0.72rem; color:rgba(17,24,39,0.58); font-style:italic; line-height:1.45; white-space:pre-wrap; position:relative; z-index:1; }
 
     /* Sourcing Analyst text */
-    .analysis-text{ font-size:0.8rem; color:var(--ink); line-height:1.6; margin-top:4px; }
+    .analysis-text{ font-size:0.8rem; color:var(--ink); line-height:1.6; margin-top:4px; position:relative; z-index:1; }
     .analysis-section{
       display:flex; align-items:flex-start; gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      background:linear-gradient(to bottom right,#f9fafb,#ffffff);
-      border:1px solid rgba(148,163,184,0.35);
-      box-shadow:0 10px 20px rgba(15,23,42,0.04);
-      margin-top:8px;
+      padding:12px 12px;
+      border-radius:16px;
+      background:linear-gradient(to bottom right, rgba(255,255,255,0.70), rgba(255,255,255,0.92));
+      border:1px solid rgba(17,24,39,0.10);
+      box-shadow:0 10px 20px rgba(2,6,23,0.04);
+      margin-top:10px;
+      backdrop-filter: blur(var(--blur));
     }
     .analysis-icon{ font-size:1.5rem; line-height:1; margin-top:2px; }
-    .analysis-title{ font-weight:900; font-size:0.85rem; }
+    .analysis-title{ font-weight:900; font-size:0.86rem; }
     .analysis-summary{ font-size:0.8rem; color:var(--ink); }
     .analysis-detail{ font-size:0.75rem; color:var(--warn); font-weight:900; }
+
   </style>
 </head>
 
 <body>
-<div class="app-shell">
-  <header>
-    <div class="title-block">
-      <h1>Sourcing Analyst & Reporting</h1>
-      <p>Dashboard Applicant Cycle Management + Sourcing Analyst Insight + Performance (Client / Area / Jobtype).</p>
-    </div>
-    <div class="title-right">
-      <span class="pill"><span class="pill-dot"></span><span id="pill-status">Ready</span></span>
-    </div>
-  </header>
-
-  <div class="tab-row">
-    <button id="tab-acm" class="tab-btn active" type="button">ACM</button>
-    <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
-    <button id="tab-pc" class="tab-btn" type="button">Performance Sourcing Client</button>
-    <button id="tab-pa" class="tab-btn" type="button">Performance Sourcing Area</button>
-    <button id="tab-pj" class="tab-btn" type="button">Performance Jobtype</button>
+  <!-- Executive background ornaments -->
+  <div class="bg-ornaments" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="grid-sheen"></div>
   </div>
 
-  <main>
-    <!-- ===================== PAGE: ACM ===================== -->
-    <section id="page-acm" class="page active">
-      <section class="card filter-card" id="acm-filter-card">
-        <div class="card-title-row">
-          <div class="card-title">Filter Data Applicant</div>
-          <div class="header-right-flex">
-            <button id="acm-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
-            </button>
-            <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
-          </div>
-        </div>
-        <div class="card-subtext">
-          Multi-select aktif. <strong>Job Type</strong> hanya muncul setelah <strong>Job Parent</strong> dipilih.
-        </div>
-
-        <div class="filter-body">
-          <div class="filters">
-            <div class="filter-group">
-              <label class="filter-label">Provinsi</label>
-              <div class="ms" id="ms-prov">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Provinsi</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <label class="filter-label">Kota</label>
-              <div class="ms ms-disabled" id="ms-kota">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari kota..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <label class="filter-label">Periode Pelamar</label>
-              <div class="ms" id="ms-periode">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Periode</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari periode..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada periode</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <label class="filter-label">Job Parent</label>
-              <div class="ms" id="ms-job-parent">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Job Parent</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <label class="filter-label">Job Type</label>
-              <div class="ms ms-disabled" id="ms-job-type">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari job type..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-hint">* Filter <strong>Cycle Hired</strong> sudah dihapus sesuai revisi.</div>
-        </div>
-
-        <div id="acm-load-state" class="loading">
-          <div class="spinner"></div><span>Memuat data ACM ...</span>
-        </div>
-        <div id="acm-error-state" class="error" style="display:none;"></div>
-      </section>
-
-      <!-- Chart -->
-      <section class="card chart-card">
-        <div class="card-title-row">
-          <div class="card-title">Trend Applicant Valid & Buffer per Bulan</div>
-          <div class="card-tag">Jan–Des</div>
-        </div>
-        <p class="card-subtext">
-          Berdasarkan <strong>PERIODE PELAMAR</strong>. Valid/Buffer dihitung dari kombinasi <strong>KATEGORI APP</strong> dan <strong>QUALIFIED</strong>.
-        </p>
-        <div class="chart-legend">
-          <div class="legend-item"><span class="legend-dot legend-valid"></span><span>Applicant Valid</span></div>
-          <div class="legend-item"><span class="legend-dot legend-buffer"></span><span>Buffer</span></div>
-        </div>
-        <div id="chart-body" class="chart-body"></div>
-        <div id="chart-summary-text" class="chart-footer">Menunggu data...</div>
-      </section>
-
-      <!-- Summary -->
-      <section class="summary-row">
-        <div class="summary-card male">
-          <div class="summary-header">
-            <div class="summary-title">Summary Laki-Laki</div>
-            <div class="summary-tag">Gender: L</div>
-          </div>
-          <div class="summary-body">
-            <div class="summary-metric">
-              <div class="summary-label">Applicant Valid</div>
-              <div id="sum-male-valid" class="summary-value">0</div>
-            </div>
-            <div class="summary-metric">
-              <div class="summary-label">Buffer</div>
-              <div id="sum-male-buffer" class="summary-value">0</div>
-            </div>
+  <div class="app-shell">
+    <!-- ===================== STICKY TOPBAR ===================== -->
+    <section class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-badge" aria-hidden="true"></div>
+          <div class="brand-text">
+            <h1>Sourcing Analyst & Reporting</h1>
+            <p>Applicant Cycle Management + Sourcing Analyst Insight + Performance (Client / Area / Jobtype).</p>
           </div>
         </div>
 
-        <div class="summary-card female">
-          <div class="summary-header">
-            <div class="summary-title">Summary Perempuan</div>
-            <div class="summary-tag">Gender: P</div>
-          </div>
-          <div class="summary-body">
-            <div class="summary-metric">
-              <div class="summary-label">Applicant Valid</div>
-              <div id="sum-female-valid" class="summary-value">0</div>
-            </div>
-            <div class="summary-metric">
-              <div class="summary-label">Buffer</div>
-              <div id="sum-female-buffer" class="summary-value">0</div>
-            </div>
-          </div>
+        <div class="topbar-right">
+          <span class="pill"><span class="pill-dot"></span><span id="pill-status">Ready</span></span>
         </div>
+      </div>
 
-        <div class="summary-card total">
-          <div class="summary-header">
-            <div class="summary-title">Total Nasional</div>
-            <div class="summary-tag">All</div>
-          </div>
-          <div class="summary-body">
-            <div class="summary-metric">
-              <div class="summary-label">Applicant Valid</div>
-              <div id="sum-total-valid" class="summary-value">0</div>
-            </div>
-            <div class="summary-metric">
-              <div class="summary-label">Buffer</div>
-              <div id="sum-total-buffer" class="summary-value">0</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tables 1 & 2 -->
-      <section class="grid">
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Applicant Valid × Buffer</div>
-            <div class="card-tag">By Provinsi</div>
-          </div>
-          <div class="table-wrap">
-            <table class="acm-table">
-              <thead>
-              <tr><th>Provinsi</th><th>Applicant Valid</th><th>Buffer</th></tr>
-              </thead>
-              <tbody id="tbl-prov-body"></tbody>
-            </table>
-          </div>
-          <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-prov">Menunggu data...</span></div>
-            <div class="status-right">Valid = KATEGORI APP "APLIKAN VALID - CTC 1" · Buffer = QUALIFIED "YES"</div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Metode Sourcing</div>
-            <div class="card-tag">MEDIA SOURCING</div>
-          </div>
-          <div class="table-wrap">
-            <table class="acm-table">
-              <thead>
-              <tr><th>Metode Sourcing</th><th>Applicant Valid</th><th>Buffer</th></tr>
-              </thead>
-              <tbody id="tbl-metode-body"></tbody>
-            </table>
-          </div>
-          <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-metode">Menunggu data...</span></div>
-            <div class="status-right">OFFLINE / ONLINE - JOB PORTAL / ONLINE - MEDIA SOSIAL</div>
-          </div>
-        </article>
-      </section>
-
-      <!-- Tables 3 & 4 -->
-      <section class="grid">
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Sourcing Media Sosial</div>
-            <div class="card-tag">Platform</div>
-          </div>
-          <div class="table-wrap">
-            <table class="acm-table">
-              <thead>
-              <tr><th>Media Sosial</th><th>Applicant Valid</th><th>Buffer</th></tr>
-              </thead>
-              <tbody id="tbl-media-body"></tbody>
-            </table>
-          </div>
-          <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-media">Menunggu data...</span></div>
-            <div class="status-right">Filter: MEDIA SOURCING = ONLINE - MEDIA SOSIAL</div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Profiling Applicant</div>
-            <div class="card-tag">Pendidikan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="acm-table">
-              <thead>
-              <tr><th>Pendidikan Terakhir</th><th>Applicant Valid</th><th>Buffer</th></tr>
-              </thead>
-              <tbody id="tbl-edu-body"></tbody>
-            </table>
-          </div>
-          <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-edu">Menunggu data...</span></div>
-            <div class="status-right">Kolom: PENDIDIKAN TERAKHIR</div>
-          </div>
-        </article>
-      </section>
-
-      <!-- Tables 5 & 6 -->
-      <section class="grid">
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Sourcing Job Portal</div>
-            <div class="card-tag">Portal</div>
-          </div>
-          <div class="table-wrap">
-            <table class="acm-table">
-              <thead>
-              <tr><th>Job Portal</th><th>Applicant Valid</th><th>Buffer</th></tr>
-              </thead>
-              <tbody id="tbl-portal-body"></tbody>
-            </table>
-          </div>
-          <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-portal">Menunggu data...</span></div>
-            <div class="status-right">Filter: MEDIA SOURCING = ONLINE - JOB PORTAL</div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Preview Sourcing Offline</div>
-            <div class="card-tag">Aktivitas</div>
-          </div>
-          <div class="table-wrap">
-            <table class="acm-table">
-              <thead>
-              <tr><th>Aktivitas Offline</th><th>Applicant Valid</th><th>Buffer</th></tr>
-              </thead>
-              <tbody id="tbl-offline-body"></tbody>
-            </table>
-          </div>
-          <div class="status-bar">
-            <div class="status-left"><span class="status-dot"></span><span id="status-offline">Menunggu data...</span></div>
-            <div class="status-right">Filter: MEDIA SOURCING = OFFLINE</div>
-          </div>
-        </article>
-      </section>
+      <div class="tab-row">
+        <button id="tab-acm" class="tab-btn active" type="button">ACM</button>
+        <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
+        <button id="tab-pc" class="tab-btn" type="button">Performance Sourcing Client</button>
+        <button id="tab-pa" class="tab-btn" type="button">Performance Sourcing Area</button>
+        <button id="tab-pj" class="tab-btn" type="button">Performance Jobtype</button>
+      </div>
     </section>
 
-    <!-- ===================== PAGE: SOURCING ANALYST ===================== -->
-    <section id="page-sa" class="page">
-      <section class="card sa-filter-card" id="sa-filter-card">
-        <div class="card-title-row">
-          <div class="card-title">Filter Sourcing Analyst</div>
-          <div class="header-right-flex">
-            <button id="sa-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
-            </button>
-            <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter</button>
-            <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
+    <main>
+      <!-- ===================== PAGE: ACM ===================== -->
+      <section id="page-acm" class="page active">
+        <section class="card filter-card" id="acm-filter-card">
+          <div class="card-title-row">
+            <div class="card-title">Filter Data Applicant</div>
+            <div class="header-right-flex">
+              <button id="acm-filter-toggle-btn" class="filter-toggle-btn" type="button">
+                <span class="hamburger-icon">☰</span><span>Filter</span>
+              </button>
+              <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
+            </div>
           </div>
-        </div>
+          <div class="card-subtext">
+            Multi-select aktif. <strong>Job Type</strong> hanya muncul setelah <strong>Job Parent</strong> dipilih.
+          </div>
 
-        <div class="sa-filter-body">
-          <div class="sa-filters">
-            <div class="filter-group">
-              <label class="filter-label">Provinsi</label>
-              <div class="ms" id="sa-ms-prov">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Provinsi</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
+          <div class="filter-body">
+            <div class="filters">
+              <div class="filter-group">
+                <label class="filter-label">Provinsi</label>
+                <div class="ms" id="ms-prov">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Semua Provinsi</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Kota</label>
+                <div class="ms ms-disabled" id="ms-kota">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari kota..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Periode Pelamar</label>
+                <div class="ms" id="ms-periode">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Semua Periode</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari periode..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada periode</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Job Parent</label>
+                <div class="ms" id="ms-job-parent">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Semua Job Parent</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Job Type</label>
+                <div class="ms ms-disabled" id="ms-job-type">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari job type..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="filter-group">
-              <label class="filter-label">Kota</label>
-              <div class="ms ms-disabled" id="sa-ms-kota">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari kota..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
+            <div class="filter-hint">* Filter <strong>Cycle Hired</strong> sudah dihapus sesuai revisi.</div>
+          </div>
+
+          <!-- Skeleton Loading ACM -->
+          <div id="acm-skeleton" class="skeleton show">
+            <div class="sk-card sk-shimmer">
+              <div class="sk-line lg sk-w-55"></div>
+              <div class="sk-gap-10"></div>
+              <div class="sk-line sm sk-w-85"></div>
+              <div class="sk-grid">
+                <div class="sk-metric sk-shimmer">
+                  <div class="sk-line sm sk-w-35"></div>
+                  <div class="sk-gap-10"></div>
+                  <div class="sk-line lg sk-w-55"></div>
+                </div>
+                <div class="sk-metric sk-shimmer">
+                  <div class="sk-line sm sk-w-35"></div>
+                  <div class="sk-gap-10"></div>
+                  <div class="sk-line lg sk-w-55"></div>
+                </div>
+                <div class="sk-metric sk-shimmer">
+                  <div class="sk-line sm sk-w-35"></div>
+                  <div class="sk-gap-10"></div>
+                  <div class="sk-line lg sk-w-55"></div>
+                </div>
+              </div>
+              <div class="sk-table sk-shimmer">
+                <div class="sk-line sm sk-w-20"></div>
+                <div class="sk-row">
+                  <div class="sk-cell sk-shimmer"></div>
+                  <div class="sk-cell sk-shimmer"></div>
+                  <div class="sk-cell sk-shimmer"></div>
+                </div>
+                <div class="sk-row">
+                  <div class="sk-cell sk-shimmer"></div>
+                  <div class="sk-cell sk-shimmer"></div>
+                  <div class="sk-cell sk-shimmer"></div>
+                </div>
+                <div class="sk-row">
+                  <div class="sk-cell sk-shimmer"></div>
+                  <div class="sk-cell sk-shimmer"></div>
+                  <div class="sk-cell sk-shimmer"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- old spinner placeholder kept but hidden by CSS -->
+          <div id="acm-load-state" class="loading">
+            <div class="spinner"></div><span>Memuat data ACM ...</span>
+          </div>
+          <div id="acm-error-state" class="error" style="display:none;"></div>
+        </section>
+
+        <!-- Chart -->
+        <section class="card chart-card">
+          <div class="card-title-row">
+            <div class="card-title">Trend Applicant Valid & Buffer per Bulan</div>
+            <div class="card-tag">Jan–Des</div>
+          </div>
+          <p class="card-subtext">
+            Berdasarkan <strong>PERIODE PELAMAR</strong>. Valid/Buffer dihitung dari kombinasi <strong>KATEGORI APP</strong> dan <strong>QUALIFIED</strong>.
+          </p>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot legend-valid"></span><span>Applicant Valid</span></div>
+            <div class="legend-item"><span class="legend-dot legend-buffer"></span><span>Buffer</span></div>
+          </div>
+          <div id="chart-body" class="chart-body"></div>
+          <div id="chart-summary-text" class="chart-footer">Menunggu data...</div>
+        </section>
+
+        <!-- Summary -->
+        <section class="summary-row">
+          <div class="summary-card male">
+            <div class="summary-header">
+              <div class="summary-title">Summary Laki-Laki</div>
+              <div class="summary-tag">Gender: L</div>
+            </div>
+            <div class="summary-body">
+              <div class="summary-metric">
+                <div class="summary-label">Applicant Valid</div>
+                <div id="sum-male-valid" class="summary-value">0</div>
+              </div>
+              <div class="summary-metric">
+                <div class="summary-label">Buffer</div>
+                <div id="sum-male-buffer" class="summary-value">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card female">
+            <div class="summary-header">
+              <div class="summary-title">Summary Perempuan</div>
+              <div class="summary-tag">Gender: P</div>
+            </div>
+            <div class="summary-body">
+              <div class="summary-metric">
+                <div class="summary-label">Applicant Valid</div>
+                <div id="sum-female-valid" class="summary-value">0</div>
+              </div>
+              <div class="summary-metric">
+                <div class="summary-label">Buffer</div>
+                <div id="sum-female-buffer" class="summary-value">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card total">
+            <div class="summary-header">
+              <div class="summary-title">Total Nasional</div>
+              <div class="summary-tag">All</div>
+            </div>
+            <div class="summary-body">
+              <div class="summary-metric">
+                <div class="summary-label">Applicant Valid</div>
+                <div id="sum-total-valid" class="summary-value">0</div>
+              </div>
+              <div class="summary-metric">
+                <div class="summary-label">Buffer</div>
+                <div id="sum-total-buffer" class="summary-value">0</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tables 1 & 2 -->
+        <section class="grid">
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Preview Applicant Valid × Buffer</div>
+              <div class="card-tag">By Provinsi</div>
+            </div>
+            <div class="table-wrap">
+              <table class="acm-table">
+                <thead>
+                <tr><th>Provinsi</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                </thead>
+                <tbody id="tbl-prov-body"></tbody>
+              </table>
+            </div>
+            <div class="status-bar">
+              <div class="status-left"><span class="status-dot"></span><span id="status-prov">Menunggu data...</span></div>
+              <div class="status-right">Valid = KATEGORI APP "APLIKAN VALID - CTC 1" · Buffer = QUALIFIED "YES"</div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Preview Metode Sourcing</div>
+              <div class="card-tag">MEDIA SOURCING</div>
+            </div>
+            <div class="table-wrap">
+              <table class="acm-table">
+                <thead>
+                <tr><th>Metode Sourcing</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                </thead>
+                <tbody id="tbl-metode-body"></tbody>
+              </table>
+            </div>
+            <div class="status-bar">
+              <div class="status-left"><span class="status-dot"></span><span id="status-metode">Menunggu data...</span></div>
+              <div class="status-right">OFFLINE / ONLINE - JOB PORTAL / ONLINE - MEDIA SOSIAL</div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Tables 3 & 4 -->
+        <section class="grid">
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Preview Sourcing Media Sosial</div>
+              <div class="card-tag">Platform</div>
+            </div>
+            <div class="table-wrap">
+              <table class="acm-table">
+                <thead>
+                <tr><th>Media Sosial</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                </thead>
+                <tbody id="tbl-media-body"></tbody>
+              </table>
+            </div>
+            <div class="status-bar">
+              <div class="status-left"><span class="status-dot"></span><span id="status-media">Menunggu data...</span></div>
+              <div class="status-right">Filter: MEDIA SOURCING = ONLINE - MEDIA SOSIAL</div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Preview Profiling Applicant</div>
+              <div class="card-tag">Pendidikan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="acm-table">
+                <thead>
+                <tr><th>Pendidikan Terakhir</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                </thead>
+                <tbody id="tbl-edu-body"></tbody>
+              </table>
+            </div>
+            <div class="status-bar">
+              <div class="status-left"><span class="status-dot"></span><span id="status-edu">Menunggu data...</span></div>
+              <div class="status-right">Kolom: PENDIDIKAN TERAKHIR</div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Tables 5 & 6 -->
+        <section class="grid">
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Preview Sourcing Job Portal</div>
+              <div class="card-tag">Portal</div>
+            </div>
+            <div class="table-wrap">
+              <table class="acm-table">
+                <thead>
+                <tr><th>Job Portal</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                </thead>
+                <tbody id="tbl-portal-body"></tbody>
+              </table>
+            </div>
+            <div class="status-bar">
+              <div class="status-left"><span class="status-dot"></span><span id="status-portal">Menunggu data...</span></div>
+              <div class="status-right">Filter: MEDIA SOURCING = ONLINE - JOB PORTAL</div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Preview Sourcing Offline</div>
+              <div class="card-tag">Aktivitas</div>
+            </div>
+            <div class="table-wrap">
+              <table class="acm-table">
+                <thead>
+                <tr><th>Aktivitas Offline</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                </thead>
+                <tbody id="tbl-offline-body"></tbody>
+              </table>
+            </div>
+            <div class="status-bar">
+              <div class="status-left"><span class="status-dot"></span><span id="status-offline">Menunggu data...</span></div>
+              <div class="status-right">Filter: MEDIA SOURCING = OFFLINE</div>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <!-- ===================== PAGE: SOURCING ANALYST ===================== -->
+      <section id="page-sa" class="page">
+        <section class="card sa-filter-card" id="sa-filter-card">
+          <div class="card-title-row">
+            <div class="card-title">Filter Sourcing Analyst</div>
+            <div class="header-right-flex">
+              <button id="sa-filter-toggle-btn" class="filter-toggle-btn" type="button">
+                <span class="hamburger-icon">☰</span><span>Filter</span>
+              </button>
+              <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter</button>
+              <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
+            </div>
+          </div>
+
+          <div class="sa-filter-body">
+            <div class="sa-filters">
+              <div class="filter-group">
+                <label class="filter-label">Provinsi</label>
+                <div class="ms" id="sa-ms-prov">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Semua Provinsi</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari provinsi..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Kota</label>
+                <div class="ms ms-disabled" id="sa-ms-kota">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari kota..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Job Parent</label>
+                <div class="ms" id="sa-ms-job-parent">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Semua Job Parent</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari job parent..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Job Type</label>
+                <div class="ms ms-disabled" id="sa-ms-job-type">
+                  <button type="button" class="ms-toggle">
+                    <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
+                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                  </button>
+                  <div class="ms-panel">
+                    <input class="ms-search" type="text" placeholder="Cari job type..." />
+                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="filter-group">
-              <label class="filter-label">Job Parent</label>
-              <div class="ms" id="sa-ms-job-parent">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Semua Job Parent</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
+            <div class="filter-hint">* Insight otomatis akan mengikuti filter di atas.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-title-row">
+            <div class="card-title">Analisa Best Practice Sourcing</div>
+            <div class="card-tag">Auto Insight</div>
+          </div>
+          <div id="sa-analysis-text" class="analysis-text">
+            Pilih filter untuk melihat rekomendasi channel terbaik berdasarkan Applicant Valid.
+          </div>
+        </section>
+      </section>
+
+      <!-- ===================== PAGE: Performance Client ===================== -->
+      <section id="page-pc" class="page">
+        <section class="card perf-filter-card" id="pc-filter-card">
+          <div class="card-title-row">
+            <div class="card-title">Filter Performance Sourcing Client</div>
+            <div class="header-right-flex">
+              <button id="pc-filter-toggle-btn" class="filter-toggle-btn" type="button">
+                <span class="hamburger-icon">☰</span><span>Filter</span>
+              </button>
+              <button id="pc-clear-btn" class="clear-btn" type="button">Hapus filter</button>
+              <div class="card-tag">Industry</div>
+            </div>
+          </div>
+          <div class="card-subtext">
+            Pilih <strong>Industry</strong> untuk menampilkan data per <strong>Client</strong>. Nilai tampil format <strong>xx.xx%</strong>.
+          </div>
+
+          <div class="perf-filter-body">
+            <div class="perf-filters">
+              <div class="filter-group">
+                <label class="filter-label">Industry</label>
+                <select id="pc-industry" class="perf-select">
+                  <option value="">Pilih Industry...</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Client</label>
+                <select id="pc-client" class="perf-select" disabled>
+                  <option value="">Semua Client</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Skeleton Performance Client -->
+            <div id="pc-skeleton" class="skeleton">
+              <div class="sk-card sk-shimmer">
+                <div class="sk-line lg sk-w-55"></div>
+                <div class="sk-gap-10"></div>
+                <div class="sk-line sm sk-w-70"></div>
+                <div class="sk-table sk-shimmer">
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="filter-group">
-              <label class="filter-label">Job Type</label>
-              <div class="ms ms-disabled" id="sa-ms-job-type">
-                <button type="button" class="ms-toggle">
-                  <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                </button>
-                <div class="ms-panel">
-                  <input class="ms-search" type="text" placeholder="Cari job type..." />
-                  <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
+            <div id="pc-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Client...</span></div>
+            <div id="pc-error-state" class="error" style="display:none;"></div>
+
+            <div class="status-bar" style="margin-top:10px;">
+              <div class="status-left"><span class="status-dot"></span><span id="pc-status-text">Menunggu data...</span></div>
+              <div class="status-right" id="pc-col-note"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stack-col">
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Rasio Submit</div>
+              <div class="card-tag">Client × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pc-submit-head"></thead>
+                <tbody id="pc-submit-body"></tbody>
+              </table>
+            </div>
+            <div id="pc-submit-empty" class="matrix-empty">Pilih Industry dulu.</div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Applicant Qualified</div>
+              <div class="card-tag">Client × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pc-qual-head"></thead>
+                <tbody id="pc-qual-body"></tbody>
+              </table>
+            </div>
+            <div id="pc-qual-empty" class="matrix-empty">Pilih Industry dulu.</div>
+          </article>
+        </section>
+      </section>
+
+      <!-- ===================== PAGE: Performance Area ===================== -->
+      <section id="page-pa" class="page">
+        <section class="card perf-filter-card" id="pa-filter-card">
+          <div class="card-title-row">
+            <div class="card-title">Filter Performance Sourcing Area</div>
+            <div class="header-right-flex">
+              <button id="pa-filter-toggle-btn" class="filter-toggle-btn" type="button">
+                <span class="hamburger-icon">☰</span><span>Filter</span>
+              </button>
+              <button id="pa-clear-btn" class="clear-btn" type="button">Hapus filter</button>
+              <div class="card-tag">Group Client · Area</div>
+            </div>
+          </div>
+
+          <div class="card-subtext">
+            Pilih <strong>Group Client</strong> lalu pilih <strong>Area</strong> (opsional). Nilai tampil format <strong>xx.xx%</strong>.
+          </div>
+
+          <div class="perf-filter-body">
+            <div class="perf-filters">
+              <div class="filter-group">
+                <label class="filter-label">Group Client</label>
+                <select id="pa-group" class="perf-select">
+                  <option value="">Pilih Group Client...</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Area</label>
+                <select id="pa-area" class="perf-select" disabled>
+                  <option value="">Semua Area</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Skeleton Performance Area -->
+            <div id="pa-skeleton" class="skeleton">
+              <div class="sk-card sk-shimmer">
+                <div class="sk-line lg sk-w-55"></div>
+                <div class="sk-gap-10"></div>
+                <div class="sk-line sm sk-w-70"></div>
+                <div class="sk-table sk-shimmer">
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="filter-hint">* Insight otomatis akan mengikuti filter di atas.</div>
-        </div>
-      </section>
+            <div id="pa-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Area...</span></div>
+            <div id="pa-error-state" class="error" style="display:none;"></div>
 
-      <section class="card">
-        <div class="card-title-row">
-          <div class="card-title">Analisa Best Practice Sourcing</div>
-          <div class="card-tag">Auto Insight</div>
-        </div>
-        <div id="sa-analysis-text" class="analysis-text">
-          Pilih filter untuk melihat rekomendasi channel terbaik berdasarkan Applicant Valid.
-        </div>
-      </section>
-    </section>
-
-    <!-- ===================== PAGE: Performance Client ===================== -->
-    <section id="page-pc" class="page">
-      <section class="card perf-filter-card" id="pc-filter-card">
-        <div class="card-title-row">
-          <div class="card-title">Filter Performance Sourcing Client</div>
-          <div class="header-right-flex">
-            <button id="pc-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
-            </button>
-            <button id="pc-clear-btn" class="clear-btn" type="button">Hapus filter</button>
-            <div class="card-tag">Industry</div>
-          </div>
-        </div>
-        <div class="card-subtext">
-          Pilih <strong>Industry</strong> untuk menampilkan data per <strong>Client</strong>. Nilai tampil format <strong>xx.xx%</strong>.
-        </div>
-
-        <div class="perf-filter-body">
-          <div class="perf-filters">
-            <div class="filter-group">
-              <label class="filter-label">Industry</label>
-              <select id="pc-industry" class="perf-select">
-                <option value="">Pilih Industry...</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label class="filter-label">Client</label>
-              <select id="pc-client" class="perf-select" disabled>
-                <option value="">Semua Client</option>
-              </select>
+            <div class="status-bar" style="margin-top:10px;">
+              <div class="status-left"><span class="status-dot"></span><span id="pa-status-text">Menunggu data...</span></div>
+              <div class="status-right" id="pa-col-note"></div>
             </div>
           </div>
+        </section>
 
-          <div id="pc-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Client...</span></div>
-          <div id="pc-error-state" class="error" style="display:none;"></div>
+        <section class="stack-col">
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Rasio Submit</div>
+              <div class="card-tag">Area × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pa-submit-head"></thead>
+                <tbody id="pa-submit-body"></tbody>
+              </table>
+            </div>
+            <div id="pa-submit-empty" class="matrix-empty">Pilih Group Client dulu.</div>
+          </article>
 
-          <div class="status-bar" style="margin-top:10px;">
-            <div class="status-left"><span class="status-dot"></span><span id="pc-status-text">Menunggu data...</span></div>
-            <div class="status-right" id="pc-col-note"></div>
-          </div>
-        </div>
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Qualified</div>
+              <div class="card-tag">Area × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pa-qual-head"></thead>
+                <tbody id="pa-qual-body"></tbody>
+              </table>
+            </div>
+            <div id="pa-qual-empty" class="matrix-empty">Pilih Group Client dulu.</div>
+          </article>
+        </section>
       </section>
 
-      <section class="stack-col">
-        <article class="card">
+      <!-- ===================== PAGE: Performance Jobtype ===================== -->
+      <section id="page-pj" class="page">
+        <section class="card perf-filter-card" id="pj-filter-card">
           <div class="card-title-row">
-            <div class="card-title">Achievement Rasio Submit</div>
-            <div class="card-tag">Client × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pc-submit-head"></thead>
-              <tbody id="pc-submit-body"></tbody>
-            </table>
-          </div>
-          <div id="pc-submit-empty" class="matrix-empty">Pilih Industry dulu.</div>
-        </article>
-
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Achievement Applicant Qualified</div>
-            <div class="card-tag">Client × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pc-qual-head"></thead>
-              <tbody id="pc-qual-body"></tbody>
-            </table>
-          </div>
-          <div id="pc-qual-empty" class="matrix-empty">Pilih Industry dulu.</div>
-        </article>
-      </section>
-    </section>
-
-    <!-- ===================== PAGE: Performance Area ===================== -->
-    <section id="page-pa" class="page">
-      <section class="card perf-filter-card" id="pa-filter-card">
-        <div class="card-title-row">
-          <div class="card-title">Filter Performance Sourcing Area</div>
-          <div class="header-right-flex">
-            <button id="pa-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
-            </button>
-            <button id="pa-clear-btn" class="clear-btn" type="button">Hapus filter</button>
-            <div class="card-tag">Group Client · Area</div>
-          </div>
-        </div>
-
-        <div class="card-subtext">
-          Pilih <strong>Group Client</strong> lalu pilih <strong>Area</strong> (opsional). Nilai tampil format <strong>xx.xx%</strong>.
-        </div>
-
-        <div class="perf-filter-body">
-          <div class="perf-filters">
-            <div class="filter-group">
-              <label class="filter-label">Group Client</label>
-              <select id="pa-group" class="perf-select">
-                <option value="">Pilih Group Client...</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label class="filter-label">Area</label>
-              <select id="pa-area" class="perf-select" disabled>
-                <option value="">Semua Area</option>
-              </select>
+            <div class="card-title">Filter Performance Jobtype</div>
+            <div class="header-right-flex">
+              <button id="pj-filter-toggle-btn" class="filter-toggle-btn" type="button">
+                <span class="hamburger-icon">☰</span><span>Filter</span>
+              </button>
+              <button id="pj-clear-btn" class="clear-btn" type="button">Hapus filter</button>
+              <div class="card-tag">Area · Job Parent · Job Type</div>
             </div>
           </div>
 
-          <div id="pa-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Area...</span></div>
-          <div id="pa-error-state" class="error" style="display:none;"></div>
-
-          <div class="status-bar" style="margin-top:10px;">
-            <div class="status-left"><span class="status-dot"></span><span id="pa-status-text">Menunggu data...</span></div>
-            <div class="status-right" id="pa-col-note"></div>
+          <div class="card-subtext">
+            <strong>Berikut adalah summary performance sourcing untuk submit kandidat dan performance qualified atas kandidat yang disubmit.</strong>
           </div>
-        </div>
-      </section>
 
-      <section class="stack-col">
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Achievement Rasio Submit</div>
-            <div class="card-tag">Area × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pa-submit-head"></thead>
-              <tbody id="pa-submit-body"></tbody>
-            </table>
-          </div>
-          <div id="pa-submit-empty" class="matrix-empty">Pilih Group Client dulu.</div>
-        </article>
+          <div class="perf-filter-body">
+            <div class="perf-filters">
+              <div class="filter-group">
+                <label class="filter-label">Area (diambil dari data Performance Area)</label>
+                <select id="pj-area" class="perf-select">
+                  <option value="">Semua Area</option>
+                </select>
+                <div class="tiny-note">Jika data Jobtype tidak punya kolom Area, dropdown Area hanya untuk label (tidak memfilter angka).</div>
+              </div>
 
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Achievement Qualified</div>
-            <div class="card-tag">Area × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pa-qual-head"></thead>
-              <tbody id="pa-qual-body"></tbody>
-            </table>
-          </div>
-          <div id="pa-qual-empty" class="matrix-empty">Pilih Group Client dulu.</div>
-        </article>
-      </section>
-    </section>
+              <div class="filter-group">
+                <label class="filter-label">Job Parent</label>
+                <select id="pj-parent" class="perf-select">
+                  <option value="">Pilih Job Parent...</option>
+                </select>
+              </div>
 
-    <!-- ===================== PAGE: Performance Jobtype ===================== -->
-    <section id="page-pj" class="page">
-      <section class="card perf-filter-card" id="pj-filter-card">
-        <div class="card-title-row">
-          <div class="card-title">Filter Performance Jobtype</div>
-          <div class="header-right-flex">
-            <button id="pj-filter-toggle-btn" class="filter-toggle-btn" type="button">
-              <span class="hamburger-icon">☰</span><span>Filter</span>
-            </button>
-            <button id="pj-clear-btn" class="clear-btn" type="button">Hapus filter</button>
-            <div class="card-tag">Area · Job Parent · Job Type</div>
-          </div>
-        </div>
-
-        <div class="card-subtext">
-          <strong>Berikut adalah summary performance sourcing untuk submit kandidat dan performance qualified atas kandidat yang disubmit.</strong>
-        </div>
-
-        <div class="perf-filter-body">
-          <div class="perf-filters">
-            <div class="filter-group">
-              <label class="filter-label">Area (diambil dari data Performance Area)</label>
-              <select id="pj-area" class="perf-select">
-                <option value="">Semua Area</option>
-              </select>
-              <div class="tiny-note">Jika data Jobtype tidak punya kolom Area, dropdown Area hanya untuk label (tidak memfilter angka).</div>
+              <div class="filter-group">
+                <label class="filter-label">Job Type</label>
+                <select id="pj-type" class="perf-select" disabled>
+                  <option value="">Pilih Job Type...</option>
+                </select>
+              </div>
             </div>
 
-            <div class="filter-group">
-              <label class="filter-label">Job Parent</label>
-              <select id="pj-parent" class="perf-select">
-                <option value="">Pilih Job Parent...</option>
-              </select>
+            <!-- Skeleton Performance Jobtype -->
+            <div id="pj-skeleton" class="skeleton">
+              <div class="sk-card sk-shimmer">
+                <div class="sk-line lg sk-w-55"></div>
+                <div class="sk-gap-10"></div>
+                <div class="sk-line sm sk-w-70"></div>
+                <div class="sk-table sk-shimmer">
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                  <div class="sk-row">
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                    <div class="sk-cell sk-shimmer"></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="filter-group">
-              <label class="filter-label">Job Type</label>
-              <select id="pj-type" class="perf-select" disabled>
-                <option value="">Pilih Job Type...</option>
-              </select>
+            <div id="pj-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Jobtype...</span></div>
+            <div id="pj-error-state" class="error" style="display:none;"></div>
+
+            <div class="status-bar" style="margin-top:10px;">
+              <div class="status-left"><span class="status-dot"></span><span id="pj-status-text">Menunggu data...</span></div>
+              <div class="status-right" id="pj-col-note"></div>
             </div>
           </div>
+        </section>
 
-          <div id="pj-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Jobtype...</span></div>
-          <div id="pj-error-state" class="error" style="display:none;"></div>
+        <section class="stack-col">
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Rasio Submit (Job Parent)</div>
+              <div class="card-tag">Parent × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pj-parent-submit-head"></thead>
+                <tbody id="pj-parent-submit-body"></tbody>
+              </table>
+            </div>
+            <div id="pj-parent-empty" class="matrix-empty">Pilih Job Parent dulu.</div>
+          </article>
 
-          <div class="status-bar" style="margin-top:10px;">
-            <div class="status-left"><span class="status-dot"></span><span id="pj-status-text">Menunggu data...</span></div>
-            <div class="status-right" id="pj-col-note"></div>
-          </div>
-        </div>
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Rasio Submit (Job Type)</div>
+              <div class="card-tag">Type × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pj-submit-head"></thead>
+                <tbody id="pj-submit-body"></tbody>
+              </table>
+            </div>
+            <div id="pj-submit-empty" class="matrix-empty">Pilih Job Parent (opsional Job Type) dulu.</div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <div class="card-title">Achievement Qualified (Job Type)</div>
+              <div class="card-tag">Type × Bulan</div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <thead id="pj-qual-head"></thead>
+                <tbody id="pj-qual-body"></tbody>
+              </table>
+            </div>
+            <div id="pj-qual-empty" class="matrix-empty">Pilih Job Parent (opsional Job Type) dulu.</div>
+          </article>
+        </section>
       </section>
 
-      <section class="stack-col">
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Achievement Rasio Submit (Job Parent)</div>
-            <div class="card-tag">Parent × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pj-parent-submit-head"></thead>
-              <tbody id="pj-parent-submit-body"></tbody>
-            </table>
-          </div>
-          <div id="pj-parent-empty" class="matrix-empty">Pilih Job Parent dulu.</div>
-        </article>
-
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Achievement Rasio Submit (Job Type)</div>
-            <div class="card-tag">Type × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pj-submit-head"></thead>
-              <tbody id="pj-submit-body"></tbody>
-            </table>
-          </div>
-          <div id="pj-submit-empty" class="matrix-empty">Pilih Job Parent (opsional Job Type) dulu.</div>
-        </article>
-
-        <article class="card">
-          <div class="card-title-row">
-            <div class="card-title">Achievement Qualified (Job Type)</div>
-            <div class="card-tag">Type × Bulan</div>
-          </div>
-          <div class="table-wrap">
-            <table class="matrix-table">
-              <thead id="pj-qual-head"></thead>
-              <tbody id="pj-qual-body"></tbody>
-            </table>
-          </div>
-          <div id="pj-qual-empty" class="matrix-empty">Pilih Job Parent (opsional Job Type) dulu.</div>
-        </article>
-      </section>
-    </section>
-
-  </main>
-</div>
+    </main>
+  </div>
 
 <script>
 /* =========================================================
@@ -1113,6 +1555,18 @@ const MONTHS = [
   {idx:11,label:"November", tokens:["NOVEMBER","NOV"]},
   {idx:12,label:"Desember", tokens:["DESEMBER","DES","DEC"]},
 ];
+
+/* =========================================================
+   SKELETON HELPERS (UI ONLY)
+========================================================= */
+function showSkeleton(id){
+  const el = $(id);
+  if(el) el.classList.add("show");
+}
+function hideSkeleton(id){
+  const el = $(id);
+  if(el) el.classList.remove("show");
+}
 
 /* =========================================================
    FIXED COLUMN MAPPING (Query Report Client / Area)
@@ -1348,8 +1802,8 @@ const FIXED_PROV_LIST = [
   "KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA",
   "NUSA TENGGARA BARAT (NTB)","NUSA TENGGARA TIMUR (NTT)",
   "PAPUA","PAPUA BARAT DAYA","PAPUA SELATAN","PAPUA TENGAH",
-  "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGAH",
-  "SULAWESI TENGGARA","SULAWESI TIMUR","SULAWESI UTARA",
+  "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGGARA",
+  "SULAWESI TENGAH","SULAWESI TIMUR","SULAWESI UTARA",
   "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
 ];
 const FIXED_MEDIA_LIST = ["Facebook","FLK","Instagram","Linkedin","SIM Talent Search","Telegram","Tiktok","Twitter","Whatsapp / Media Chat"];
@@ -1819,7 +2273,7 @@ function updateMonthlyChart(rows){
 
     const values = document.createElement("div");
     values.className = "chart-col-values";
-    values.innerHTML = `<div>${o.valid}</div><div style="color:var(--orange);font-weight:900">${o.buffer}</div>`;
+    values.innerHTML = `<div>${o.valid}</div><div style="color:rgba(212,175,55,0.95);font-weight:900">${o.buffer}</div>`;
 
     const label = document.createElement("div");
     label.className = "chart-col-label";
@@ -2211,9 +2665,10 @@ function updateClientDropdown(){
 
 function initPerformanceClient(){
   $("pc-error-state").style.display = "none";
-  $("pc-load-state").style.display = "flex";
   $("pc-status-text").textContent = "Memuat data...";
   $("pc-col-note").textContent = "";
+
+  showSkeleton("pc-skeleton");
 
   loadCsv(CSV_URL_CLIENT).then(({rows,fields})=>{
     perfClient.rows = rows;
@@ -2248,14 +2703,15 @@ function initPerformanceClient(){
     const sel = $("pc-industry");
     sel.innerHTML = `<option value="">Pilih Industry...</option>` + industryVals.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
 
-    $("pc-load-state").style.display = "none";
+    hideSkeleton("pc-skeleton");
+
     $("pc-col-note").textContent = "Jika header bulan tidak terbaca, sistem otomatis pakai urutan kolom setelah ID.";
 
     $("pc-submit-empty").style.display = "block";
     $("pc-qual-empty").style.display = "block";
   }).catch(err=>{
     console.error(err);
-    $("pc-load-state").style.display = "none";
+    hideSkeleton("pc-skeleton");
     $("pc-error-state").style.display = "block";
     $("pc-error-state").textContent = "Gagal memuat Performance Client: " + (err.message || err);
   });
@@ -2318,9 +2774,10 @@ function detectAreaFields(fields){
 
 function initPerformanceArea(){
   $("pa-error-state").style.display = "none";
-  $("pa-load-state").style.display = "flex";
   $("pa-status-text").textContent = "Memuat data...";
   $("pa-col-note").textContent = "";
+
+  showSkeleton("pa-skeleton");
 
   loadCsv(CSV_URL_AREA).then(({rows,fields})=>{
     perfArea.rows = rows;
@@ -2358,7 +2815,8 @@ function initPerformanceArea(){
     $("pa-area").innerHTML = `<option value="">Semua Area</option>`;
     $("pa-area").disabled = true;
 
-    $("pa-load-state").style.display = "none";
+    hideSkeleton("pa-skeleton");
+
     $("pa-status-text").textContent = `Data siap. Kolom: Group="${perfArea.groupField}", Area="${perfArea.areaField}".`;
     $("pa-col-note").textContent = "Area list akan muncul setelah Group Client dipilih.";
 
@@ -2366,7 +2824,7 @@ function initPerformanceArea(){
     $("pa-qual-empty").style.display = "block";
   }).catch(err=>{
     console.error(err);
-    $("pa-load-state").style.display = "none";
+    hideSkeleton("pa-skeleton");
     $("pa-error-state").style.display = "block";
     $("pa-error-state").textContent = "Gagal memuat Performance Area: " + (err.message || err);
   });
@@ -2438,9 +2896,10 @@ let perfJob = {
 
 function initPerformanceJobtype(){
   $("pj-error-state").style.display = "none";
-  $("pj-load-state").style.display = "flex";
   $("pj-status-text").textContent = "Memuat data...";
   $("pj-col-note").textContent = "";
+
+  showSkeleton("pj-skeleton");
 
   loadCsv(CSV_URL_JOBTYPE).then(({rows,fields})=>{
     perfJob.rows = rows;
@@ -2453,17 +2912,17 @@ function initPerformanceJobtype(){
     // ✅ FIXED: Query Report Jobtype mapping by column letters
     const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
     const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
-    
+
     const okSubmit = fixedSubmit.filter(Boolean).length;
     const okQual   = fixedQual.filter(Boolean).length;
-    
+
     // Kalau mapping kolom tersedia, pakai itu. Kalau tidak, fallback ke auto-detect lama.
     if(okSubmit >= 8) perfJob.submitCols = fixedSubmit;
     else{
       const submitDetect = detectMonthCols(fields, "SUBMIT");
       perfJob.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
     }
-    
+
     if(okQual >= 8) perfJob.qualCols = fixedQual;
     else{
       const qualDetect = detectMonthCols(fields, "QUALIFIED");
@@ -2484,7 +2943,8 @@ function initPerformanceJobtype(){
 
     refreshPJAreaOptions();
 
-    $("pj-load-state").style.display = "none";
+    hideSkeleton("pj-skeleton");
+
     $("pj-status-text").textContent = `Data siap. JobType(A)="${perfJob.jobTypeField}", JobParent(B)="${perfJob.jobParentField}".`;
     $("pj-col-note").textContent = perfJob.areaField ? `Kolom Area terdeteksi: "${perfJob.areaField}" (Area bisa memfilter).` : "Kolom Area tidak terdeteksi (dropdown Area hanya label).";
 
@@ -2493,7 +2953,7 @@ function initPerformanceJobtype(){
     $("pj-qual-empty").style.display = "block";
   }).catch(err=>{
     console.error(err);
-    $("pj-load-state").style.display = "none";
+    hideSkeleton("pj-skeleton");
     $("pj-error-state").style.display = "block";
     $("pj-error-state").textContent = "Gagal memuat Performance Jobtype: " + (err.message || err);
   });
@@ -2606,7 +3066,9 @@ async function loadAll(){
   try{
     setPill("Loading...");
     $("acm-error-state").style.display = "none";
-    $("acm-load-state").style.display = "flex";
+
+    // Skeleton ON
+    showSkeleton("acm-skeleton");
 
     const acm = await loadCsv(CSV_URL_ACM);
     acmRows = acm.rows;
@@ -2614,17 +3076,20 @@ async function loadAll(){
 
     detectACMColumns(acmFields);
 
-    $("acm-load-state").style.display = "none";
     if(!acmRows.length){
       $("acm-error-state").style.display = "block";
       $("acm-error-state").textContent = "Data ACM kosong atau header tidak sesuai.";
       setPill("ACM empty");
+      hideSkeleton("acm-skeleton");
       return;
     }
 
     initACMFilters();
     initSourcingAnalystFilters();
     updateACMAll();
+
+    // Skeleton OFF (ACM ready)
+    hideSkeleton("acm-skeleton");
 
     setPill("Loaded");
 
@@ -2633,7 +3098,7 @@ async function loadAll(){
     initPerformanceJobtype();
   }catch(err){
     console.error(err);
-    $("acm-load-state").style.display = "none";
+    hideSkeleton("acm-skeleton");
     $("acm-error-state").style.display = "block";
     $("acm-error-state").textContent =
       "Terjadi kesalahan saat memuat ACM: " + (err.message || err) +
