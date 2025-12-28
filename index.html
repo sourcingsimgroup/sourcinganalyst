@@ -846,13 +846,20 @@
 
         <div class="perf-filter-body">
           <div class="perf-filters">
-            <div class="filter-group">
-              <label class="filter-label">Industry</label>
-              <select id="pc-industry" class="perf-select">
-                <option value="">Pilih Industry...</option>
-              </select>
-            </div>
+          <div class="filter-group">
+            <label class="filter-label">Industry</label>
+            <select id="pc-industry" class="perf-select">
+              <option value="">Pilih Industry...</option>
+            </select>
           </div>
+        
+          <div class="filter-group">
+            <label class="filter-label">Client</label>
+            <select id="pc-client" class="perf-select" disabled>
+              <option value="">Semua Client</option>
+            </select>
+          </div>
+        </div>
 
           <div id="pc-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Client...</span></div>
           <div id="pc-error-state" class="error" style="display:none;"></div>
@@ -2222,7 +2229,26 @@ function detectClientFields(fields){
   const client = findField(fields, ["CLIENT"]);
   return {industry, client};
 }
+function updateClientDropdown(){
+  const ind = $("pc-industry").value;
+  const selC = $("pc-client");
 
+  if(!ind){
+    selC.innerHTML = `<option value="">Semua Client</option>`;
+    selC.disabled = true;
+    return;
+  }
+
+  const rows = perfClient.rows.filter(r => trimStr(r[perfClient.industryField]) === ind);
+  const clients = uniqueSorted(rows.map(r => r[perfClient.clientField]));
+
+  selC.innerHTML =
+    `<option value="">Semua Client</option>` +
+    clients.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
+
+  selC.disabled = false;
+}
+  
 function initPerformanceClient(){
   $("pc-error-state").style.display = "none";
   $("pc-load-state").style.display = "flex";
@@ -2281,6 +2307,8 @@ function initPerformanceClient(){
 
 function updatePerformanceClientView(){
   const ind = $("pc-industry").value;
+  const client = $("pc-client").value;
+
   const emptySubmit = $("pc-submit-empty");
   const emptyQual = $("pc-qual-empty");
 
@@ -2292,6 +2320,26 @@ function updatePerformanceClientView(){
     $("pc-status-text").textContent = "Pilih Industry untuk menampilkan data.";
     return;
   }
+
+  let rows = perfClient.rows.filter(r => trimStr(r[perfClient.industryField]) === ind);
+  if(client){
+    rows = rows.filter(r => trimStr(r[perfClient.clientField]) === client);
+  }
+
+  const clients = uniqueSorted(rows.map(r => r[perfClient.clientField]));
+  const submitMap = buildMatrixRows(rows, perfClient.clientField, perfClient.submitCols);
+  const qualMap = buildMatrixRows(rows, perfClient.clientField, perfClient.qualCols);
+
+  renderMatrixBody($("pc-submit-body"), clients, submitMap);
+  renderMatrixBody($("pc-qual-body"), clients, qualMap);
+
+  emptySubmit.style.display = clients.length ? "none" : "block";
+  emptyQual.style.display = clients.length ? "none" : "block";
+
+  $("pc-status-text").textContent =
+    `Industry "${ind}"` +
+    (client ? ` · Client "${client}"` : ` · ${clients.length} client`);
+}
 
   const rows = perfClient.rows.filter(r=>trimStr(r[perfClient.industryField])===ind);
   const clients = uniqueSorted(rows.map(r=>r[perfClient.clientField]));
@@ -2308,6 +2356,8 @@ function updatePerformanceClientView(){
 
 function clearPC(){
   $("pc-industry").value = "";
+  $("pc-client").innerHTML = `<option value="">Semua Client</option>`;
+  $("pc-client").disabled = true;
   updatePerformanceClientView();
 }
 
@@ -2671,7 +2721,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("pj-clear-btn").addEventListener("click", clearPJ);
 
   // Perf events
-  $("pc-industry").addEventListener("change", updatePerformanceClientView);
+  $("pc-industry").addEventListener("change", ()=>{
+    updateClientDropdown();       // refresh pilihan client sesuai industry
+    updatePerformanceClientView(); // render tabel
+  });
+  
+  $("pc-client").addEventListener("change", updatePerformanceClientView);
 
   $("pa-group").addEventListener("change", ()=>{
     updateAreaDropdown();
