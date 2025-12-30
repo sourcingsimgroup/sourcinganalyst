@@ -107,19 +107,55 @@
     /* =========================
        STICKY TOP BAR (SaaS mahal)
     ========================= */
-    .topbar{
-      position:sticky;
-      top:10px;
-      z-index:80;
-      margin-bottom:14px;
-      border-radius:22px;
-      background:rgba(255,255,255,0.62);
+    /* === TOPBAR: Anti tembus konten saat scroll === */
+  .topbar{
+      /* lebih solid supaya data di belakang tidak kebaca */
+      background: rgba(255,255,255,0.92);
+    
+      /* blur + saturate biar efek "mahal" */
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+    
+      /* tetap border & shadow */
       border:1px solid rgba(17,24,39,0.10);
       box-shadow:0 22px 60px rgba(2,6,23,0.10);
-      backdrop-filter: blur(var(--blur));
-      -webkit-backdrop-filter: blur(var(--blur));
-      overflow:hidden;
+    
+      /* penting: biar pseudo-element nutup rapi */
+      position: sticky;
+      top: 10px;
+      z-index: 80;
+      overflow: visible; /* boleh visible karena kita bikin fade di bawah */
     }
+    
+    /* matikan overlay gradient lama yang bikin semi-transparan */
+    .topbar::before{
+      opacity: 0;
+    }
+
+        .filter-card, .sa-filter-card, .perf-filter-card{
+      background: rgba(255,255,255,0.90);
+      backdrop-filter: blur(16px) saturate(170%);
+      -webkit-backdrop-filter: blur(16px) saturate(170%);
+    }
+    
+    /* === Fade shield: menutupi konten yang naik tepat di bawah header === */
+    .topbar::after{
+      content:"";
+      position:absolute;
+      left:0; right:0;
+      bottom:-20px;
+      height:26px;
+      pointer-events:none;
+    
+      /* putih ke transparan (jadi konten yang lewat gak "nyangkut" kebaca) */
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.92) 0%,
+        rgba(255,255,255,0.65) 45%,
+        rgba(255,255,255,0.00) 100%
+      );
+    }
+
     .topbar::before{
       content:"";
       position:absolute;
