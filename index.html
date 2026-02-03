@@ -1861,6 +1861,9 @@ let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
 const provKotaMap = new Map();
 const jobParentTypeMap = new Map();
 
+// ✅ NEW: provinsi source (tetap ada walau kota kosong)
+const provSet = new Set();
+
 function findField(fields, candidates){
   const set = candidates.map(norm);
   const exact = fields.find(f=>set.includes(norm(f)));
@@ -1919,9 +1922,16 @@ function genderBucket(row){
 
 function buildProvKotaMap(){
   provKotaMap.clear();
+  provSet.clear();
+
   acmRows.forEach(r=>{
     const p = trimStr(r[COL_PROV]);
     const k = trimStr(r[COL_KOTA]);
+
+    // ✅ provinsi tetap dicatat meski kota kosong
+    if(p) provSet.add(p);
+
+    // kota hanya dimapping kalau ada
     if(!p || !k) return;
     if(!provKotaMap.has(p)) provKotaMap.set(p, new Set());
     provKotaMap.get(p).add(k);
@@ -1996,7 +2006,9 @@ function initACMFilters(){
   buildProvKotaMap();
   buildJobParentTypeMap();
 
-  const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
+  // ✅ FIX: gunakan provSet, bukan provKotaMap.keys()
+  let provVals = uniqueSorted(Array.from(provSet));
+  if(!provVals.length) provVals = FIXED_PROV_LIST.slice();
   const periodeVals = uniqueSorted(acmRows.map(r=>r[COL_PERIODE]));
   const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
 
@@ -2346,7 +2358,8 @@ function updateACMAll(){
    SOURCING ANALYST
 ========================================================= */
 function initSourcingAnalystFilters(){
-  const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
+  let provVals = uniqueSorted(Array.from(provSet));
+  if(!provVals.length) provVals = FIXED_PROV_LIST.slice();
   const allParents = uniqueSorted(Array.from(jobParentTypeMap.keys()));
 
   saProvMS = createMultiSelect("sa-ms-prov", provVals, "Semua Provinsi", false, (sel)=>{
