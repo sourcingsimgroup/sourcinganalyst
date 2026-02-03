@@ -1002,7 +1002,7 @@
      ******************************************************************/
     const CONFIG = {
       // ACM + Sourcing Analyst (biasanya dari "Responses")
-      ACM_CSV_URL: "PASTE_YOUR_ACM_CSV_URL_HERE",
+      ACM_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv",
 
       // Performance pages (kalau pakai sheet berbeda, isi URL berbeda)
       PERF_CLIENT_CSV_URL: "PASTE_YOUR_PERF_CLIENT_CSV_URL_HERE",
@@ -1145,8 +1145,8 @@
      ******************************************************************/
     function loadCsv(url){
       return new Promise((resolve, reject)=>{
-        if(!url || url.includes("PASTE_YOUR")) {
-          reject(new Error("URL CSV belum diisi di CONFIG."));
+        if(!url || url.includes("Phttps://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv")) {
+          reject(new Error("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv."));
           return;
         }
         Papa.parse(url, {
