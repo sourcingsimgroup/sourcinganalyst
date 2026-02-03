@@ -2,3195 +2,2130 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sourcing Analyst & Reporting</title>
+  <meta name="description" content="ACM + Sourcing Analyst + Performance (Client/Area/Jobtype) dengan filter Tahun (kolom AK) + fix dropdown Provinsi + grafik bulanan valid/buffer akurat." />
 
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
     :root{
-      /* Executive Modern Gold */
-      --bg:#ffffff;
-      --card:rgba(255,255,255,0.78);
-      --card-solid:#ffffff;
-
-      --ink:#0b1220;
-      --muted:#6b7280;
-
-      /* Gold accent (20% feel) */
-      --gold:#d4af37;
-      --gold-soft:rgba(212,175,55,0.20);
-      --gold-10:rgba(212,175,55,0.10);
-      --gold-06:rgba(212,175,55,0.06);
-
-      /* Primary (navy-black executive) */
-      --brand:#111827;
-      --brand-2:#0b1220;
-
-      --line:rgba(17,24,39,0.10);
-      --line-strong:rgba(17,24,39,0.16);
-
-      --radius:20px;
-      --radius-lg:26px;
-
-      --shadow:0 22px 60px rgba(2,6,23,0.08);
-      --shadow-soft:0 14px 30px rgba(2,6,23,0.06);
-
-      --warn:#b91c1c;
-      --male:#1d4ed8;
-      --female:#db2777;
-      --total:#059669;
-      --orange:#f97316;
-
-      --blur:14px;
-
-      /* skeleton */
-      --sk-base:rgba(17,24,39,0.06);
-      --sk-hi:rgba(212,175,55,0.14);
-      --sk-hi2:rgba(255,255,255,0.72);
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --brand:#1d4ed8;
+      --brand2:#2563eb;
+      --brand-soft:#e8f0ff;
+      --line:#e5e7eb;
+      --radius:18px;
+      --shadow:0 18px 50px rgba(15,23,42,.10);
+      --shadow2:0 10px 28px rgba(15,23,42,.10);
+      --ok:#059669;
+      --warn:#f97316;
+      --bad:#dc2626;
     }
-
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{
-      width:100%;
-      min-height:100%;
-      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(212,175,55,0.20) 0%, rgba(212,175,55,0.00) 60%),
-        radial-gradient(900px 600px at 85% 30%, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.00) 55%),
-        linear-gradient(180deg, #ffffff 0%, #fbfbfd 38%, #ffffff 100%);
+        radial-gradient(1200px 700px at 10% -10%, rgba(37,99,235,.18), transparent 60%),
+        radial-gradient(900px 600px at 80% 0%, rgba(29,78,216,.12), transparent 55%),
+        radial-gradient(1000px 700px at 60% 120%, rgba(5,150,105,.10), transparent 55%),
+        var(--bg);
     }
-    body{ display:flex; justify-content:center; padding:18px; }
-    .app-shell{ width:100%; max-width:1240px; position:relative; z-index:1; }
+    a{ color:inherit; text-decoration:none; }
 
-    /* Background ornaments */
-    .bg-ornaments{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:0;
+    /* Topbar */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(245,247,251,.72);
+      border-bottom:1px solid rgba(229,231,235,.8);
     }
-    .orb{
-      position:absolute;
-      border-radius:999px;
-      filter:blur(22px);
-      opacity:.9;
-    }
-    .orb-a{
-      width:520px; height:520px;
-      left:-140px; top:-170px;
-      background:radial-gradient(circle at 30% 30%, rgba(212,175,55,.28), rgba(212,175,55,0) 60%);
-    }
-    .orb-b{
-      width:460px; height:460px;
-      right:-160px; top:120px;
-      background:radial-gradient(circle at 40% 40%, rgba(212,175,55,.22), rgba(212,175,55,0) 62%);
-    }
-    .grid-sheen{
-      position:absolute;
-      inset:-40px;
-      background:
-        linear-gradient(to right, rgba(17,24,39,0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(17,24,39,0.04) 1px, transparent 1px);
-      background-size:64px 64px;
-      opacity:.35;
-      mask-image: radial-gradient(circle at 50% 30%, rgba(0,0,0,0.9), rgba(0,0,0,0) 68%);
-    }
-
-    /* =========================
-       STICKY TOP BAR (SaaS mahal)
-    ========================= */
-    /* === TOPBAR: Anti tembus konten saat scroll === */
-  .topbar{
-      /* lebih solid supaya data di belakang tidak kebaca */
-      background: rgba(255,255,255,0.92);
-    
-      /* blur + saturate biar efek "mahal" */
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
-    
-      /* tetap border & shadow */
-      border:1px solid rgba(17,24,39,0.10);
-      box-shadow:0 22px 60px rgba(2,6,23,0.10);
-    
-      /* penting: biar pseudo-element nutup rapi */
-      position: sticky;
-      top: 10px;
-      z-index: 80;
-      overflow: visible; /* boleh visible karena kita bikin fade di bawah */
-    }
-    
-    /* matikan overlay gradient lama yang bikin semi-transparan */
-    .topbar::before{
-      opacity: 0;
-    }
-
-        .filter-card, .sa-filter-card, .perf-filter-card{
-      background: rgba(255,255,255,0.98);
-      backdrop-filter: blur(16px) saturate(170%);
-      -webkit-backdrop-filter: blur(16px) saturate(170%);
-    }
-    
-    /* === Fade shield: menutupi konten yang naik tepat di bawah header === */
-    .topbar::after{
-      content:"";
-      position:absolute;
-      left:0; right:0;
-      bottom:-20px;
-      height:26px;
-      pointer-events:none;
-    
-      /* putih ke transparan (jadi konten yang lewat gak "nyangkut" kebaca) */
-      background: linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.92) 0%,
-        rgba(255,255,255,0.65) 45%,
-        rgba(255,255,255,0.00) 100%
-      );
-    }
-
     .topbar::before{
       content:"";
-      position:absolute;
-      inset:0;
+      position:absolute; inset:-60px 0 auto 0;
+      height:60px;
+      background: linear-gradient(to bottom, rgba(245,247,251,1), rgba(245,247,251,0));
       pointer-events:none;
-      background:linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.12));
-      opacity:.35;
     }
     .topbar-inner{
       position:relative;
-      padding:14px 16px 12px;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
+      max-width:1200px; margin:0 auto;
+      padding:14px 18px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px;
     }
     .brand{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      min-width:240px;
+      display:flex; align-items:center; gap:10px; min-width:220px;
     }
-    .brand-badge{
-      width:38px; height:38px;
-      border-radius:14px;
-      background:linear-gradient(135deg, rgba(17,24,39,0.95), rgba(17,24,39,0.80));
-      position:relative;
-      box-shadow:0 14px 30px rgba(2,6,23,0.14);
-      border:1px solid rgba(212,175,55,0.25);
-      flex:0 0 auto;
+    .logo{
+      width:40px; height:40px; border-radius:14px;
+      background: linear-gradient(135deg, rgba(29,78,216,1), rgba(37,99,235,1));
+      box-shadow: 0 12px 28px rgba(29,78,216,.25);
+      display:grid; place-items:center;
+      color:#fff; font-weight:800;
+      letter-spacing:.5px;
     }
-    .brand-badge::after{
-      content:"";
-      position:absolute; inset:8px;
-      border-radius:11px;
-      background:radial-gradient(circle at 30% 30%, rgba(212,175,55,0.85), rgba(212,175,55,0.15));
-      opacity:.95;
-      mix-blend-mode:screen;
+    .brand-title{
+      line-height:1.05;
     }
-    .brand-text h1{
-      font-size:1.25rem;
-      font-weight:900;
-      letter-spacing:0.01em;
-      background:linear-gradient(90deg, var(--brand-2), rgba(212,175,55,.85));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      line-height:1.15;
-    }
-    .brand-text p{
-      margin-top:6px;
-      font-size:0.85rem;
-      color:rgba(17,24,39,0.70);
-      line-height:1.35;
-    }
+    .brand-title b{ display:block; font-size:14px; }
+    .brand-title span{ font-size:12px; color:var(--muted); }
 
-    .topbar-right{
-      display:flex;
-      align-items:center;
-      gap:10px;
+    .tabs{
+      display:flex; align-items:center; gap:8px;
       flex-wrap:wrap;
       justify-content:flex-end;
     }
-    .pill{
-      padding:9px 14px;
-      background:rgba(255,255,255,0.65);
-      border:1px solid var(--line);
+    .tab{
+      border:1px solid rgba(229,231,235,.9);
+      background:rgba(255,255,255,.7);
+      padding:9px 12px;
       border-radius:999px;
-      font-size:0.78rem;
-      color:rgba(17,24,39,0.78);
-      font-weight:900;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-      box-shadow:var(--shadow-soft);
-      backdrop-filter: blur(var(--blur));
+      font-size:12px;
+      color:var(--muted);
+      transition:.18s ease;
+      box-shadow: 0 10px 22px rgba(15,23,42,.05);
+      user-select:none;
     }
-    .pill-dot{
-      width:8px; height:8px; border-radius:999px;
-      background:rgba(212,175,55,0.95);
-      box-shadow:0 0 0 4px rgba(212,175,55,0.16);
+    .tab:hover{ transform: translateY(-1px); }
+    .tab.active{
+      color:var(--brand);
+      border-color: rgba(37,99,235,.35);
+      background: rgba(232,240,255,.8);
+      box-shadow: 0 12px 26px rgba(29,78,216,.12);
+      font-weight:700;
     }
 
-    /* Tabs inside topbar */
-    .tab-row{
-      position:relative;
-      padding:0 16px 14px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .tab-btn{
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,0.65);
-      font-size:0.78rem;
-      padding:7px 14px;
-      cursor:pointer;
-      color:rgba(17,24,39,0.70);
-      font-weight:900;
-      white-space:nowrap;
-      box-shadow:0 10px 24px rgba(2,6,23,0.05);
-      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-      backdrop-filter: blur(var(--blur));
-    }
-    .tab-btn:hover{
-      transform:translateY(-1px);
-      border-color:rgba(212,175,55,0.32);
-      box-shadow:0 16px 30px rgba(2,6,23,0.08);
-    }
-    .tab-btn.active{
-      background:linear-gradient(135deg, rgba(17,24,39,0.96), rgba(17,24,39,0.86));
-      color:#ffffff;
-      border-color:rgba(212,175,55,0.30);
-      box-shadow:0 18px 40px rgba(2,6,23,0.18);
-      position:relative;
-    }
-    .tab-btn.active::after{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:999px;
-      border:1px solid rgba(212,175,55,0.35);
-      pointer-events:none;
-    }
-
-    /* Cards */
-    .card{
-      background:var(--card);
-      border-radius:var(--radius-lg);
-      box-shadow:var(--shadow);
-      padding:18px 18px 16px;
-      border:1px solid rgba(17,24,39,0.10);
-      backdrop-filter: blur(var(--blur));
-      position:relative;
-      overflow:hidden;
-    }
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:inherit;
-      pointer-events:none;
-      background:linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.08));
-      opacity:.35;
-    }
-
-    /* Pages */
+    /* Layout */
+    .wrap{ max-width:1200px; margin:0 auto; padding:18px; }
     .page{ display:none; }
     .page.active{ display:block; }
 
-    /* Sticky filter cards */
-    .filter-card, .sa-filter-card, .perf-filter-card{
-      margin-bottom:14px;
-      position:sticky;
-      top:110px;  /* because topbar sticky */
-      z-index:40;
+    .hero{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap:14px;
+      margin-top:6px;
+      margin-bottom:12px;
+    }
+    .hero h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .hero p{ margin:6px 0 0 0; color:var(--muted); font-size:12px; }
+    .hero .right{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
     }
 
-    .card-title-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-      position:relative;
-      z-index:1;
-    }
-    .card-title{ font-size:0.95rem; font-weight:900; letter-spacing:.01em; }
-    .card-tag{
-      font-size:0.7rem;
-      padding:5px 10px;
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
       border-radius:999px;
-      background:rgba(212,175,55,0.12);
-      color:rgba(17,24,39,0.78);
-      border:1px solid rgba(212,175,55,0.18);
-      font-weight:900;
+      background: rgba(255,255,255,.75);
+      border:1px solid rgba(229,231,235,.9);
+      box-shadow: 0 10px 22px rgba(15,23,42,.05);
+      font-size:12px; color:var(--muted);
+    }
+    .chip b{ color:var(--ink); }
+
+    .card{
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(229,231,235,.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(229,231,235,.7);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .card .hd .title{ font-weight:800; font-size:13px; }
+    .card .hd .sub{ font-size:12px; color:var(--muted); }
+    .card .bd{ padding:14px 16px; }
+
+    .grid-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+    .grid-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+    .grid-4{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+    @media (max-width: 980px){
+      .grid-3,.grid-4,.grid-2{ grid-template-columns:1fr; }
+      .brand{ min-width:auto; }
+      .tabs{ justify-content:flex-start; }
+    }
+
+    .kpi{
+      padding:14px;
+      border-radius:16px;
+      background: rgba(255,255,255,.86);
+      border:1px solid rgba(229,231,235,.9);
+      box-shadow: var(--shadow2);
+      min-height:76px;
+    }
+    .kpi .label{ font-size:12px; color:var(--muted); }
+    .kpi .value{ margin-top:6px; font-size:22px; font-weight:900; letter-spacing:.2px; }
+    .kpi .hint{ margin-top:4px; font-size:11px; color:var(--muted); }
+
+    /* Filters */
+    .filters, .sa-filters, .perf-filters{
+      display:grid;
+      gap:12px;
+      align-items:end;
+    }
+    .filters{ grid-template-columns: repeat(6, minmax(0,1fr)); }     /* + Tahun */
+    .sa-filters{ grid-template-columns: repeat(5, minmax(0,1fr)); }  /* + Tahun */
+    .perf-filters{ grid-template-columns: repeat(4, minmax(0,1fr)); }/* + Tahun */
+    @media (max-width: 980px){
+      .filters, .sa-filters, .perf-filters{ grid-template-columns:1fr; }
+    }
+
+    .filter-group{ display:flex; flex-direction:column; gap:6px; }
+    .filter-label{ font-size:12px; color:var(--muted); font-weight:700; }
+    .select, .perf-select{
+      appearance:none;
+      width:100%;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(229,231,235,.95);
+      background: rgba(255,255,255,.88);
+      font-family:inherit;
+      font-size:12px;
+      outline:none;
+      box-shadow: 0 10px 22px rgba(15,23,42,.05);
+    }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:10px;
+      border:1px solid rgba(37,99,235,.25);
+      background: rgba(232,240,255,.85);
+      color: var(--brand);
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 12px 26px rgba(29,78,216,.10);
+      transition:.18s ease;
       white-space:nowrap;
     }
-    .card-subtext{
-      font-size:0.75rem;
-      color:rgba(17,24,39,0.70);
-      line-height:1.45;
-      margin-bottom:8px;
-      position:relative;
-      z-index:1;
+    .btn:hover{ transform: translateY(-1px); }
+    .btn.ghost{
+      border:1px solid rgba(229,231,235,.95);
+      background: rgba(255,255,255,.78);
+      color: var(--muted);
+      box-shadow: 0 10px 22px rgba(15,23,42,.05);
+      font-weight:800;
     }
 
-    .header-right-flex{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .clear-btn{
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,0.70);
-      font-size:0.75rem;
-      padding:6px 11px;
-      cursor:pointer;
-      color:rgba(17,24,39,0.72);
-      font-weight:900;
-      box-shadow:0 10px 24px rgba(2,6,23,0.05);
-      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
-      backdrop-filter: blur(var(--blur));
-    }
-    .clear-btn:hover{
-      transform:translateY(-1px);
-      border-color:rgba(212,175,55,0.32);
-      box-shadow:0 16px 30px rgba(2,6,23,0.08);
-    }
-
-    .filter-toggle-btn{
-      display:none;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,0.70);
-      font-size:0.75rem;
-      padding:6px 11px;
-      cursor:pointer;
-      color:rgba(17,24,39,0.72);
-      align-items:center;
-      gap:6px;
-      box-shadow:0 10px 24px rgba(2,6,23,0.05);
-      font-weight:900;
-      backdrop-filter: blur(var(--blur));
-    }
-    .filter-toggle-btn .hamburger-icon{ font-size:0.9rem; line-height:1; }
-
-    .filter-body,.sa-filter-body,.perf-filter-body{ margin-top:6px; position:relative; z-index:1; }
-
-    @media (max-width:1024px){
-      .filter-toggle-btn{ display:inline-flex; }
-      .filter-body,.sa-filter-body,.perf-filter-body{ display:none; }
-      .filter-card.open .filter-body,
-      .sa-filter-card.open .sa-filter-body,
-      .perf-filter-card.open .perf-filter-body{ display:block; }
-      .filter-card,.sa-filter-card,.perf-filter-card{
-        box-shadow:0 22px 60px rgba(2,6,23,0.14);
-        border-color:rgba(17,24,39,0.16);
-      }
-      .filter-card, .sa-filter-card, .perf-filter-card{ top:120px; }
-    }
-
-    /* Filters layout */
-    .filters{
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-    @media (max-width:1024px){
-      .filters{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-    }
-    @media (max-width:640px){
-      .filters{ grid-template-columns:1fr; }
-    }
-
-    .sa-filters{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-    @media (max-width:1024px){ .sa-filters{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media (max-width:640px){ .sa-filters{ grid-template-columns:1fr; } }
-
-    .perf-filters{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:10px;
-      margin-top:10px;
-    }
-    @media (max-width:1024px){ .perf-filters{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media (max-width:640px){ .perf-filters{ grid-template-columns:1fr; } }
-
-    .filter-group{ display:flex; flex-direction:column; gap:6px; font-size:0.8rem; }
-    .filter-label{ font-weight:900; color:rgba(17,24,39,0.62); font-size:0.78rem; }
-
-    /* Multi select */
+    /* Multi-select */
     .ms{ position:relative; }
     .ms-toggle{
       width:100%;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
       border-radius:14px;
-      border:1px solid rgba(17,24,39,0.12);
-      background:rgba(255,255,255,0.72);
-      padding:8px 10px;
-      font-size:0.78rem;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:6px;
+      border:1px solid rgba(229,231,235,.95);
+      background: rgba(255,255,255,.88);
+      font-family:inherit;
+      font-size:12px;
+      outline:none;
+      box-shadow: 0 10px 22px rgba(15,23,42,.05);
       cursor:pointer;
-      box-shadow:0 12px 26px rgba(2,6,23,0.05);
-      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
-      backdrop-filter: blur(var(--blur));
     }
-    .ms-toggle:hover{
-      transform:translateY(-1px);
-      border-color:rgba(212,175,55,0.30);
-      box-shadow:0 16px 34px rgba(2,6,23,0.08);
-    }
-    .ms-placeholder{ flex:1; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .ms-counter{ font-size:0.68rem; color:rgba(17,24,39,0.55); white-space:nowrap; }
-    .ms-arrow{ font-size:0.68rem; color:rgba(17,24,39,0.55); }
+    .ms-placeholder{ color:var(--ink); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ms-counter{ color:var(--muted); font-weight:700; margin-left:auto; }
+    .ms-arrow{ color:var(--muted); font-weight:900; }
+
     .ms-panel{
-      position:absolute;
-      left:0; right:0; top:100%;
-      margin-top:6px;
-      background:rgba(255,255,255,0.90);
+      position:absolute; left:0; right:0; top:calc(100% + 8px);
       border-radius:16px;
-      box-shadow:0 22px 48px rgba(2,6,23,0.12);
-      border:1px solid rgba(17,24,39,0.12);
-      padding:10px;
-      z-index:60;
+      border:1px solid rgba(229,231,235,.95);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
       display:none;
-      backdrop-filter: blur(var(--blur));
+      z-index:40;
     }
     .ms.open .ms-panel{ display:block; }
     .ms-search{
       width:100%;
+      border:0;
+      border-bottom:1px solid rgba(229,231,235,.7);
+      padding:10px 12px;
+      font-family:inherit;
+      font-size:12px;
+      outline:none;
+      background: rgba(255,255,255,.85);
+    }
+    .ms-options{
+      max-height:220px;
+      overflow:auto;
+      padding:8px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .ms-opt{
+      display:flex; align-items:center; gap:10px;
       padding:8px 10px;
       border-radius:12px;
-      border:1px solid rgba(17,24,39,0.12);
-      font-size:0.75rem;
-      margin-bottom:8px;
-      outline:none;
-      background:rgba(255,255,255,0.85);
-    }
-    .ms-search:focus{
-      border-color:rgba(212,175,55,0.40);
-      box-shadow:0 0 0 4px rgba(212,175,55,0.14);
-    }
-    .ms-options{ max-height:240px; overflow-y:auto; }
-    .ms-option{
-      display:flex; align-items:center; gap:8px;
-      padding:7px 8px;
-      font-size:0.76rem;
+      border:1px solid rgba(229,231,235,.7);
+      background: rgba(255,255,255,.85);
       cursor:pointer;
-      border-radius:10px;
-      transition:background .12s ease;
+      user-select:none;
     }
-    .ms-option:hover{ background:rgba(212,175,55,0.08); }
-    .ms-option input{ accent-color:rgba(17,24,39,0.88); }
-    .ms-empty{ font-size:0.74rem; color:rgba(17,24,39,0.60); padding:6px 2px; display:none; }
-    .ms-disabled .ms-toggle{ background:rgba(17,24,39,0.06); color:#9ca3af; cursor:not-allowed; box-shadow:none; }
-    .filter-hint{ margin-top:10px; font-size:0.75rem; color:rgba(17,24,39,0.60); }
-
-    /* Perf select native */
-    .perf-select{
-      width:100%;
-      border-radius:14px;
-      border:1px solid rgba(17,24,39,0.12);
-      background:rgba(255,255,255,0.78);
-      padding:10px 12px;
-      font-size:0.8rem;
-      outline:none;
-      cursor:pointer;
-      box-shadow:0 12px 26px rgba(2,6,23,0.05);
-      backdrop-filter: blur(var(--blur));
-    }
-    .perf-select:focus{
-      border-color:rgba(212,175,55,0.40);
-      box-shadow:0 0 0 4px rgba(212,175,55,0.14), 0 12px 26px rgba(2,6,23,0.06);
-    }
-    .perf-select:disabled{ background:rgba(17,24,39,0.06); color:#9ca3af; cursor:not-allowed; box-shadow:none; }
-
-    /* Loading (spinner kept but hidden; skeleton used instead) */
-    .loading{ display:none; align-items:center; gap:8px; font-size:0.8rem; color:rgba(17,24,39,0.60); margin-top:10px; }
-    .spinner{ display:none; }
-    .error{ margin-top:10px; font-size:0.8rem; color:var(--warn); font-weight:800; line-height:1.4; }
-
-    /* Skeleton system */
-    .skeleton{ display:none; position:relative; z-index:1; }
-    .skeleton.show{ display:block; }
-    .sk-card{
-      border-radius:18px;
-      border:1px solid rgba(17,24,39,0.10);
-      background:rgba(255,255,255,0.62);
-      box-shadow:0 14px 30px rgba(2,6,23,0.06);
-      padding:14px;
-      overflow:hidden;
-      position:relative;
-      backdrop-filter: blur(var(--blur));
-    }
-    .sk-card + .sk-card{ margin-top:10px; }
-    .sk-line{
-      height:12px;
-      border-radius:999px;
-      background:var(--sk-base);
-      position:relative;
-      overflow:hidden;
-    }
-    .sk-line.sm{ height:10px; opacity:.9; }
-    .sk-line.lg{ height:14px; }
-    .sk-w-20{ width:20%; }
-    .sk-w-35{ width:35%; }
-    .sk-w-55{ width:55%; }
-    .sk-w-70{ width:70%; }
-    .sk-w-85{ width:85%; }
-    .sk-gap-10{ height:10px; }
-    .sk-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:10px;
-      margin-top:12px;
-    }
-    @media (max-width:900px){ .sk-grid{ grid-template-columns:1fr; } }
-    .sk-metric{
-      border-radius:16px;
-      border:1px solid rgba(17,24,39,0.08);
-      background:rgba(255,255,255,0.55);
+    .ms-opt:hover{ border-color: rgba(37,99,235,.25); background: rgba(232,240,255,.55); }
+    .ms-opt input{ margin:0; }
+    .ms-opt span{ font-size:12px; }
+    .ms-empty{
+      display:none;
       padding:12px;
-      overflow:hidden;
-      position:relative;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
     }
-    .sk-shimmer::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(212,175,55,0.14) 50%, rgba(255,255,255,0) 100%);
-      transform:translateX(-60%);
-      animation:shimmer 1.1s ease-in-out infinite;
-      opacity:.9;
-    }
-    @keyframes shimmer{
-      0%{ transform:translateX(-60%); }
-      100%{ transform:translateX(160%); }
-    }
-    .sk-table{
-      margin-top:12px;
-      border-radius:16px;
-      border:1px solid rgba(17,24,39,0.08);
-      background:rgba(255,255,255,0.55);
-      padding:12px;
-      overflow:hidden;
-      position:relative;
-    }
-    .sk-row{
-      display:flex;
-      gap:10px;
-      margin-top:10px;
-    }
-    .sk-cell{ height:12px; border-radius:999px; background:var(--sk-base); flex:1; overflow:hidden; position:relative; }
-
-    /* Summary cards */
-    .summary-row{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
-      margin-bottom:18px;
-    }
-    @media (max-width:900px){ .summary-row{ grid-template-columns:1fr; } }
-    .summary-card{
-      border-radius:18px;
-      padding:12px 14px;
-      background:rgba(255,255,255,0.72);
-      box-shadow:0 18px 40px rgba(2,6,23,0.07);
-      border:1px solid rgba(17,24,39,0.10);
-      display:flex; flex-direction:column; gap:6px;
-      backdrop-filter: blur(var(--blur));
-      position:relative;
-      overflow:hidden;
-    }
-    .summary-header{ display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; }
-    .summary-title{ font-weight:900; }
-    .summary-tag{
-      font-size:0.7rem; padding:4px 9px; border-radius:999px;
-      background:rgba(212,175,55,0.12);
-      border:1px solid rgba(212,175,55,0.18);
-      font-weight:900;
-      color:rgba(17,24,39,0.78);
-    }
-    .summary-body{ display:flex; justify-content:space-between; gap:8px; font-size:0.8rem; margin-top:4px; }
-    .summary-metric{ flex:1; }
-    .summary-label{ color:rgba(17,24,39,0.60); font-size:0.73rem; }
-    .summary-value{ font-weight:900; font-size:1.02rem; font-variant-numeric:tabular-nums; }
-
-    .summary-card.male .summary-title{ color:var(--male); }
-    .summary-card.female .summary-title{ color:var(--female); }
-    .summary-card.total .summary-title{ color:var(--total); }
-
-    /* Layout */
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:16px;
-      margin-bottom:12px;
-    }
-    @media (max-width:960px){ .grid{ grid-template-columns:1fr; } }
 
     /* Tables */
-    .table-wrap{
-      width:100%;
-      overflow-x:auto;
-      border-radius:16px;
-      border:1px solid rgba(17,24,39,0.10);
-      background:rgba(255,255,255,0.65);
-      box-shadow:0 14px 30px rgba(2,6,23,0.06);
-      backdrop-filter: blur(var(--blur));
-      position:relative;
-      z-index:1;
-    }
-    table{ width:100%; border-collapse:collapse; font-size:0.78rem; min-width:360px; }
-    thead{
-      background:linear-gradient(135deg, rgba(17,24,39,0.98), rgba(17,24,39,0.90));
-      color:#f9fafb;
-    }
-    th,td{ padding:9px 10px; text-align:left; border-bottom:1px solid rgba(17,24,39,0.08); white-space:nowrap; }
-    thead th{ position:sticky; top:0; z-index:1; border-bottom:1px solid rgba(212,175,55,0.18); }
-    tbody tr:nth-child(even){ background:rgba(17,24,39,0.035); }
-    .col-label{ font-weight:900; color:#111827; }
-    .col-number{ text-align:right; font-variant-numeric:tabular-nums; }
-    .total-row{
-      background:rgba(212,175,55,0.14);
-      color:#111827;
-      font-weight:900;
-    }
-    table.acm-table{ table-layout:fixed; min-width:560px; }
-    table.acm-table th:nth-child(1), table.acm-table td:nth-child(1){
-      width:58%; max-width:58%; overflow:hidden; text-overflow:ellipsis;
-    }
-    table.acm-table th:nth-child(2), table.acm-table td:nth-child(2),
-    table.acm-table th:nth-child(3), table.acm-table td:nth-child(3){ width:21%; }
-
-    .status-bar{
-      display:flex; align-items:center; justify-content:space-between;
-      margin:8px 2px 0;
-      font-size:0.72rem; color:rgba(17,24,39,0.60);
-      gap:10px; flex-wrap:wrap;
-      position:relative;
-      z-index:1;
-    }
-    .status-left{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-    .status-dot{
-      width:8px; height:8px; border-radius:999px;
-      background:rgba(17,24,39,0.85);
-      box-shadow:0 0 0 3px rgba(212,175,55,0.16);
-    }
-    .status-right{ font-style:italic; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; }
+    th,td{ padding:10px 10px; border-bottom:1px solid rgba(229,231,235,.7); font-size:12px; }
+    th{ text-align:left; color:var(--muted); font-weight:800; background: rgba(255,255,255,.65); position:sticky; top:0; z-index:1; }
+    tr:hover td{ background: rgba(232,240,255,.35); }
+    .nowrap{ white-space:nowrap; }
+    .right{ text-align:right; }
+    .muted{ color:var(--muted); }
 
     /* Chart */
-    .chart-card{ margin-bottom:14px; }
-    .chart-legend{
-      display:flex; align-items:center; gap:16px;
-      font-size:0.75rem; color:rgba(17,24,39,0.60);
-      margin-bottom:8px; flex-wrap:wrap;
-      position:relative; z-index:1;
-    }
-    .legend-item{ display:flex; align-items:center; gap:6px; }
-    .legend-dot{ width:14px; height:8px; border-radius:999px; }
-    .legend-valid{ background:rgba(17,24,39,0.85); }
-    .legend-buffer{ background:rgba(212,175,55,0.85); }
-
-    .chart-body{
-      display:flex; align-items:flex-end; gap:10px;
+    .chart{
+      width:100%;
       height:260px;
-      padding:10px 10px 6px;
-      border-radius:18px;
-      background:linear-gradient(to top, rgba(255,255,255,0.65), rgba(255,255,255,0.92));
-      border:1px solid rgba(17,24,39,0.10);
-      box-shadow:0 14px 30px rgba(2,6,23,0.06);
-      overflow-x:auto;
-      position:relative;
-      z-index:1;
-    }
-    .chart-col{
-      flex:1; min-width:48px; height:100%;
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px;
-    }
-    .chart-col-bars{ flex:1; display:flex; align-items:flex-end; justify-content:center; gap:4px; width:100%; }
-    .chart-bar-vert{ width:14px; border-radius:10px 10px 0 0; background:#e5e7eb; transition:height .25s ease-out; }
-    .bar-valid{ background:linear-gradient(180deg, rgba(17,24,39,0.95), rgba(17,24,39,0.72)); }
-    .bar-buffer{ background:linear-gradient(180deg, rgba(212,175,55,0.90), rgba(212,175,55,0.55)); }
-    .chart-col-values{ font-size:0.7rem; text-align:center; font-variant-numeric:tabular-nums; color:#111827; line-height:1.2; }
-    .chart-col-label{ font-size:0.7rem; text-align:center; color:rgba(17,24,39,0.55); white-space:nowrap; }
-    .chart-footer{ margin-top:8px; font-size:0.72rem; color:rgba(17,24,39,0.60); font-style:italic; position:relative; z-index:1; }
-
-    /* Performance stacked */
-    .stack-col{ display:flex; flex-direction:column; gap:16px; margin-bottom:16px; width:100%; }
-    table.matrix-table{ min-width:920px; table-layout:auto; }
-    .matrix-empty{ margin-top:10px; font-size:0.78rem; color:rgba(17,24,39,0.60); font-weight:900; display:none; position:relative; z-index:1; }
-    .tiny-note{ margin-top:6px; font-size:0.72rem; color:rgba(17,24,39,0.58); font-style:italic; line-height:1.45; white-space:pre-wrap; position:relative; z-index:1; }
-
-    /* Sourcing Analyst text */
-    .analysis-text{ font-size:0.8rem; color:var(--ink); line-height:1.6; margin-top:4px; position:relative; z-index:1; }
-    .analysis-section{
-      display:flex; align-items:flex-start; gap:10px;
-      padding:12px 12px;
       border-radius:16px;
-      background:linear-gradient(to bottom right, rgba(255,255,255,0.70), rgba(255,255,255,0.92));
-      border:1px solid rgba(17,24,39,0.10);
-      box-shadow:0 10px 20px rgba(2,6,23,0.04);
-      margin-top:10px;
-      backdrop-filter: blur(var(--blur));
+      border:1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.86);
+      box-shadow: var(--shadow2);
+      padding:12px;
+      overflow:hidden;
     }
-    .analysis-icon{ font-size:1.5rem; line-height:1; margin-top:2px; }
-    .analysis-title{ font-weight:900; font-size:0.86rem; }
-    .analysis-summary{ font-size:0.8rem; color:var(--ink); }
-    .analysis-detail{ font-size:0.75rem; color:var(--warn); font-weight:900; }
+    .bars{
+      display:flex; gap:6px; align-items:flex-end;
+      height:100%;
+      padding:4px 2px 22px 2px;
+    }
+    .bar-col{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      gap:4px;
+      min-width:0;
+    }
+    .bar{
+      width:100%;
+      border-radius:10px 10px 10px 10px;
+      background: rgba(29,78,216,.25);
+      border: 1px solid rgba(29,78,216,.25);
+      min-height:2px;
+    }
+    .bar2{
+      background: rgba(5,150,105,.22);
+      border:1px solid rgba(5,150,105,.22);
+    }
+    .bar-label{
+      position:relative;
+      top:18px;
+      font-size:10px;
+      color:var(--muted);
+      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
+    /* Skeleton */
+    .skeleton{
+      border-radius:16px;
+      border:1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.78);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+      min-height: 86px;
+    }
+    .skeleton::before{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, rgba(229,231,235,.0), rgba(229,231,235,.55), rgba(229,231,235,.0));
+      transform: translateX(-100%);
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer{
+      0%{ transform: translateX(-100%); }
+      100%{ transform: translateX(100%); }
+    }
+
+    .toast{
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      padding:10px 12px; border-radius:999px;
+      background: rgba(15,23,42,.88);
+      color:#fff;
+      font-size:12px;
+      box-shadow: 0 18px 40px rgba(15,23,42,.35);
+      display:none;
+      z-index:80;
+    }
+    .toast.show{ display:block; }
+
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+      line-height:1.6;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px; display:inline-block;
+      background: rgba(29,78,216,.9);
+      box-shadow: 0 8px 18px rgba(29,78,216,.25);
+    }
+    .dot.g{ background: rgba(5,150,105,.95); box-shadow: 0 8px 18px rgba(5,150,105,.25); }
   </style>
 </head>
 
 <body>
-  <!-- Executive background ornaments -->
-  <div class="bg-ornaments" aria-hidden="true">
-    <div class="orb orb-a"></div>
-    <div class="orb orb-b"></div>
-    <div class="grid-sheen"></div>
-  </div>
-
-  <div class="app-shell">
-    <!-- ===================== STICKY TOPBAR ===================== -->
-    <section class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <div class="brand-badge" aria-hidden="true"></div>
-          <div class="brand-text">
-            <h1>Sourcing Analyst & Reporting</h1>
-            <p>Applicant Cycle Management + Sourcing Analyst Insight + Performance (Client / Area / Jobtype).</p>
-          </div>
-        </div>
-
-        <div class="topbar-right">
-          <span class="pill"><span class="pill-dot"></span><span id="pill-status">Ready</span></span>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">SI</div>
+        <div class="brand-title">
+          <b>Sourcing Analyst & Reporting</b>
+          <span>ACM · Sourcing Analyst · Performance</span>
         </div>
       </div>
 
-      <div class="tab-row">
-        <button id="tab-acm" class="tab-btn active" type="button">ACM</button>
-        <button id="tab-sa" class="tab-btn" type="button">Sourcing Analyst</button>
-        <button id="tab-pc" class="tab-btn" type="button">Performance Sourcing Client</button>
-        <button id="tab-pa" class="tab-btn" type="button">Performance Sourcing Area</button>
-        <button id="tab-pj" class="tab-btn" type="button">Performance Jobtype</button>
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-page="acm">ACM</div>
+        <div class="tab" data-page="sa">Sourcing Analyst</div>
+        <div class="tab" data-page="pc">Performance Client</div>
+        <div class="tab" data-page="pa">Performance Area</div>
+        <div class="tab" data-page="pj">Performance Jobtype</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- PAGE: ACM -->
+    <section class="page active" id="page-acm">
+      <div class="hero">
+        <div>
+          <h1>Applicant Cycle Management (ACM)</h1>
+          <p>Filter Provinsi tidak kosong + grafik bulanan valid/buffer akurat + filter Tahun (kolom AK).</p>
+        </div>
+        <div class="right">
+          <span class="chip"><span class="dot"></span> <b>Valid</b></span>
+          <span class="chip"><span class="dot g"></span> <b>Buffer</b></span>
+          <button class="btn ghost" id="btn-reload">Reload Data</button>
+          <button class="btn" id="btn-clear-acm">Clear Filter</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div class="hd">
+          <div>
+            <div class="title">Filter</div>
+            <div class="sub" id="acm-status">Memuat data...</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="filters">
+            <div class="filter-group">
+              <label class="filter-label">Periode Pelamar</label>
+              <div class="ms" id="ms-periode">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Periode</span>
+                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari periode..." />
+                  <div class="ms-options"></div><div class="ms-empty">Tidak ada periode</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Tahun</label>
+              <div class="ms" id="ms-year">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Tahun</span>
+                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari tahun..." />
+                  <div class="ms-options"></div><div class="ms-empty">Tidak ada tahun</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Industry</label>
+              <select id="f-industry" class="select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Client</label>
+              <select id="f-client" class="select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Provinsi</label>
+              <select id="f-prov" class="select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Kota</label>
+              <select id="f-kota" class="select"></select>
+            </div>
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <div class="filters">
+            <div class="filter-group">
+              <label class="filter-label">Job Parent</label>
+              <select id="f-jobparent" class="select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Job Type</label>
+              <select id="f-jobtype" class="select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Kategori</label>
+              <select id="f-kategori" class="select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Qualified (Yes/No)</label>
+              <select id="f-qualified" class="select"></select>
+            </div>
+
+            <div class="filter-group" style="grid-column: span 2;">
+              <label class="filter-label">Catatan</label>
+              <div class="chip" style="width:100%; justify-content:space-between;">
+                <span class="muted">Buffer = Qualified Yes <b>dan bukan</b> kategori valid</span>
+                <span class="muted">· Tahun dari kolom AK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:12px;">
+        <div class="kpi">
+          <div class="label">Total Rows</div>
+          <div class="value" id="kpi-total">—</div>
+          <div class="hint" id="kpi-total-h">Setelah filter</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Aplikan Valid</div>
+          <div class="value" id="kpi-valid">—</div>
+          <div class="hint">Kategori valid</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Buffer</div>
+          <div class="value" id="kpi-buffer">—</div>
+          <div class="hint">Qualified Yes & bukan valid</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Qualified Yes</div>
+          <div class="value" id="kpi-qyes">—</div>
+          <div class="hint">Semua yang qualified</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Grafik Bulanan (Jan–Des)</div>
+              <div class="sub">Valid (biru) vs Buffer (hijau)</div>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="chart" id="chart-acm"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Ringkasan by Kategori</div>
+              <div class="sub">Top 10 kategori berdasarkan jumlah</div>
+            </div>
+          </div>
+          <div class="bd">
+            <div style="max-height:320px; overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Kategori</th>
+                    <th class="right">Count</th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-kategori"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <main>
-      <!-- ===================== PAGE: ACM ===================== -->
-      <section id="page-acm" class="page active">
-        <section class="card filter-card" id="acm-filter-card">
-          <div class="card-title-row">
-            <div class="card-title">Filter Data Applicant</div>
-            <div class="header-right-flex">
-              <button id="acm-filter-toggle-btn" class="filter-toggle-btn" type="button">
-                <span class="hamburger-icon">☰</span><span>Filter</span>
-              </button>
-              <button id="clear-filters-btn" class="clear-btn" type="button">Hapus semua filter</button>
-            </div>
+    <!-- PAGE: SA -->
+    <section class="page" id="page-sa">
+      <div class="hero">
+        <div>
+          <h1>Sourcing Analyst</h1>
+          <p>Analisis distribusi Job Parent, filter Tahun + dependent options (Industry/Client/Area/Job Parent).</p>
+        </div>
+        <div class="right">
+          <button class="btn" id="btn-clear-sa">Clear Filter</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div class="hd">
+          <div>
+            <div class="title">Filter Sourcing Analyst</div>
+            <div class="sub" id="sa-status">Menunggu data ACM...</div>
           </div>
-          <div class="card-subtext">
-            Multi-select aktif. <strong>Job Type</strong> hanya muncul setelah <strong>Job Parent</strong> dipilih.
-          </div>
-
-          <div class="filter-body">
-            <div class="filters">
-              <div class="filter-group">
-                <label class="filter-label">Provinsi</label>
-                <div class="ms" id="ms-prov">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Semua Provinsi</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Kota</label>
-                <div class="ms ms-disabled" id="ms-kota">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari kota..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Periode Pelamar</label>
-                <div class="ms" id="ms-periode">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Semua Periode</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari periode..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada periode</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Job Parent</label>
-                <div class="ms" id="ms-job-parent">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Semua Job Parent</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Job Type</label>
-                <div class="ms ms-disabled" id="ms-job-type">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari job type..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
-                  </div>
+        </div>
+        <div class="bd">
+          <div class="sa-filters">
+            <div class="filter-group">
+              <label class="filter-label">Tahun</label>
+              <div class="ms" id="sa-ms-year">
+                <button type="button" class="ms-toggle">
+                  <span class="ms-placeholder">Semua Tahun</span>
+                  <span class="ms-counter"></span><span class="ms-arrow">▾</span>
+                </button>
+                <div class="ms-panel">
+                  <input class="ms-search" type="text" placeholder="Cari tahun..." />
+                  <div class="ms-options"></div><div class="ms-empty">Tidak ada tahun</div>
                 </div>
               </div>
             </div>
 
-            <div class="filter-hint">* Filter <strong>Cycle Hired</strong> sudah dihapus sesuai revisi.</div>
-          </div>
+            <div class="filter-group">
+              <label class="filter-label">Industry</label>
+              <select id="sa-industry" class="select"></select>
+            </div>
 
-          <!-- Skeleton Loading ACM -->
-          <div id="acm-skeleton" class="skeleton show">
-            <div class="sk-card sk-shimmer">
-              <div class="sk-line lg sk-w-55"></div>
-              <div class="sk-gap-10"></div>
-              <div class="sk-line sm sk-w-85"></div>
-              <div class="sk-grid">
-                <div class="sk-metric sk-shimmer">
-                  <div class="sk-line sm sk-w-35"></div>
-                  <div class="sk-gap-10"></div>
-                  <div class="sk-line lg sk-w-55"></div>
-                </div>
-                <div class="sk-metric sk-shimmer">
-                  <div class="sk-line sm sk-w-35"></div>
-                  <div class="sk-gap-10"></div>
-                  <div class="sk-line lg sk-w-55"></div>
-                </div>
-                <div class="sk-metric sk-shimmer">
-                  <div class="sk-line sm sk-w-35"></div>
-                  <div class="sk-gap-10"></div>
-                  <div class="sk-line lg sk-w-55"></div>
-                </div>
-              </div>
-              <div class="sk-table sk-shimmer">
-                <div class="sk-line sm sk-w-20"></div>
-                <div class="sk-row">
-                  <div class="sk-cell sk-shimmer"></div>
-                  <div class="sk-cell sk-shimmer"></div>
-                  <div class="sk-cell sk-shimmer"></div>
-                </div>
-                <div class="sk-row">
-                  <div class="sk-cell sk-shimmer"></div>
-                  <div class="sk-cell sk-shimmer"></div>
-                  <div class="sk-cell sk-shimmer"></div>
-                </div>
-                <div class="sk-row">
-                  <div class="sk-cell sk-shimmer"></div>
-                  <div class="sk-cell sk-shimmer"></div>
-                  <div class="sk-cell sk-shimmer"></div>
-                </div>
-              </div>
+            <div class="filter-group">
+              <label class="filter-label">Client</label>
+              <select id="sa-client" class="select"></select>
             </div>
-          </div>
 
-          <!-- old spinner placeholder kept but hidden by CSS -->
-          <div id="acm-load-state" class="loading">
-            <div class="spinner"></div><span>Memuat data ACM ...</span>
-          </div>
-          <div id="acm-error-state" class="error" style="display:none;"></div>
-        </section>
+            <div class="filter-group">
+              <label class="filter-label">Area</label>
+              <select id="sa-area" class="select"></select>
+            </div>
 
-        <!-- Chart -->
-        <section class="card chart-card">
-          <div class="card-title-row">
-            <div class="card-title">Trend Applicant Valid & Buffer per Bulan</div>
-            <div class="card-tag">Jan–Des</div>
+            <div class="filter-group">
+              <label class="filter-label">Job Parent</label>
+              <select id="sa-jobparent" class="select"></select>
+            </div>
           </div>
-          <p class="card-subtext">
-            Berdasarkan <strong>PERIODE PELAMAR</strong>. Valid/Buffer dihitung dari kombinasi <strong>KATEGORI APP</strong> dan <strong>QUALIFIED</strong>.
-          </p>
-          <div class="chart-legend">
-            <div class="legend-item"><span class="legend-dot legend-valid"></span><span>Applicant Valid</span></div>
-            <div class="legend-item"><span class="legend-dot legend-buffer"></span><span>Buffer</span></div>
-          </div>
-          <div id="chart-body" class="chart-body"></div>
-          <div id="chart-summary-text" class="chart-footer">Menunggu data...</div>
-        </section>
+        </div>
+      </div>
 
-        <!-- Summary -->
-        <section class="summary-row">
-          <div class="summary-card male">
-            <div class="summary-header">
-              <div class="summary-title">Summary Laki-Laki</div>
-              <div class="summary-tag">Gender: L</div>
-            </div>
-            <div class="summary-body">
-              <div class="summary-metric">
-                <div class="summary-label">Applicant Valid</div>
-                <div id="sum-male-valid" class="summary-value">0</div>
-              </div>
-              <div class="summary-metric">
-                <div class="summary-label">Buffer</div>
-                <div id="sum-male-buffer" class="summary-value">0</div>
-              </div>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div class="kpi">
+          <div class="label">Rows (filtered)</div>
+          <div class="value" id="sa-kpi-rows">—</div>
+          <div class="hint" id="sa-kpi-hint">Semua tahun</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Valid</div>
+          <div class="value" id="sa-kpi-valid">—</div>
+          <div class="hint">Kategori valid</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Buffer</div>
+          <div class="value" id="sa-kpi-buffer">—</div>
+          <div class="hint">Qualified Yes & bukan valid</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Top Job Parent</div>
+              <div class="sub">Berdasarkan jumlah rows</div>
             </div>
           </div>
-
-          <div class="summary-card female">
-            <div class="summary-header">
-              <div class="summary-title">Summary Perempuan</div>
-              <div class="summary-tag">Gender: P</div>
-            </div>
-            <div class="summary-body">
-              <div class="summary-metric">
-                <div class="summary-label">Applicant Valid</div>
-                <div id="sum-female-valid" class="summary-value">0</div>
-              </div>
-              <div class="summary-metric">
-                <div class="summary-label">Buffer</div>
-                <div id="sum-female-buffer" class="summary-value">0</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="summary-card total">
-            <div class="summary-header">
-              <div class="summary-title">Total Nasional</div>
-              <div class="summary-tag">All</div>
-            </div>
-            <div class="summary-body">
-              <div class="summary-metric">
-                <div class="summary-label">Applicant Valid</div>
-                <div id="sum-total-valid" class="summary-value">0</div>
-              </div>
-              <div class="summary-metric">
-                <div class="summary-label">Buffer</div>
-                <div id="sum-total-buffer" class="summary-value">0</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tables 1 & 2 -->
-        <section class="grid">
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Preview Applicant Valid × Buffer</div>
-              <div class="card-tag">By Provinsi</div>
-            </div>
-            <div class="table-wrap">
-              <table class="acm-table">
+          <div class="bd">
+            <div style="max-height:340px; overflow:auto;">
+              <table>
                 <thead>
-                <tr><th>Provinsi</th><th>Applicant Valid</th><th>Buffer</th></tr>
+                  <tr>
+                    <th>Job Parent</th>
+                    <th class="right">Rows</th>
+                    <th class="right">Valid</th>
+                    <th class="right">Buffer</th>
+                  </tr>
                 </thead>
-                <tbody id="tbl-prov-body"></tbody>
+                <tbody id="sa-tbl"></tbody>
               </table>
             </div>
-            <div class="status-bar">
-              <div class="status-left"><span class="status-dot"></span><span id="status-prov">Menunggu data...</span></div>
-              <div class="status-right">Valid = KATEGORI APP "APLIKAN VALID - CTC 1" · Buffer = QUALIFIED "YES"</div>
-            </div>
-          </article>
+          </div>
+        </div>
 
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Preview Metode Sourcing</div>
-              <div class="card-tag">MEDIA SOURCING</div>
-            </div>
-            <div class="table-wrap">
-              <table class="acm-table">
-                <thead>
-                <tr><th>Metode Sourcing</th><th>Applicant Valid</th><th>Buffer</th></tr>
-                </thead>
-                <tbody id="tbl-metode-body"></tbody>
-              </table>
-            </div>
-            <div class="status-bar">
-              <div class="status-left"><span class="status-dot"></span><span id="status-metode">Menunggu data...</span></div>
-              <div class="status-right">OFFLINE / ONLINE - JOB PORTAL / ONLINE - MEDIA SOSIAL</div>
-            </div>
-          </article>
-        </section>
-
-        <!-- Tables 3 & 4 -->
-        <section class="grid">
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Preview Sourcing Media Sosial</div>
-              <div class="card-tag">Platform</div>
-            </div>
-            <div class="table-wrap">
-              <table class="acm-table">
-                <thead>
-                <tr><th>Media Sosial</th><th>Applicant Valid</th><th>Buffer</th></tr>
-                </thead>
-                <tbody id="tbl-media-body"></tbody>
-              </table>
-            </div>
-            <div class="status-bar">
-              <div class="status-left"><span class="status-dot"></span><span id="status-media">Menunggu data...</span></div>
-              <div class="status-right">Filter: MEDIA SOURCING = ONLINE - MEDIA SOSIAL</div>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Preview Profiling Applicant</div>
-              <div class="card-tag">Pendidikan</div>
-            </div>
-            <div class="table-wrap">
-              <table class="acm-table">
-                <thead>
-                <tr><th>Pendidikan Terakhir</th><th>Applicant Valid</th><th>Buffer</th></tr>
-                </thead>
-                <tbody id="tbl-edu-body"></tbody>
-              </table>
-            </div>
-            <div class="status-bar">
-              <div class="status-left"><span class="status-dot"></span><span id="status-edu">Menunggu data...</span></div>
-              <div class="status-right">Kolom: PENDIDIKAN TERAKHIR</div>
-            </div>
-          </article>
-        </section>
-
-        <!-- Tables 5 & 6 -->
-        <section class="grid">
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Preview Sourcing Job Portal</div>
-              <div class="card-tag">Portal</div>
-            </div>
-            <div class="table-wrap">
-              <table class="acm-table">
-                <thead>
-                <tr><th>Job Portal</th><th>Applicant Valid</th><th>Buffer</th></tr>
-                </thead>
-                <tbody id="tbl-portal-body"></tbody>
-              </table>
-            </div>
-            <div class="status-bar">
-              <div class="status-left"><span class="status-dot"></span><span id="status-portal">Menunggu data...</span></div>
-              <div class="status-right">Filter: MEDIA SOURCING = ONLINE - JOB PORTAL</div>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Preview Sourcing Offline</div>
-              <div class="card-tag">Aktivitas</div>
-            </div>
-            <div class="table-wrap">
-              <table class="acm-table">
-                <thead>
-                <tr><th>Aktivitas Offline</th><th>Applicant Valid</th><th>Buffer</th></tr>
-                </thead>
-                <tbody id="tbl-offline-body"></tbody>
-              </table>
-            </div>
-            <div class="status-bar">
-              <div class="status-left"><span class="status-dot"></span><span id="status-offline">Menunggu data...</span></div>
-              <div class="status-right">Filter: MEDIA SOURCING = OFFLINE</div>
-            </div>
-          </article>
-        </section>
-      </section>
-
-      <!-- ===================== PAGE: SOURCING ANALYST ===================== -->
-      <section id="page-sa" class="page">
-        <section class="card sa-filter-card" id="sa-filter-card">
-          <div class="card-title-row">
-            <div class="card-title">Filter Sourcing Analyst</div>
-            <div class="header-right-flex">
-              <button id="sa-filter-toggle-btn" class="filter-toggle-btn" type="button">
-                <span class="hamburger-icon">☰</span><span>Filter</span>
-              </button>
-              <button id="sa-clear-filters-btn" class="clear-btn" type="button">Hapus filter</button>
-              <div class="card-tag">Provinsi · Kota · Job Parent · Job Type</div>
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Grafik Bulanan (Jan–Des)</div>
+              <div class="sub">Valid vs Buffer (setelah filter)</div>
             </div>
           </div>
+          <div class="bd">
+            <div class="chart" id="chart-sa"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <div class="sa-filter-body">
-            <div class="sa-filters">
-              <div class="filter-group">
-                <label class="filter-label">Provinsi</label>
-                <div class="ms" id="sa-ms-prov">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Semua Provinsi</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari provinsi..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada provinsi</div>
-                  </div>
-                </div>
-              </div>
+    <!-- PAGE: Performance Client -->
+    <section class="page" id="page-pc">
+      <div class="hero">
+        <div>
+          <h1>Performance Client</h1>
+          <p>Filter Tahun + Industry + Client. Grafik bulanan valid/buffer.</p>
+        </div>
+        <div class="right">
+          <button class="btn" id="btn-clear-pc">Clear Filter</button>
+        </div>
+      </div>
 
-              <div class="filter-group">
-                <label class="filter-label">Kota</label>
-                <div class="ms ms-disabled" id="sa-ms-kota">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Pilih provinsi terlebih dahulu</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari kota..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada kota</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Job Parent</label>
-                <div class="ms" id="sa-ms-job-parent">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Semua Job Parent</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari job parent..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job parent</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Job Type</label>
-                <div class="ms ms-disabled" id="sa-ms-job-type">
-                  <button type="button" class="ms-toggle">
-                    <span class="ms-placeholder">Pilih Job Parent terlebih dahulu</span>
-                    <span class="ms-counter"></span><span class="ms-arrow">▾</span>
-                  </button>
-                  <div class="ms-panel">
-                    <input class="ms-search" type="text" placeholder="Cari job type..." />
-                    <div class="ms-options"></div><div class="ms-empty">Tidak ada job type</div>
-                  </div>
-                </div>
-              </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="hd">
+          <div>
+            <div class="title">Filter Performance Client</div>
+            <div class="sub" id="pc-status-text">Memuat data...</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="perf-filters">
+            <div class="filter-group">
+              <label class="filter-label">Tahun</label>
+              <select id="pc-year" class="perf-select">
+                <option value="">Semua Tahun</option>
+              </select>
             </div>
 
-            <div class="filter-hint">* Insight otomatis akan mengikuti filter di atas.</div>
-          </div>
-        </section>
+            <div class="filter-group">
+              <label class="filter-label">Industry</label>
+              <select id="pc-industry" class="perf-select"></select>
+            </div>
 
-        <section class="card">
-          <div class="card-title-row">
-            <div class="card-title">Analisa Best Practice Sourcing</div>
-            <div class="card-tag">Auto Insight</div>
-          </div>
-          <div id="sa-analysis-text" class="analysis-text">
-            Pilih filter untuk melihat rekomendasi channel terbaik berdasarkan Applicant Valid.
-          </div>
-        </section>
-      </section>
+            <div class="filter-group">
+              <label class="filter-label">Client</label>
+              <select id="pc-client" class="perf-select"></select>
+            </div>
 
-      <!-- ===================== PAGE: Performance Client ===================== -->
-      <section id="page-pc" class="page">
-        <section class="card perf-filter-card" id="pc-filter-card">
-          <div class="card-title-row">
-            <div class="card-title">Filter Performance Sourcing Client</div>
-            <div class="header-right-flex">
-              <button id="pc-filter-toggle-btn" class="filter-toggle-btn" type="button">
-                <span class="hamburger-icon">☰</span><span>Filter</span>
-              </button>
-              <button id="pc-clear-btn" class="clear-btn" type="button">Hapus filter</button>
-              <div class="card-tag">Industry</div>
+            <div class="filter-group">
+              <label class="filter-label">Keterangan</label>
+              <div class="chip" style="width:100%; justify-content:space-between;">
+                <span class="muted">Data source: Performance Client CSV</span>
+                <span class="muted">· Tahun kolom AK</span>
+              </div>
             </div>
           </div>
-          <div class="card-subtext">
-            Pilih <strong>Industry</strong> untuk menampilkan data per <strong>Client</strong>. Nilai tampil format <strong>xx.xx%</strong>.
-          </div>
+        </div>
+      </div>
 
-          <div class="perf-filter-body">
-            <div class="perf-filters">
-              <div class="filter-group">
-                <label class="filter-label">Industry</label>
-                <select id="pc-industry" class="perf-select">
-                  <option value="">Pilih Industry...</option>
-                </select>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Client</label>
-                <select id="pc-client" class="perf-select" disabled>
-                  <option value="">Semua Client</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Skeleton Performance Client -->
-            <div id="pc-skeleton" class="skeleton">
-              <div class="sk-card sk-shimmer">
-                <div class="sk-line lg sk-w-55"></div>
-                <div class="sk-gap-10"></div>
-                <div class="sk-line sm sk-w-70"></div>
-                <div class="sk-table sk-shimmer">
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="pc-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Client...</span></div>
-            <div id="pc-error-state" class="error" style="display:none;"></div>
-
-            <div class="status-bar" style="margin-top:10px;">
-              <div class="status-left"><span class="status-dot"></span><span id="pc-status-text">Menunggu data...</span></div>
-              <div class="status-right" id="pc-col-note"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Grafik Bulanan</div>
+              <div class="sub">Valid vs Buffer</div>
             </div>
           </div>
-        </section>
+          <div class="bd"><div class="chart" id="chart-pc"></div></div>
+        </div>
 
-        <section class="stack-col">
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Rasio Submit</div>
-              <div class="card-tag">Client × Bulan</div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pc-submit-head"></thead>
-                <tbody id="pc-submit-body"></tbody>
-              </table>
-            </div>
-            <div id="pc-submit-empty" class="matrix-empty">Pilih Industry dulu.</div>
-          </article>
-
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Applicant Qualified</div>
-              <div class="card-tag">Client × Bulan</div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pc-qual-head"></thead>
-                <tbody id="pc-qual-body"></tbody>
-              </table>
-            </div>
-            <div id="pc-qual-empty" class="matrix-empty">Pilih Industry dulu.</div>
-          </article>
-        </section>
-      </section>
-
-      <!-- ===================== PAGE: Performance Area ===================== -->
-      <section id="page-pa" class="page">
-        <section class="card perf-filter-card" id="pa-filter-card">
-          <div class="card-title-row">
-            <div class="card-title">Filter Performance Sourcing Area</div>
-            <div class="header-right-flex">
-              <button id="pa-filter-toggle-btn" class="filter-toggle-btn" type="button">
-                <span class="hamburger-icon">☰</span><span>Filter</span>
-              </button>
-              <button id="pa-clear-btn" class="clear-btn" type="button">Hapus filter</button>
-              <div class="card-tag">Group Client · Area</div>
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Ringkasan</div>
+              <div class="sub">KPI setelah filter</div>
             </div>
           </div>
-
-          <div class="card-subtext">
-            Pilih <strong>Group Client</strong> lalu pilih <strong>Area</strong> (opsional). Nilai tampil format <strong>xx.xx%</strong>.
+          <div class="bd">
+            <div class="grid-2">
+              <div class="kpi">
+                <div class="label">Rows</div>
+                <div class="value" id="pc-kpi-rows">—</div>
+                <div class="hint" id="pc-kpi-h">Filtered</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Valid</div>
+                <div class="value" id="pc-kpi-valid">—</div>
+                <div class="hint">Kategori valid</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Buffer</div>
+                <div class="value" id="pc-kpi-buffer">—</div>
+                <div class="hint">Qualified Yes & bukan valid</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Qualified Yes</div>
+                <div class="value" id="pc-kpi-qyes">—</div>
+                <div class="hint">Semua qualified</div>
+              </div>
+            </div>
+            <div class="note">Catatan: definisi buffer dibuat <b>mutually exclusive</b> terhadap valid agar grafik tidak dobel hitung.</div>
           </div>
+        </div>
+      </div>
+    </section>
 
-          <div class="perf-filter-body">
-            <div class="perf-filters">
-              <div class="filter-group">
-                <label class="filter-label">Group Client</label>
-                <select id="pa-group" class="perf-select">
-                  <option value="">Pilih Group Client...</option>
-                </select>
-              </div>
+    <!-- PAGE: Performance Area -->
+    <section class="page" id="page-pa">
+      <div class="hero">
+        <div>
+          <h1>Performance Area</h1>
+          <p>Filter Tahun + Group + Area. Grafik bulanan valid/buffer.</p>
+        </div>
+        <div class="right">
+          <button class="btn" id="btn-clear-pa">Clear Filter</button>
+        </div>
+      </div>
 
-              <div class="filter-group">
-                <label class="filter-label">Area</label>
-                <select id="pa-area" class="perf-select" disabled>
-                  <option value="">Semua Area</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Skeleton Performance Area -->
-            <div id="pa-skeleton" class="skeleton">
-              <div class="sk-card sk-shimmer">
-                <div class="sk-line lg sk-w-55"></div>
-                <div class="sk-gap-10"></div>
-                <div class="sk-line sm sk-w-70"></div>
-                <div class="sk-table sk-shimmer">
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="pa-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Area...</span></div>
-            <div id="pa-error-state" class="error" style="display:none;"></div>
-
-            <div class="status-bar" style="margin-top:10px;">
-              <div class="status-left"><span class="status-dot"></span><span id="pa-status-text">Menunggu data...</span></div>
-              <div class="status-right" id="pa-col-note"></div>
-            </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="hd">
+          <div>
+            <div class="title">Filter Performance Area</div>
+            <div class="sub" id="pa-status-text">Memuat data...</div>
           </div>
-        </section>
+        </div>
+        <div class="bd">
+          <div class="perf-filters">
+            <div class="filter-group">
+              <label class="filter-label">Tahun</label>
+              <select id="pa-year" class="perf-select">
+                <option value="">Semua Tahun</option>
+              </select>
+            </div>
 
-        <section class="stack-col">
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Rasio Submit</div>
-              <div class="card-tag">Area × Bulan</div>
+            <div class="filter-group">
+              <label class="filter-label">Group</label>
+              <select id="pa-group" class="perf-select"></select>
             </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pa-submit-head"></thead>
-                <tbody id="pa-submit-body"></tbody>
-              </table>
-            </div>
-            <div id="pa-submit-empty" class="matrix-empty">Pilih Group Client dulu.</div>
-          </article>
 
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Qualified</div>
-              <div class="card-tag">Area × Bulan</div>
+            <div class="filter-group">
+              <label class="filter-label">Area</label>
+              <select id="pa-area" class="perf-select"></select>
             </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pa-qual-head"></thead>
-                <tbody id="pa-qual-body"></tbody>
-              </table>
-            </div>
-            <div id="pa-qual-empty" class="matrix-empty">Pilih Group Client dulu.</div>
-          </article>
-        </section>
-      </section>
 
-      <!-- ===================== PAGE: Performance Jobtype ===================== -->
-      <section id="page-pj" class="page">
-        <section class="card perf-filter-card" id="pj-filter-card">
-          <div class="card-title-row">
-            <div class="card-title">Filter Performance Jobtype</div>
-            <div class="header-right-flex">
-              <button id="pj-filter-toggle-btn" class="filter-toggle-btn" type="button">
-                <span class="hamburger-icon">☰</span><span>Filter</span>
-              </button>
-              <button id="pj-clear-btn" class="clear-btn" type="button">Hapus filter</button>
-              <div class="card-tag">Area · Job Parent · Job Type</div>
+            <div class="filter-group">
+              <label class="filter-label">Keterangan</label>
+              <div class="chip" style="width:100%; justify-content:space-between;">
+                <span class="muted">Data source: Performance Area CSV</span>
+                <span class="muted">· Tahun kolom AK</span>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="card-subtext">
-            <strong>Berikut adalah summary performance sourcing untuk submit kandidat dan performance qualified atas kandidat yang disubmit.</strong>
-          </div>
-
-          <div class="perf-filter-body">
-            <div class="perf-filters">
-              <div class="filter-group">
-                <label class="filter-label">Area (diambil dari data Performance Area)</label>
-                <select id="pj-area" class="perf-select">
-                  <option value="">Semua Area</option>
-                </select>
-                <div class="tiny-note">Jika data Jobtype tidak punya kolom Area, dropdown Area hanya untuk label (tidak memfilter angka).</div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Job Parent</label>
-                <select id="pj-parent" class="perf-select">
-                  <option value="">Pilih Job Parent...</option>
-                </select>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">Job Type</label>
-                <select id="pj-type" class="perf-select" disabled>
-                  <option value="">Pilih Job Type...</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Skeleton Performance Jobtype -->
-            <div id="pj-skeleton" class="skeleton">
-              <div class="sk-card sk-shimmer">
-                <div class="sk-line lg sk-w-55"></div>
-                <div class="sk-gap-10"></div>
-                <div class="sk-line sm sk-w-70"></div>
-                <div class="sk-table sk-shimmer">
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                  <div class="sk-row">
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                    <div class="sk-cell sk-shimmer"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="pj-load-state" class="loading"><div class="spinner"></div><span>Memuat Performance Jobtype...</span></div>
-            <div id="pj-error-state" class="error" style="display:none;"></div>
-
-            <div class="status-bar" style="margin-top:10px;">
-              <div class="status-left"><span class="status-dot"></span><span id="pj-status-text">Menunggu data...</span></div>
-              <div class="status-right" id="pj-col-note"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Grafik Bulanan</div>
+              <div class="sub">Valid vs Buffer</div>
             </div>
           </div>
-        </section>
+          <div class="bd"><div class="chart" id="chart-pa"></div></div>
+        </div>
 
-        <section class="stack-col">
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Rasio Submit (Job Parent)</div>
-              <div class="card-tag">Parent × Bulan</div>
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Ringkasan</div>
+              <div class="sub">KPI setelah filter</div>
             </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pj-parent-submit-head"></thead>
-                <tbody id="pj-parent-submit-body"></tbody>
-              </table>
+          </div>
+          <div class="bd">
+            <div class="grid-2">
+              <div class="kpi">
+                <div class="label">Rows</div>
+                <div class="value" id="pa-kpi-rows">—</div>
+                <div class="hint">Filtered</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Valid</div>
+                <div class="value" id="pa-kpi-valid">—</div>
+                <div class="hint">Kategori valid</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Buffer</div>
+                <div class="value" id="pa-kpi-buffer">—</div>
+                <div class="hint">Qualified Yes & bukan valid</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Qualified Yes</div>
+                <div class="value" id="pa-kpi-qyes">—</div>
+                <div class="hint">Semua qualified</div>
+              </div>
             </div>
-            <div id="pj-parent-empty" class="matrix-empty">Pilih Job Parent dulu.</div>
-          </article>
+            <div class="note">Group biasanya = Industry/Cluster. Area biasanya lokasi/region.</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Rasio Submit (Job Type)</div>
-              <div class="card-tag">Type × Bulan</div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pj-submit-head"></thead>
-                <tbody id="pj-submit-body"></tbody>
-              </table>
-            </div>
-            <div id="pj-submit-empty" class="matrix-empty">Pilih Job Parent (opsional Job Type) dulu.</div>
-          </article>
+    <!-- PAGE: Performance Jobtype -->
+    <section class="page" id="page-pj">
+      <div class="hero">
+        <div>
+          <h1>Performance Jobtype</h1>
+          <p>Filter Tahun + Job Parent + Area + Job Type. Grafik bulanan valid/buffer.</p>
+        </div>
+        <div class="right">
+          <button class="btn" id="btn-clear-pj">Clear Filter</button>
+        </div>
+      </div>
 
-          <article class="card">
-            <div class="card-title-row">
-              <div class="card-title">Achievement Qualified (Job Type)</div>
-              <div class="card-tag">Type × Bulan</div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="hd">
+          <div>
+            <div class="title">Filter Performance Jobtype</div>
+            <div class="sub" id="pj-status-text">Memuat data...</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="perf-filters">
+            <div class="filter-group">
+              <label class="filter-label">Tahun</label>
+              <select id="pj-year" class="perf-select">
+                <option value="">Semua Tahun</option>
+              </select>
             </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <thead id="pj-qual-head"></thead>
-                <tbody id="pj-qual-body"></tbody>
-              </table>
-            </div>
-            <div id="pj-qual-empty" class="matrix-empty">Pilih Job Parent (opsional Job Type) dulu.</div>
-          </article>
-        </section>
-      </section>
 
-    </main>
+            <div class="filter-group">
+              <label class="filter-label">Job Parent</label>
+              <select id="pj-parent" class="perf-select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Area</label>
+              <select id="pj-area" class="perf-select"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Job Type</label>
+              <select id="pj-type" class="perf-select"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Grafik Bulanan</div>
+              <div class="sub">Valid vs Buffer</div>
+            </div>
+          </div>
+          <div class="bd"><div class="chart" id="chart-pj"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <div>
+              <div class="title">Ringkasan</div>
+              <div class="sub">KPI setelah filter</div>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="grid-2">
+              <div class="kpi">
+                <div class="label">Rows</div>
+                <div class="value" id="pj-kpi-rows">—</div>
+                <div class="hint">Filtered</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Valid</div>
+                <div class="value" id="pj-kpi-valid">—</div>
+                <div class="hint">Kategori valid</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Buffer</div>
+                <div class="value" id="pj-kpi-buffer">—</div>
+                <div class="hint">Qualified Yes & bukan valid</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Qualified Yes</div>
+                <div class="value" id="pj-kpi-qyes">—</div>
+                <div class="hint">Semua qualified</div>
+              </div>
+            </div>
+            <div class="note">Tip: kalau chart masih “aneh”, biasanya karena kolom Periode kosong → mapping bulan gagal.</div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-<script>
-/* =========================================================
-   KONFIGURASI CSV URL (GANTI JIKA PERLU)
-========================================================= */
-const CSV_URL_ACM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1IRy6uulUDdZtEV05QNMrse9vdqLTn_NDDoi-KgYTkEBV44HZAqAZHqgOQ6m4FwZ59kcQxHm3elhT/pub?gid=1347000673&single=true&output=csv";
+  <div class="toast" id="toast"></div>
 
-/* Performance */
-const CSV_URL_CLIENT  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1768056592&single=true&output=csv";
-const CSV_URL_AREA    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=631317217&single=true&output=csv";
-const CSV_URL_JOBTYPE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTt_Ogppb0Q15snoZmje8NSvgpsBuu4cqhy4e8YY8eJgYNSNyHsKNC4G5rUQz70aFTm0O2ARoXeIUgz/pub?gid=1873604383&single=true&output=csv";
+  <script>
+    /******************************************************************
+     * CONFIG — ganti URL CSV sesuai sheet kamu
+     ******************************************************************/
+    const CONFIG = {
+      // ACM + Sourcing Analyst (biasanya dari "Responses")
+      ACM_CSV_URL: "PASTE_YOUR_ACM_CSV_URL_HERE",
 
-/* =========================================================
-   UTILITIES
-========================================================= */
-const $ = (id)=>document.getElementById(id);
-const norm = (v)=>String(v ?? "").trim().toUpperCase();
-const trimStr = (v)=>String(v ?? "").trim();
-const numberFmt = new Intl.NumberFormat("id-ID",{maximumFractionDigits:0});
-const percentFmt2 = new Intl.NumberFormat("id-ID",{minimumFractionDigits:2,maximumFractionDigits:2});
+      // Performance pages (kalau pakai sheet berbeda, isi URL berbeda)
+      PERF_CLIENT_CSV_URL: "PASTE_YOUR_PERF_CLIENT_CSV_URL_HERE",
+      PERF_AREA_CSV_URL: "PASTE_YOUR_PERF_AREA_CSV_URL_HERE",
+      PERF_JOBTYPE_CSV_URL: "PASTE_YOUR_PERF_JOBTYPE_CSV_URL_HERE",
+    };
 
-const MONTHS = [
-  {idx:1,label:"Januari", tokens:["JANUARI","JAN"]},
-  {idx:2,label:"Februari", tokens:["FEBRUARI","FEB"]},
-  {idx:3,label:"Maret", tokens:["MARET","MAR"]},
-  {idx:4,label:"April", tokens:["APRIL","APR"]},
-  {idx:5,label:"Mei", tokens:["MEI","MAY"]},
-  {idx:6,label:"Juni", tokens:["JUNI","JUN"]},
-  {idx:7,label:"Juli", tokens:["JULI","JUL"]},
-  {idx:8,label:"Agustus", tokens:["AGUSTUS","AGU","AUG"]},
-  {idx:9,label:"September", tokens:["SEPTEMBER","SEP"]},
-  {idx:10,label:"Oktober", tokens:["OKTOBER","OKT","OCT"]},
-  {idx:11,label:"November", tokens:["NOVEMBER","NOV"]},
-  {idx:12,label:"Desember", tokens:["DESEMBER","DES","DEC"]},
-];
+    /******************************************************************
+     * DOM helpers
+     ******************************************************************/
+    const $ = (id)=>document.getElementById(id);
+    const $$ = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
+    const trimStr = (v)=>String(v ?? "").trim();
 
-/* =========================================================
-   SKELETON HELPERS (UI ONLY)
-========================================================= */
-function showSkeleton(id){
-  const el = $(id);
-  if(el) el.classList.add("show");
-}
-function hideSkeleton(id){
-  const el = $(id);
-  if(el) el.classList.remove("show");
-}
-
-/* =========================================================
-   FIXED COLUMN MAPPING (Query Report Client / Area)
-========================================================= */
-const FIX_SUBMIT_LETTERS = ["E","H","K","N","Q","T","W","Z","AC","AF","AI","AL"];
-const FIX_QUAL_LETTERS   = ["F","I","L","O","R","U","X","AA","AD","AG","AJ","AM"];
-
-function colLetterToIndex(letter){
-  const s = String(letter || "").trim().toUpperCase();
-  if(!s) return null;
-  let n = 0;
-  for(let i=0;i<s.length;i++){
-    const code = s.charCodeAt(i);
-    if(code < 65 || code > 90) return null;
-    n = n * 26 + (code - 64);
-  }
-  return n - 1;
-}
-function fieldsByLetters(fields, letters){
-  return (letters || []).map(L=>{
-    const idx = colLetterToIndex(L);
-    return (idx!=null && fields[idx]) ? fields[idx] : null;
-  });
-}
-
-function uniqueSorted(arr){
-  return Array.from(new Set((arr||[]).map(v=>String(v??"").trim()).filter(v=>v!=="")))
-    .sort((a,b)=>a.localeCompare(b,"id"));
-}
-
-function loadCsv(url){
-  return new Promise((resolve,reject)=>{
-    Papa.parse(url,{
-      download:true,
-      header:true,
-      skipEmptyLines:true,
-
-      // ✅ tambahan untuk percepat & bikin UI tidak nge-freeze
-      worker:true,
-      fastMode:true,
-
-      complete:(parsed)=>{
-        try{
-          resolve({
-            rows: parsed.data || [],
-            fields: (parsed.meta && parsed.meta.fields) ? parsed.meta.fields : []
-          });
-        }catch(e){ reject(e); }
-      },
-      error:(err)=>reject(err)
-    });
-  });
-}
-
-function toFloat(v){
-  if(v==null) return null;
-  let s = String(v).trim();
-  if(!s) return null;
-  s = s.replace("%","").trim();
-  s = s.replace(/[^0-9.,-]/g,"");
-  if(!s) return null;
-  if(s.includes(",") && s.includes(".")){
-    s = s.replace(/\./g,"").replace(",",".");
-  }else{
-    if(s.includes(",")) s = s.replace(",",".");
-  }
-  const n = Number(s);
-  return isNaN(n) ? null : n;
-}
-function fmtPercent(v){
-  const n = toFloat(v);
-  if(n==null) return "-";
-  const pct = (n>0 && n<=1) ? (n*100) : n;
-  return `${percentFmt2.format(pct)}%`;
-}
-function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-
-/* parse month index from PERIODE */
-function parseMonthIndex(periodStr){
-  const s = norm(periodStr);
-  if(!s) return null;
-
-  for(const m of MONTHS){
-    if(m.tokens.some(t=>s.includes(t))) return m.idx;
-  }
-  const mIso = s.match(/(\d{4})[-/](0?[1-9]|1[0-2])\b/);
-  if(mIso) return Number(mIso[2]);
-  const mIso2 = s.match(/\b(0?[1-9]|1[0-2])[-/](\d{4})/);
-  if(mIso2) return Number(mIso2[1]);
-
-  const m1 = s.match(/\b(0?[1-9]|1[0-2])\b/);
-  if(m1){
-    const n = Number(m1[1]);
-    if(n>=1 && n<=12) return n;
-  }
-  return null;
-}
-
-/* =========================================================
-   MULTISELECT
-========================================================= */
-function createMultiSelect(rootId, options, placeholder, disabled, onChange){
-  const root = $(rootId);
-  const toggle = root.querySelector(".ms-toggle");
-  const searchInput = root.querySelector(".ms-search");
-  const optsContainer = root.querySelector(".ms-options");
-  const emptyEl = root.querySelector(".ms-empty");
-  const labelSpan = root.querySelector(".ms-placeholder");
-  const counterSpan = root.querySelector(".ms-counter");
-
-  const state = { options:[...(options||[])], selected:new Set() };
-
-  function updateLabel(){
-    const count = state.selected.size;
-    if(count===0){
-      labelSpan.textContent = placeholder;
-      counterSpan.textContent = "";
-    }else if(count<=2){
-      labelSpan.textContent = Array.from(state.selected).join(", ");
-      counterSpan.textContent = "";
-    }else{
-      labelSpan.textContent = placeholder;
-      counterSpan.textContent = count+" dipilih";
+    function toast(msg){
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(()=>el.classList.remove("show"), 2200);
     }
-  }
 
-  function renderOptions(){
-    optsContainer.innerHTML = "";
-    const term = searchInput.value.toLowerCase();
-    let visible = 0;
+    function uniqueSorted(arr){
+      const s = new Set();
+      arr.forEach(v=>{
+        const t = trimStr(v);
+        if(t) s.add(t);
+      });
+      return Array.from(s).sort((a,b)=>a.localeCompare(b, "id"));
+    }
 
-    state.options.forEach(val=>{
-      const text = String(val);
-      if(term && !text.toLowerCase().includes(term)) return;
-      visible++;
+    function safeNum(n){ const x = Number(n); return Number.isFinite(x) ? x : 0; }
 
-      const label = document.createElement("label");
-      label.className = "ms-option";
+    /******************************************************************
+     * MultiSelect (search + checkbox)
+     ******************************************************************/
+    function createMultiSelect(rootId, options, placeholder="Pilih", defaultAll=false, onChange=null){
+      const root = $(rootId);
+      if(!root) return null;
 
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.value = text;
-      cb.checked = state.selected.has(text);
+      const toggle = root.querySelector(".ms-toggle");
+      const panel = root.querySelector(".ms-panel");
+      const search = root.querySelector(".ms-search");
+      const optWrap = root.querySelector(".ms-options");
+      const empty = root.querySelector(".ms-empty");
+      const ph = root.querySelector(".ms-placeholder");
+      const counter = root.querySelector(".ms-counter");
 
-      cb.addEventListener("change",()=>{
-        if(cb.checked) state.selected.add(text);
-        else state.selected.delete(text);
-        updateLabel();
-        onChange && onChange(getSelected());
+      let stateOptions = (options || []).map(v=>trimStr(v)).filter(Boolean);
+      let selected = new Set();
+
+      const closeAll = ()=>{
+        $$(".ms.open").forEach(x=>x.classList.remove("open"));
+      };
+
+      const render = ()=>{
+        const q = trimStr(search.value).toLowerCase();
+        optWrap.innerHTML = "";
+
+        const filtered = stateOptions.filter(v=>v.toLowerCase().includes(q));
+        empty.style.display = filtered.length ? "none" : "block";
+
+        filtered.forEach(v=>{
+          const row = document.createElement("div");
+          row.className = "ms-opt";
+          row.innerHTML = `
+            <input type="checkbox" ${selected.has(v) ? "checked": ""} />
+            <span title="${escapeHtml(v)}">${escapeHtml(v)}</span>
+          `;
+          row.addEventListener("click", (e)=>{
+            e.preventDefault();
+            if(selected.has(v)) selected.delete(v);
+            else selected.add(v);
+            renderHeader();
+            render(); // refresh checkboxes
+            onChange && onChange();
+          });
+          optWrap.appendChild(row);
+        });
+
+        renderHeader();
+      };
+
+      const renderHeader = ()=>{
+        const c = selected.size;
+        counter.textContent = c ? `(${c})` : "";
+        ph.textContent = c ? `${c} dipilih` : placeholder;
+      };
+
+      const setOptions = (newOptions)=>{
+        stateOptions = (newOptions || []).map(v=>trimStr(v)).filter(Boolean);
+        // keep selection if still exists
+        const nextSel = new Set();
+        selected.forEach(v=>{ if(stateOptions.includes(v)) nextSel.add(v); });
+        selected = nextSel;
+        if(defaultAll && !selected.size){
+          stateOptions.forEach(v=>selected.add(v));
+        }
+        render();
+      };
+
+      const getSelected = ()=>Array.from(selected);
+
+      const clear = ()=>{
+        selected.clear();
+        render();
+        onChange && onChange();
+      };
+
+      if(defaultAll){
+        stateOptions.forEach(v=>selected.add(v));
+      }
+
+      toggle.addEventListener("click",(e)=>{
+        e.preventDefault();
+        const isOpen = root.classList.contains("open");
+        closeAll();
+        if(!isOpen) root.classList.add("open");
+      });
+      document.addEventListener("click",(e)=>{
+        if(!root.contains(e.target)) root.classList.remove("open");
+      });
+      search.addEventListener("input", render);
+
+      render();
+
+      return { setOptions, getSelected, clear };
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    /******************************************************************
+     * CSV loader (PapaParse)
+     ******************************************************************/
+    function loadCsv(url){
+      return new Promise((resolve, reject)=>{
+        if(!url || url.includes("PASTE_YOUR")) {
+          reject(new Error("URL CSV belum diisi di CONFIG."));
+          return;
+        }
+        Papa.parse(url, {
+          download:true,
+          header:true,
+          skipEmptyLines:true,
+          dynamicTyping:false,
+          complete: (res)=>{
+            if(res.errors && res.errors.length){
+              console.warn("CSV parse errors:", res.errors);
+            }
+            resolve({ rows: res.data || [], fields: res.meta?.fields || [] });
+          },
+          error: (err)=>reject(err)
+        });
+      });
+    }
+
+    /******************************************************************
+     * Column utilities
+     ******************************************************************/
+    function findField(fields, candidates){
+      const fset = new Set(fields.map(f=>trimStr(f).toUpperCase()));
+      for(const c of candidates){
+        const key = String(c).trim().toUpperCase();
+        if(fset.has(key)){
+          // return original cased name
+          return fields.find(x=>trimStr(x).toUpperCase()===key);
+        }
+      }
+      // fuzzy contains
+      for(const c of candidates){
+        const key = String(c).trim().toUpperCase();
+        const hit = fields.find(x=>trimStr(x).toUpperCase().includes(key));
+        if(hit) return hit;
+      }
+      return null;
+    }
+
+    function colLetterToIndex(col){
+      // A->0, B->1, ..., Z->25, AA->26 ...
+      const s = String(col).trim().toUpperCase();
+      let n = 0;
+      for(let i=0;i<s.length;i++){
+        const code = s.charCodeAt(i);
+        if(code<65 || code>90) continue;
+        n = n*26 + (code-64);
+      }
+      return n-1;
+    }
+
+    /******************************************************************
+     * Date / Month / Year helpers
+     ******************************************************************/
+    function parseYearFromText(txt){
+      const s = String(txt ?? "");
+      const m = s.match(/\b(19\d{2}|20\d{2})\b/);
+      return m ? m[1] : "";
+    }
+
+    function parseMonthIndexFromText(txt){
+      // return 0..11 or -1
+      const s = String(txt ?? "").trim();
+      if(!s) return -1;
+
+      // Try ISO / date-like
+      const d = new Date(s);
+      if(!isNaN(d.getTime())) return d.getMonth();
+
+      // Try "Jan", "Feb", "Maret", "Mar", etc.
+      const low = s.toLowerCase();
+      const map = [
+        ["jan",0],["janu",0],
+        ["feb",1],["febr",1],
+        ["mar",2],["maret",2],["march",2],
+        ["apr",3],["apri",3],
+        ["mei",4],["may",4],
+        ["jun",5],["juni",5],
+        ["jul",6],["juli",6],
+        ["agu",7],["ags",7],["aug",7],["agustus",7],
+        ["sep",8],["sept",8],["september",8],
+        ["okt",9],["oct",9],["oktober",9],
+        ["nov",10],["november",10],
+        ["des",11],["dec",11],["desember",11],
+      ];
+      for(const [k,idx] of map){
+        if(low.includes(k)) return idx;
+      }
+
+      // Try numeric month: "2026-02", "02/2026", "2-2026", etc.
+      const m1 = low.match(/\b(0?[1-9]|1[0-2])\b/);
+      if(m1) {
+        const mm = parseInt(m1[1],10);
+        if(mm>=1 && mm<=12) return mm-1;
+      }
+      return -1;
+    }
+
+    /******************************************************************
+     * DEFINITIONS — valid/buffer/qualified logic
+     ******************************************************************/
+    function isYes(v){
+      const s = trimStr(v).toLowerCase();
+      return ["yes","ya","y","true","1"].includes(s);
+    }
+
+    // Kategori valid: kamu bisa tambah keyword lain di sini bila perlu
+    function isKategoriValid(row){
+      const k = trimStr(row?.[COL_KATEGORI]).toLowerCase();
+      if(!k) return false;
+      // aturan default: kategori mengandung "valid"
+      // (kalau kamu pakai label lain seperti "CTC 1", tambahin di bawah)
+      if(k.includes("valid")) return true;
+      if(k.includes("ctc 1")) return true;
+      if(k.includes("aplikan valid")) return true;
+      return false;
+    }
+
+    function isQualifiedYes(row){
+      return isYes(row?.[COL_QUALIFIED]);
+    }
+
+    function getValidFlag(row){ return isKategoriValid(row) ? 1 : 0; }
+
+    // ✅ Buffer = qualified yes tapi bukan valid (mutually exclusive)
+    function getBufferFlag(row){
+      return (isQualifiedYes(row) && !isKategoriValid(row)) ? 1 : 0;
+    }
+
+    /******************************************************************
+     * ACM GLOBALS
+     ******************************************************************/
+    let acmRows = [];
+    let acmFields = [];
+    let provKotaMap = new Map();
+
+    // Columns (auto-detected)
+    let COL_PERIODE = "PERIODE";
+    let COL_YEAR = "TAHUN";
+    let COL_INDUSTRY = "INDUSTRY";
+    let COL_CLIENT = "CLIENT";
+    let COL_PROV = "PROVINSI";
+    let COL_KOTA = "KOTA";
+    let COL_AREA = "AREA";
+    let COL_JOBPARENT = "JOB PARENT";
+    let COL_JOBTYPE = "JOB TYPE";
+    let COL_KATEGORI = "KATEGORI";
+    let COL_QUALIFIED = "QUALIFIED";
+
+    // MultiSelect
+    let msPeriode = null;
+    let msYear = null;
+
+    let GLOBAL_YEAR_OPTIONS = [];
+
+    function detectACMColumns(fields){
+      // Periode / Timestamp
+      COL_PERIODE = findField(fields, ["PERIODE PELAMAR","PERIODE","TIMESTAMP","WAKTU"]) || fields[0] || "PERIODE";
+
+      // Tahun (prefer header "TAHUN/YEAR", fallback kolom AK)
+      const year = findField(fields, ["TAHUN","YEAR"]);
+      const akField = fields[colLetterToIndex("AK")]; // kolom AK dari sheet Responses
+      if(year) COL_YEAR = year;
+      else if(akField) COL_YEAR = akField;
+
+      COL_INDUSTRY = findField(fields, ["INDUSTRY","INDUSTRI","GROUP"]) || "INDUSTRY";
+      COL_CLIENT = findField(fields, ["CLIENT","KLIEN","COMPANY","PERUSAHAAN"]) || "CLIENT";
+      COL_PROV = findField(fields, ["PROVINSI","PROVINCE"]) || "PROVINSI";
+      COL_KOTA = findField(fields, ["KOTA","CITY","KABUPATEN","KAB/KOTA"]) || "KOTA";
+      COL_AREA = findField(fields, ["AREA","REGION","CABANG","BRANCH"]) || "AREA";
+      COL_JOBPARENT = findField(fields, ["JOB PARENT","JOBPARENT","PARENT"]) || "JOB PARENT";
+      COL_JOBTYPE = findField(fields, ["JOB TYPE","JOBTYPE","TYPE","JENIS"]) || "JOB TYPE";
+      COL_KATEGORI = findField(fields, ["KATEGORI","CATEGORY","STATUS"]) || "KATEGORI";
+      COL_QUALIFIED = findField(fields, ["QUALIFIED","QUALIFIED?","KUALIFIKASI","QUALIFIED YES/NO"]) || "QUALIFIED";
+    }
+
+    function getYearVal(row){
+      const y1 = trimStr(row?.[COL_YEAR]);
+      if(y1) return y1;
+      return parseYearFromText(row?.[COL_PERIODE]) || "";
+    }
+
+    function buildProvKotaMap(){
+      provKotaMap.clear();
+      acmRows.forEach(r=>{
+        const p = trimStr(r[COL_PROV]);
+        const k = trimStr(r[COL_KOTA]);
+
+        // ✅ provinsi masuk map walau kota kosong
+        if(!p) return;
+        if(!provKotaMap.has(p)) provKotaMap.set(p, new Set());
+        if(k) provKotaMap.get(p).add(k);
+      });
+    }
+
+    function setSelectOptions(selectId, values, placeholder="Semua"){
+      const el = $(selectId);
+      if(!el) return;
+      const opts = [`<option value="">${escapeHtml(placeholder)}</option>`]
+        .concat(values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+      el.innerHTML = opts.join("");
+    }
+
+    function setYearSelectOptions(selectId, years){
+      const el = $(selectId);
+      if(!el) return;
+      const ys = (years && years.length) ? years : (GLOBAL_YEAR_OPTIONS || []);
+      el.innerHTML = `<option value="">Semua Tahun</option>` + ys.map(y=>`<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join("");
+    }
+
+    function initACMFilters(){
+      // Periode MS
+      const periodeVals = uniqueSorted(acmRows.map(r=>r[COL_PERIODE]));
+      msPeriode = createMultiSelect("ms-periode", periodeVals, "Semua Periode", false, ()=>updateACMAll());
+
+      // Tahun MS (dari COL_YEAR / fallback)
+      const yearVals = uniqueSorted(acmRows.map(r=>getYearVal(r))).filter(v=>v!=="");
+      GLOBAL_YEAR_OPTIONS = yearVals;
+      msYear = createMultiSelect("ms-year", yearVals, "Semua Tahun", false, ()=>updateACMAll());
+
+      // Build prov-kota map (fix prov empty)
+      buildProvKotaMap();
+
+      // Industry options
+      setSelectOptions("f-industry", uniqueSorted(acmRows.map(r=>r[COL_INDUSTRY])), "Semua Industry");
+      setSelectOptions("f-client", uniqueSorted(acmRows.map(r=>r[COL_CLIENT])), "Semua Client");
+
+      // ✅ Provinsi: jangan bergantung kota
+      setSelectOptions("f-prov", uniqueSorted(acmRows.map(r=>r[COL_PROV])), "Semua Provinsi");
+      setSelectOptions("f-kota", uniqueSorted(acmRows.map(r=>r[COL_KOTA])), "Semua Kota");
+
+      setSelectOptions("f-jobparent", uniqueSorted(acmRows.map(r=>r[COL_JOBPARENT])), "Semua Job Parent");
+      setSelectOptions("f-jobtype", uniqueSorted(acmRows.map(r=>r[COL_JOBTYPE])), "Semua Job Type");
+      setSelectOptions("f-kategori", uniqueSorted(acmRows.map(r=>r[COL_KATEGORI])), "Semua Kategori");
+
+      // Qualified options (normalize)
+      const qVals = uniqueSorted(acmRows.map(r=>r[COL_QUALIFIED])).map(v=>v.toLowerCase());
+      const qSet = new Set(qVals);
+      const showQ = [];
+      if(qSet.has("yes") || qSet.has("ya")) showQ.push("Yes");
+      if(qSet.has("no") || qSet.has("tidak")) showQ.push("No");
+      // fallback include whatever is present
+      if(!showQ.length) showQ.push(...uniqueSorted(acmRows.map(r=>r[COL_QUALIFIED])));
+      setSelectOptions("f-qualified", showQ, "Semua Qualified");
+
+      // dependent: prov -> kota
+      $("f-prov").addEventListener("change", ()=>{
+        const p = $("f-prov").value;
+        if(!p){
+          setSelectOptions("f-kota", uniqueSorted(acmRows.map(r=>r[COL_KOTA])), "Semua Kota");
+        } else {
+          const cities = provKotaMap.has(p) ? Array.from(provKotaMap.get(p)) : [];
+          setSelectOptions("f-kota", uniqueSorted(cities), "Semua Kota");
+        }
+        updateACMAll();
       });
 
-      const span = document.createElement("span");
-      span.textContent = text;
+      // industry -> client
+      $("f-industry").addEventListener("change", ()=>{
+        const ind = $("f-industry").value;
+        if(!ind){
+          setSelectOptions("f-client", uniqueSorted(acmRows.map(r=>r[COL_CLIENT])), "Semua Client");
+        } else {
+          const clients = uniqueSorted(acmRows.filter(r=>trimStr(r[COL_INDUSTRY])===ind).map(r=>r[COL_CLIENT]));
+          setSelectOptions("f-client", clients, "Semua Client");
+        }
+        updateACMAll();
+      });
 
-      label.appendChild(cb);
-      label.appendChild(span);
-      optsContainer.appendChild(label);
-    });
+      ["f-client","f-kota","f-jobparent","f-jobtype","f-kategori","f-qualified"].forEach(id=>{
+        $(id).addEventListener("change", updateACMAll);
+      });
 
-    emptyEl.style.display = visible ? "none" : "block";
-  }
-
-  function getSelected(){ return Array.from(state.selected); }
-
-  function setOptions(newOptions){
-    state.options = [...(newOptions||[])];
-    state.selected.clear();
-    searchInput.value = "";
-    renderOptions();
-    updateLabel();
-    onChange && onChange(getSelected());
-  }
-
-  function setDisabled(flag){
-    if(flag){
-      root.classList.add("ms-disabled");
-      root.classList.remove("open");
-    }else{
-      root.classList.remove("ms-disabled");
+      updateACMAll();
     }
-  }
 
-  function clear(){
-    state.selected.clear();
-    searchInput.value = "";
-    renderOptions();
-    updateLabel();
-    onChange && onChange(getSelected());
-  }
+    function getFilteredACMRows(){
+      const periodeSel = new Set(msPeriode ? msPeriode.getSelected() : []);
+      const yearSel = new Set(msYear ? msYear.getSelected() : []);
 
-  toggle.addEventListener("click",()=>{
-    if(root.classList.contains("ms-disabled")) return;
-    const isOpen = root.classList.toggle("open");
-    if(isOpen){
-      searchInput.value = "";
-      renderOptions();
-      searchInput.focus();
+      const ind = $("f-industry").value;
+      const client = $("f-client").value;
+      const prov = $("f-prov").value;
+      const kota = $("f-kota").value;
+      const jp = $("f-jobparent").value;
+      const jt = $("f-jobtype").value;
+      const kat = $("f-kategori").value;
+      const q = $("f-qualified").value;
+
+      return acmRows.filter(r=>{
+        const per = trimStr(r[COL_PERIODE]);
+        const y = getYearVal(r);
+        const i = trimStr(r[COL_INDUSTRY]);
+        const c = trimStr(r[COL_CLIENT]);
+        const p = trimStr(r[COL_PROV]);
+        const k = trimStr(r[COL_KOTA]);
+        const jpp = trimStr(r[COL_JOBPARENT]);
+        const jtt = trimStr(r[COL_JOBTYPE]);
+        const kk = trimStr(r[COL_KATEGORI]);
+        const qq = trimStr(r[COL_QUALIFIED]);
+
+        if(periodeSel.size && !periodeSel.has(per)) return false;
+        if(yearSel.size && !yearSel.has(y)) return false;
+
+        if(ind && i!==ind) return false;
+        if(client && c!==client) return false;
+        if(prov && p!==prov) return false;
+        if(kota && k!==kota) return false;
+        if(jp && jpp!==jp) return false;
+        if(jt && jtt!==jt) return false;
+        if(kat && kk!==kat) return false;
+
+        if(q){
+          const qnorm = q.toLowerCase();
+          if(qnorm==="yes"){
+            if(!isYes(qq)) return false;
+          } else if(qnorm==="no"){
+            if(isYes(qq)) return false;
+          } else {
+            if(qq!==q) return false;
+          }
+        }
+        return true;
+      });
     }
-  });
-  searchInput.addEventListener("input",renderOptions);
-  document.addEventListener("click",(e)=>{
-    if(!root.contains(e.target)) root.classList.remove("open");
-  });
 
-  setDisabled(!!disabled);
-  renderOptions(); updateLabel();
-  return {getSelected,setOptions,setDisabled,clear};
-}
+    function updateACMAll(){
+      const rows = getFilteredACMRows();
 
-/* =========================================================
-   ACM CONFIG & DATA
-========================================================= */
-let COL_PROV      = "PROVINSI MINAT PENEMPATAN";
-let COL_KOTA      = "KOTA MINAT PENEMPATAN";
-let COL_PERIODE   = "PERIODE PELAMAR";
-let COL_KATEGORI  = "KATEGORI APP";
-let COL_QUALIFIED = "QUALIFIED";
-let COL_METODE    = "METODE SOURCING";
-let COL_MEDIA     = "MEDIA SOURCING";
-let COL_EDU       = "PENDIDIKAN TERAKHIR";
-let COL_GENDER    = "JENIS KELAMIN";
-let COL_JOB_PARENT= "JOB PARENT";
-let COL_JOB_TYPE  = "JOB TYPE";
+      // Status
+      $("acm-status").textContent = `Rows: ${rows.length.toLocaleString("id-ID")} (filtered)`;
 
-const KATEGORI_VALID_TARGET = "APLIKAN VALID - CTC 1";
-const LABEL_LAINNYA = "LAINNYA / TIDAK TERDETEKSI";
+      // KPIs
+      const valid = rows.reduce((a,r)=>a+getValidFlag(r),0);
+      const buffer = rows.reduce((a,r)=>a+getBufferFlag(r),0);
+      const qyes = rows.reduce((a,r)=>a+(isQualifiedYes(r)?1:0),0);
 
-const FIXED_PROV_LIST = [
-  "ACEH (NAD)","BALI","BANTEN","BENGKULU","DI YOGYAKARTA","DKI JAKARTA",
-  "GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR",
-  "KALIMANTAN BARAT","KALIMANTAN SELATAN","KALIMANTAN TENGAH",
-  "KALIMANTAN TIMUR","KALIMANTAN UTARA","KEPULAUAN BANGKA BELITUNG",
-  "KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA",
-  "NUSA TENGGARA BARAT (NTB)","NUSA TENGGARA TIMUR (NTT)",
-  "PAPUA","PAPUA BARAT DAYA","PAPUA SELATAN","PAPUA TENGAH",
-  "RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGGARA",
-  "SULAWESI TENGAH","SULAWESI TIMUR","SULAWESI UTARA",
-  "SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"
-];
-const FIXED_MEDIA_LIST = ["Facebook","FLK","Instagram","Linkedin","SIM Talent Search","Telegram","Tiktok","Twitter","Whatsapp / Media Chat"];
-const FIXED_PORTAL_LIST = ["Glints","Hired Today","Indeed","JobStreet","Jobstreet Express","KarirHub","KitaLutus","KitaLulus","Lumina","Pintarnya"];
-const FIXED_OFFLINE_LIST = [
-  "Academy/Training/Seminar","Balai Latian Kerja (BLK)","Brosur/Banner/Spanduk/Flyer",
-  "Campus Hiring","Disnaker","Drop CV","Freelance Recruiter","Job Fair",
-  "Komunitas Informal","Referensi Client","Referensi Teman/Keluarga/Komunitas",
-  "School Hiring","Walk In Interview (WI)"
-];
-const FIXED_EDU_LIST = ["SMP","SMA / SMK","D1","D2","D3","D4","S1","S2","S3"];
+      $("kpi-total").textContent = rows.length.toLocaleString("id-ID");
+      $("kpi-valid").textContent = valid.toLocaleString("id-ID");
+      $("kpi-buffer").textContent = buffer.toLocaleString("id-ID");
+      $("kpi-qyes").textContent = qyes.toLocaleString("id-ID");
 
-/* State */
-let acmRows = [];
-let acmFields = [];
-let msProv, msKota, msPeriode, msJobParent, msJobType;
-let saProvMS, saKotaMS, saJobParentMS, saJobTypeMS;
+      // Table kategori top10
+      const catCount = new Map();
+      rows.forEach(r=>{
+        const k = trimStr(r[COL_KATEGORI]) || "(Kosong)";
+        catCount.set(k, (catCount.get(k)||0) + 1);
+      });
+      const top = Array.from(catCount.entries())
+        .sort((a,b)=>b[1]-a[1])
+        .slice(0,10);
 
-const provKotaMap = new Map();
-const jobParentTypeMap = new Map();
+      $("tbl-kategori").innerHTML = top.map(([k,c])=>`
+        <tr>
+          <td>${escapeHtml(k)}</td>
+          <td class="right">${c.toLocaleString("id-ID")}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="2" class="muted">Tidak ada data</td></tr>`;
 
-function findField(fields, candidates){
-  const set = candidates.map(norm);
-  const exact = fields.find(f=>set.includes(norm(f)));
-  if(exact) return exact;
-  for(const f of fields){
-    const s = norm(f);
-    for(const c of candidates){
-      const cs = norm(c);
-      if(s.includes(cs)) return f;
+      // Chart per bulan
+      const validByM = Array(12).fill(0);
+      const bufferByM = Array(12).fill(0);
+
+      rows.forEach(r=>{
+        const m = parseMonthIndexFromText(r[COL_PERIODE]);
+        if(m<0) return;
+        validByM[m] += getValidFlag(r);
+        bufferByM[m] += getBufferFlag(r);
+      });
+
+      renderDualBarChart("chart-acm", validByM, bufferByM);
     }
-  }
-  return null;
-}
-function detectACMColumns(fields){
-  if(!fields || !fields.length) return;
-  const prov = findField(fields, ["PROVINSI MINAT PENEMPATAN","PROVINSI"]);
-  const kota = findField(fields, ["KOTA MINAT PENEMPATAN","KOTA"]);
-  const periode = findField(fields, ["PERIODE PELAMAR","PERIODE"]);
-  const kategori = findField(fields, ["KATEGORI APP","KATEGORI"]);
-  const qualified = findField(fields, ["QUALIFIED"]);
-  const metode = findField(fields, ["METODE SOURCING","METODE"]);
-  const media = findField(fields, ["MEDIA SOURCING","MEDIA"]);
-  const edu = findField(fields, ["PENDIDIKAN TERAKHIR","PENDIDIKAN"]);
-  const gender = findField(fields, ["JENIS KELAMIN","GENDER"]);
-  const jp = findField(fields, ["JOB PARENT"]);
-  const jt = findField(fields, ["JOB TYPE"]);
 
-  if(prov) COL_PROV = prov;
-  if(kota) COL_KOTA = kota;
-  if(periode) COL_PERIODE = periode;
-  if(kategori) COL_KATEGORI = kategori;
-  if(qualified) COL_QUALIFIED = qualified;
-  if(metode) COL_METODE = metode;
-  if(media) COL_MEDIA = media;
-  if(edu) COL_EDU = edu;
-  if(gender) COL_GENDER = gender;
-  if(jp) COL_JOB_PARENT = jp;
-  if(jt) COL_JOB_TYPE = jt;
-}
-
-function isKategoriValid(row){ return norm(row[COL_KATEGORI]) === norm(KATEGORI_VALID_TARGET); }
-function isQualifiedYes(row){
-  const s = norm(row[COL_QUALIFIED]);
-  return s === "YES" || s === "YA";
-}
-function getValidFlag(row){ return isKategoriValid(row) ? 1 : 0; }
-function getBufferFlag(row){ return isQualifiedYes(row) ? 1 : 0; }
-
-function genderBucket(row){
-  const s = norm(row[COL_GENDER]);
-  if(!s) return "UNK";
-  if(s === "L" || s.includes("LAKI") || s==="M" || s.includes("MALE")) return "M";
-  if(s === "P" || s.includes("PEREM") || s==="F" || s.includes("FEMALE")) return "F";
-  return "UNK";
-}
-
-function buildProvKotaMap(){
-  provKotaMap.clear();
-  acmRows.forEach(r=>{
-    const p = trimStr(r[COL_PROV]);
-    const k = trimStr(r[COL_KOTA]);
-    if(!p || !k) return;
-    if(!provKotaMap.has(p)) provKotaMap.set(p, new Set());
-    provKotaMap.get(p).add(k);
-  });
-}
-function buildJobParentTypeMap(){
-  jobParentTypeMap.clear();
-  acmRows.forEach(r=>{
-    const jp = trimStr(r[COL_JOB_PARENT]);
-    const jt = trimStr(r[COL_JOB_TYPE]);
-    if(!jp || !jt) return;
-    if(!jobParentTypeMap.has(jp)) jobParentTypeMap.set(jp, new Set());
-    jobParentTypeMap.get(jp).add(jt);
-  });
-}
-
-function getFilteredACMRows(){
-  const provSel = new Set(msProv ? msProv.getSelected() : []);
-  const kotaSel = new Set(msKota ? msKota.getSelected() : []);
-  const perSel  = new Set(msPeriode ? msPeriode.getSelected() : []);
-  const jpSel   = new Set(msJobParent ? msJobParent.getSelected() : []);
-  const jtSel   = new Set(msJobType ? msJobType.getSelected() : []);
-
-  return acmRows.filter(r=>{
-    const p = trimStr(r[COL_PROV]);
-    const k = trimStr(r[COL_KOTA]);
-    const pe= trimStr(r[COL_PERIODE]);
-    const jp= trimStr(r[COL_JOB_PARENT]);
-    const jt= trimStr(r[COL_JOB_TYPE]);
-
-    if(provSel.size && !provSel.has(p)) return false;
-    if(kotaSel.size && !kotaSel.has(k)) return false;
-    if(perSel.size  && !perSel.has(pe)) return false;
-    if(jpSel.size   && !jpSel.has(jp)) return false;
-    if(jtSel.size   && !jtSel.has(jt)) return false;
-    return true;
-  });
-}
-
-function updateKotaOptionsByProv(selProv){
-  if(!msKota) return;
-  if(!selProv || !selProv.length){
-    msKota.setOptions([]);
-    msKota.setDisabled(true);
-    return;
-  }
-  const set = new Set();
-  selProv.forEach(p=>{
-    const s = provKotaMap.get(p);
-    if(s) s.forEach(v=>set.add(v));
-  });
-  msKota.setOptions(uniqueSorted(Array.from(set)));
-  msKota.setDisabled(false);
-}
-function updateJobTypeOptionsByParent(selParents){
-  if(!msJobType) return;
-  if(!selParents || !selParents.length){
-    msJobType.setOptions([]);
-    msJobType.setDisabled(true);
-    return;
-  }
-  const set = new Set();
-  selParents.forEach(p=>{
-    const s = jobParentTypeMap.get(p);
-    if(s) s.forEach(v=>set.add(v));
-  });
-  msJobType.setOptions(uniqueSorted(Array.from(set)));
-  msJobType.setDisabled(false);
-}
-
-function initACMFilters(){
-  buildProvKotaMap();
-  buildJobParentTypeMap();
-
-  const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
-  const periodeVals = uniqueSorted(acmRows.map(r=>r[COL_PERIODE]));
-  const jobParentVals = uniqueSorted(Array.from(jobParentTypeMap.keys()));
-
-  msProv = createMultiSelect("ms-prov", provVals, "Semua Provinsi", false, (sel)=>{
-    updateKotaOptionsByProv(sel);
-    updateACMAll();
-  });
-  msKota = createMultiSelect("ms-kota", [], "Semua kota di provinsi ini", true, ()=>{
-    updateACMAll();
-  });
-  msPeriode = createMultiSelect("ms-periode", periodeVals, "Semua Periode", false, ()=>{
-    updateACMAll();
-  });
-  msJobParent = createMultiSelect("ms-job-parent", jobParentVals, "Semua Job Parent", false, (sel)=>{
-    updateJobTypeOptionsByParent(sel);
-    updateACMAll();
-  });
-  msJobType = createMultiSelect("ms-job-type", [], "Semua Job Type", true, ()=>{
-    updateACMAll();
-  });
-}
-
-function clearACMFilters(){
-  msProv && msProv.clear();
-  msPeriode && msPeriode.clear();
-  msJobParent && msJobParent.clear();
-  if(msKota){
-    msKota.setOptions([]);
-    msKota.setDisabled(true);
-  }
-  if(msJobType){
-    msJobType.setOptions([]);
-    msJobType.setDisabled(true);
-  }
-  updateACMAll();
-}
-
-function renderRowsToTbody(tbodyId, rows){
-  const tb = $(tbodyId);
-  tb.innerHTML = "";
-  rows.forEach(r=>{
-    const tr = document.createElement("tr");
-
-    const tdLabel = document.createElement("td");
-    tdLabel.textContent = r.label;
-    tdLabel.className = "col-label";
-    tr.appendChild(tdLabel);
-
-    const tdV = document.createElement("td");
-    tdV.textContent = numberFmt.format(r.valid);
-    tdV.className = "col-number";
-    tr.appendChild(tdV);
-
-    const tdB = document.createElement("td");
-    tdB.textContent = numberFmt.format(r.buffer);
-    tdB.className = "col-number";
-    tr.appendChild(tdB);
-
-    tb.appendChild(tr);
-  });
-}
-function addTotalRow(tbodyId, totalLabel, valid, buffer){
-  const tb = $(tbodyId);
-  const tr = document.createElement("tr");
-  tr.className = "total-row";
-
-  const td0 = document.createElement("td");
-  td0.textContent = totalLabel;
-  tr.appendChild(td0);
-
-  const td1 = document.createElement("td");
-  td1.textContent = numberFmt.format(valid);
-  td1.className = "col-number";
-  tr.appendChild(td1);
-
-  const td2 = document.createElement("td");
-  td2.textContent = numberFmt.format(buffer);
-  td2.className = "col-number";
-  tr.appendChild(td2);
-
-  tb.appendChild(tr);
-}
-
-function aggregateByKey(rows, keyFn){
-  const map = new Map();
-  rows.forEach(r=>{
-    const key = trimStr(keyFn(r)) || "";
-    const v = getValidFlag(r);
-    const b = getBufferFlag(r);
-    if(!map.has(key)) map.set(key, {valid:0, buffer:0});
-    const obj = map.get(key);
-    obj.valid += v;
-    obj.buffer += b;
-  });
-  return map;
-}
-
-function buildProvTable(rows){
-  const map = aggregateByKey(rows, r=>r[COL_PROV]);
-
-  let out = [];
-  let validSum = 0, bufferSum = 0;
-  const fixedSet = new Set(FIXED_PROV_LIST.map(norm));
-
-  FIXED_PROV_LIST.forEach(name=>{
-    const obj = map.get(name) || null;
-    const v = obj ? obj.valid : 0;
-    const b = obj ? obj.buffer : 0;
-    if(v+b>0) out.push({label:name, valid:v, buffer:b});
-    validSum += v; bufferSum += b;
-  });
-
-  let otherV = 0, otherB = 0;
-  for(const [k,obj] of map.entries()){
-    const kk = norm(k);
-    if(!kk) continue;
-    if(!fixedSet.has(kk)){
-      otherV += obj.valid;
-      otherB += obj.buffer;
-    }
-  }
-  if(otherV+otherB>0){
-    out.push({label:LABEL_LAINNYA, valid:otherV, buffer:otherB});
-    validSum += otherV; bufferSum += otherB;
-  }
-
-  if(out.length===0){
-    out.push({label:"(Tidak ada data)", valid:0, buffer:0});
-  }
-
-  renderRowsToTbody("tbl-prov-body", out);
-  addTotalRow("tbl-prov-body","TOTAL", validSum, bufferSum);
-  $("status-prov").textContent = `Menampilkan ${rows.length} baris (filter aktif).`;
-}
-
-function buildMetodeTable(rows){
-  const map = aggregateByKey(rows, r=>r[COL_MEDIA]);
-  const buckets = ["OFFLINE","ONLINE - JOB PORTAL","ONLINE - MEDIA SOSIAL"];
-  let out = [];
-  let validSum=0, bufferSum=0;
-
-  const used = new Set();
-  buckets.forEach(b=>{
-    const obj = map.get(b) || null;
-    const v = obj ? obj.valid : 0;
-    const bu= obj ? obj.buffer : 0;
-    out.push({label:b, valid:v, buffer:bu});
-    used.add(norm(b));
-    validSum += v; bufferSum += bu;
-  });
-
-  let otherV=0, otherB=0;
-  for(const [k,obj] of map.entries()){
-    const kk = norm(k);
-    if(!kk) continue;
-    if(!used.has(kk)){
-      otherV += obj.valid;
-      otherB += obj.buffer;
-    }
-  }
-  if(otherV+otherB>0){
-    out.push({label:LABEL_LAINNYA, valid:otherV, buffer:otherB});
-    validSum += otherV; bufferSum += otherB;
-  }
-
-  renderRowsToTbody("tbl-metode-body", out);
-  addTotalRow("tbl-metode-body","TOTAL", validSum, bufferSum);
-  $("status-metode").textContent = `Menampilkan ${rows.length} baris (filter aktif).`;
-}
-
-function buildMediaSosialTable(rows){
-  const subset = rows.filter(r=>norm(r[COL_MEDIA])===norm("ONLINE - MEDIA SOSIAL"));
-  const map = aggregateByKey(subset, r=>r[COL_METODE]);
-
-  const out = [];
-  let validSum=0, bufferSum=0;
-  FIXED_MEDIA_LIST.forEach(name=>{
-    const obj = map.get(name) || null;
-    const v = obj ? obj.valid : 0;
-    const b = obj ? obj.buffer : 0;
-    out.push({label:name, valid:v, buffer:b});
-    validSum += v; bufferSum += b;
-  });
-
-  renderRowsToTbody("tbl-media-body", out);
-  addTotalRow("tbl-media-body","TOTAL", validSum, bufferSum);
-  $("status-media").textContent = `Subset Media Sosial: ${subset.length} baris.`;
-}
-
-function buildEduTable(rows){
-  const map = aggregateByKey(rows, r=>r[COL_EDU]);
-  const out = [];
-  let validSum=0, bufferSum=0;
-
-  FIXED_EDU_LIST.forEach(name=>{
-    const obj = map.get(name) || null;
-    const v = obj ? obj.valid : 0;
-    const b = obj ? obj.buffer : 0;
-    out.push({label:name, valid:v, buffer:b});
-    validSum += v; bufferSum += b;
-  });
-
-  renderRowsToTbody("tbl-edu-body", out);
-  addTotalRow("tbl-edu-body","TOTAL", validSum, bufferSum);
-  $("status-edu").textContent = `Menampilkan ${rows.length} baris (filter aktif).`;
-}
-
-function buildPortalTable(rows){
-  const subset = rows.filter(r=>norm(r[COL_MEDIA])===norm("ONLINE - JOB PORTAL"));
-  const map = aggregateByKey(subset, r=>r[COL_METODE]);
-
-  const out = [];
-  let validSum=0, bufferSum=0;
-  FIXED_PORTAL_LIST.forEach(name=>{
-    const obj = map.get(name) || null;
-    const v = obj ? obj.valid : 0;
-    const b = obj ? obj.buffer : 0;
-    out.push({label:name, valid:v, buffer:b});
-    validSum += v; bufferSum += b;
-  });
-
-  renderRowsToTbody("tbl-portal-body", out);
-  addTotalRow("tbl-portal-body","TOTAL", validSum, bufferSum);
-  $("status-portal").textContent = `Subset Job Portal: ${subset.length} baris.`;
-}
-
-function buildOfflineTable(rows){
-  const subset = rows.filter(r=>norm(r[COL_MEDIA])===norm("OFFLINE"));
-  const map = aggregateByKey(subset, r=>r[COL_METODE]);
-
-  const out = [];
-  let validSum=0, bufferSum=0;
-  FIXED_OFFLINE_LIST.forEach(name=>{
-    const obj = map.get(name) || null;
-    const v = obj ? obj.valid : 0;
-    const b = obj ? obj.buffer : 0;
-    out.push({label:name, valid:v, buffer:b});
-    validSum += v; bufferSum += b;
-  });
-
-  renderRowsToTbody("tbl-offline-body", out);
-  addTotalRow("tbl-offline-body","TOTAL", validSum, bufferSum);
-  $("status-offline").textContent = `Subset Offline: ${subset.length} baris.`;
-}
-
-function updateSummary(rows){
-  let mv=0, mb=0, fv=0, fb=0, tv=0, tb=0;
-
-  rows.forEach(r=>{
-    const v = getValidFlag(r);
-    const b = getBufferFlag(r);
-    tv += v; tb += b;
-    const g = genderBucket(r);
-    if(g==="M"){ mv += v; mb += b; }
-    else if(g==="F"){ fv += v; fb += b; }
-  });
-
-  $("sum-male-valid").textContent = numberFmt.format(mv);
-  $("sum-male-buffer").textContent = numberFmt.format(mb);
-  $("sum-female-valid").textContent = numberFmt.format(fv);
-  $("sum-female-buffer").textContent = numberFmt.format(fb);
-  $("sum-total-valid").textContent = numberFmt.format(tv);
-  $("sum-total-buffer").textContent = numberFmt.format(tb);
-}
-
-function updateMonthlyChart(rows){
-  const bucket = new Map();
-  MONTHS.forEach(m=>bucket.set(m.idx, {valid:0, buffer:0}));
-
-  let skipped=0;
-  rows.forEach(r=>{
-    const mi = parseMonthIndex(r[COL_PERIODE]);
-    if(!mi){ skipped++; return; }
-    const obj = bucket.get(mi);
-    if(!obj) return;
-    obj.valid  += getValidFlag(r);
-    obj.buffer += getBufferFlag(r);
-  });
-
-  let maxV=1;
-  for(const m of MONTHS){
-    const o = bucket.get(m.idx);
-    maxV = Math.max(maxV, o.valid, o.buffer);
-  }
-
-  const body = $("chart-body");
-  body.innerHTML = "";
-
-  MONTHS.forEach(m=>{
-    const o = bucket.get(m.idx);
-    const validH = Math.round((o.valid / maxV) * 190);
-    const bufferH= Math.round((o.buffer/ maxV) * 190);
-
-    const col = document.createElement("div");
-    col.className = "chart-col";
-
-    const bars = document.createElement("div");
-    bars.className = "chart-col-bars";
-
-    const barV = document.createElement("div");
-    barV.className = "chart-bar-vert bar-valid";
-    barV.style.height = `${clamp(validH,0,190)}px`;
-
-    const barB = document.createElement("div");
-    barB.className = "chart-bar-vert bar-buffer";
-    barB.style.height = `${clamp(bufferH,0,190)}px`;
-
-    bars.appendChild(barV);
-    bars.appendChild(barB);
-
-    const values = document.createElement("div");
-    values.className = "chart-col-values";
-    values.innerHTML = `<div>${o.valid}</div><div style="color:rgba(212,175,55,0.95);font-weight:900">${o.buffer}</div>`;
-
-    const label = document.createElement("div");
-    label.className = "chart-col-label";
-    label.textContent = m.label.slice(0,3);
-
-    col.appendChild(bars);
-    col.appendChild(values);
-    col.appendChild(label);
-    body.appendChild(col);
-  });
-
-  $("chart-summary-text").textContent =
-    skipped>0
-      ? `Catatan: ${skipped} baris dilewati karena PERIODE PELAMAR tidak terbaca bulan-nya.`
-      : `Periode terbaca dengan baik untuk seluruh data.`;
-}
-
-function updateACMAll(){
-  const filtered = getFilteredACMRows();
-  updateSummary(filtered);
-  updateMonthlyChart(filtered);
-
-  buildProvTable(filtered);
-  buildMetodeTable(filtered);
-  buildMediaSosialTable(filtered);
-  buildEduTable(filtered);
-  buildPortalTable(filtered);
-  buildOfflineTable(filtered);
-
-  updateSourcingAnalystAnalysis();
-}
-
-/* =========================================================
-   SOURCING ANALYST
-========================================================= */
-function initSourcingAnalystFilters(){
-  const provVals = uniqueSorted(Array.from(provKotaMap.keys()));
-  const allParents = uniqueSorted(Array.from(jobParentTypeMap.keys()));
-
-  saProvMS = createMultiSelect("sa-ms-prov", provVals, "Semua Provinsi", false, (sel)=>{
-    updateSaKotaOptions(sel);
-    updateSaJobParentOptions();
-    updateSourcingAnalystAnalysis();
-  });
-
-  saKotaMS = createMultiSelect("sa-ms-kota", [], "Semua Kota", true, ()=>{
-    updateSaJobParentOptions();
-    updateSourcingAnalystAnalysis();
-  });
-
-  saJobParentMS = createMultiSelect("sa-ms-job-parent", allParents, "Semua Job Parent", false, ()=>{
-    updateSaJobTypeOptions();
-    updateSourcingAnalystAnalysis();
-  });
-
-  saJobTypeMS = createMultiSelect("sa-ms-job-type", [], "Semua Job Type", true, ()=>{
-    updateSourcingAnalystAnalysis();
-  });
-
-  updateSaJobParentOptions();
-}
-
-function updateSaKotaOptions(selProv){
-  if(!saKotaMS) return;
-  if(!selProv || !selProv.length){
-    saKotaMS.setOptions([]);
-    saKotaMS.setDisabled(true);
-    return;
-  }
-  const set = new Set();
-  selProv.forEach(p=>{
-    const s = provKotaMap.get(p);
-    if(s) s.forEach(v=>set.add(v));
-  });
-  saKotaMS.setOptions(uniqueSorted(Array.from(set)));
-  saKotaMS.setDisabled(false);
-}
-
-function getSourcingAnalystFilteredRows(){
-  const provSel = new Set(saProvMS ? saProvMS.getSelected() : []);
-  const kotaSel = new Set(saKotaMS ? saKotaMS.getSelected() : []);
-  const jpSel   = new Set(saJobParentMS ? saJobParentMS.getSelected() : []);
-  const jtSel   = new Set(saJobTypeMS ? saJobTypeMS.getSelected() : []);
-
-  return acmRows.filter(r=>{
-    const p = trimStr(r[COL_PROV]);
-    const k = trimStr(r[COL_KOTA]);
-    const jp= trimStr(r[COL_JOB_PARENT]);
-    const jt= trimStr(r[COL_JOB_TYPE]);
-    if(provSel.size && !provSel.has(p)) return false;
-    if(kotaSel.size && !kotaSel.has(k)) return false;
-    if(jpSel.size && !jpSel.has(jp)) return false;
-    if(jtSel.size && !jtSel.has(jt)) return false;
-    return true;
-  });
-}
-
-function updateSaJobParentOptions(){
-  if(!saJobParentMS) return;
-  const provSel = saProvMS ? saProvMS.getSelected() : [];
-  const kotaSel = saKotaMS ? saKotaMS.getSelected() : [];
-
-  const set = new Set();
-  acmRows.forEach(r=>{
-    const p = trimStr(r[COL_PROV]);
-    const k = trimStr(r[COL_KOTA]);
-    if(provSel.length && !provSel.includes(p)) return;
-    if(kotaSel.length && !kotaSel.includes(k)) return;
-    const jp = trimStr(r[COL_JOB_PARENT]);
-    if(jp) set.add(jp);
-  });
-
-  const list = uniqueSorted(Array.from(set));
-  saJobParentMS.setOptions(list);
-  saJobParentMS.setDisabled(list.length===0);
-
-  if(saJobTypeMS){
-    saJobTypeMS.setOptions([]);
-    saJobTypeMS.setDisabled(true);
-  }
-}
-
-function updateSaJobTypeOptions(){
-  if(!saJobTypeMS) return;
-  const rows = getSourcingAnalystFilteredRows();
-  const parentSel = saJobParentMS ? saJobParentMS.getSelected() : [];
-  if(!parentSel.length){
-    saJobTypeMS.setOptions([]);
-    saJobTypeMS.setDisabled(true);
-    return;
-  }
-  const set = new Set();
-  rows.forEach(r=>{
-    const jt = trimStr(r[COL_JOB_TYPE]);
-    if(jt) set.add(jt);
-  });
-  const list = uniqueSorted(Array.from(set));
-  saJobTypeMS.setOptions(list);
-  saJobTypeMS.setDisabled(list.length===0);
-}
-
-function clearSaFilters(){
-  saProvMS && saProvMS.clear();
-  if(saKotaMS){ saKotaMS.setOptions([]); saKotaMS.setDisabled(true); }
-  saJobParentMS && saJobParentMS.clear();
-  if(saJobTypeMS){ saJobTypeMS.setOptions([]); saJobTypeMS.setDisabled(true); }
-  updateSaJobParentOptions();
-  updateSourcingAnalystAnalysis();
-}
-
-function topNFromMap(map, n){
-  const arr = Array.from(map.entries())
-    .map(([k,v])=>({k, v}))
-    .sort((a,b)=>b.v-a.v);
-  return arr.slice(0,n);
-}
-
-function updateSourcingAnalystAnalysis(){
-  const rows = getSourcingAnalystFilteredRows();
-  const base = $("sa-analysis-text");
-  if(!rows.length){
-    base.innerHTML = `<div class="analysis-text">Tidak ada data untuk kombinasi filter tersebut.</div>`;
-    return;
-  }
-
-  const mediaMap = new Map();
-  const metodeMap = new Map();
-  const msosMap = new Map();
-  const portalMap = new Map();
-  const offMap = new Map();
-
-  rows.forEach(r=>{
-    const v = getValidFlag(r);
-    if(!v) return;
-
-    const media = trimStr(r[COL_MEDIA]) || "(Kosong)";
-    mediaMap.set(media, (mediaMap.get(media)||0)+v);
-
-    const metode = trimStr(r[COL_METODE]) || "(Kosong)";
-    metodeMap.set(metode, (metodeMap.get(metode)||0)+v);
-
-    const m = norm(r[COL_MEDIA]);
-    if(m===norm("ONLINE - MEDIA SOSIAL")){
-      msosMap.set(metode, (msosMap.get(metode)||0)+v);
-    }else if(m===norm("ONLINE - JOB PORTAL")){
-      portalMap.set(metode, (portalMap.get(metode)||0)+v);
-    }else if(m===norm("OFFLINE")){
-      offMap.set(metode, (offMap.get(metode)||0)+v);
-    }
-  });
-
-  const topMedia = topNFromMap(mediaMap, 3);
-  const topMetode = topNFromMap(metodeMap, 3);
-  const topSos = topNFromMap(msosMap, 3);
-  const topPortal = topNFromMap(portalMap, 3);
-  const topOff = topNFromMap(offMap, 3);
-
-  const totalValid = rows.reduce((acc,r)=>acc+getValidFlag(r),0);
-  const totalBuf = rows.reduce((acc,r)=>acc+getBufferFlag(r),0);
-
-  base.innerHTML = `
-    <div class="analysis-text">
-      <div class="analysis-section">
-        <div class="analysis-icon">📌</div>
-        <div>
-          <div class="analysis-title">Ringkasan</div>
-          <div class="analysis-summary">Applicant Valid: <strong>${numberFmt.format(totalValid)}</strong> · Buffer: <strong>${numberFmt.format(totalBuf)}</strong> (berdasarkan filter SA)</div>
+    function renderDualBarChart(containerId, arrA, arrB){
+      const el = $(containerId);
+      if(!el) return;
+      const labels = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+      const maxV = Math.max(1, ...arrA, ...arrB);
+
+      el.innerHTML = `
+        <div class="bars">
+          ${labels.map((lb,idx)=>{
+            const a = arrA[idx]||0;
+            const b = arrB[idx]||0;
+            const ha = Math.round((a/maxV)*190) + 8;
+            const hb = Math.round((b/maxV)*190) + 8;
+            return `
+              <div class="bar-col" title="${lb} · Valid ${a} · Buffer ${b}">
+                <div class="bar bar2" style="height:${hb}px"></div>
+                <div class="bar" style="height:${ha}px"></div>
+                <div class="bar-label">${lb}</div>
+              </div>
+            `;
+          }).join("")}
         </div>
-      </div>
+      `;
+    }
 
-      <div class="analysis-section">
-        <div class="analysis-icon">🚀</div>
-        <div>
-          <div class="analysis-title">Top Metode Utama (MEDIA SOURCING) berdasarkan Applicant Valid</div>
-          <div class="analysis-summary">
-            ${topMedia.map((x,i)=>`${i+1}. <strong>${x.k}</strong> (${numberFmt.format(x.v)})`).join("<br/>")}
-          </div>
-        </div>
-      </div>
+    function clearACMFilters(){
+      msPeriode && msPeriode.clear();
+      msYear && msYear.clear();
 
-      <div class="analysis-section">
-        <div class="analysis-icon">🎯</div>
-        <div>
-          <div class="analysis-title">Top Channel (METODE SOURCING) berdasarkan Applicant Valid</div>
-          <div class="analysis-summary">
-            ${topMetode.map((x,i)=>`${i+1}. <strong>${x.k}</strong> (${numberFmt.format(x.v)})`).join("<br/>")}
-          </div>
-        </div>
-      </div>
+      ["f-industry","f-client","f-prov","f-kota","f-jobparent","f-jobtype","f-kategori","f-qualified"].forEach(id=>{
+        const el = $(id);
+        if(el) el.value = "";
+      });
 
-      <div class="analysis-section">
-        <div class="analysis-icon">📣</div>
-        <div>
-          <div class="analysis-title">Rekomendasi Fokus Per Metode</div>
-          <div class="analysis-summary">
-            <strong>Media Sosial:</strong><br/>
-            ${topSos.length ? topSos.map((x,i)=>`${i+1}. ${x.k} (${numberFmt.format(x.v)})`).join("<br/>") : "-"}<br/><br/>
-            <strong>Job Portal:</strong><br/>
-            ${topPortal.length ? topPortal.map((x,i)=>`${i+1}. ${x.k} (${numberFmt.format(x.v)})`).join("<br/>") : "-"}<br/><br/>
-            <strong>Offline:</strong><br/>
-            ${topOff.length ? topOff.map((x,i)=>`${i+1}. ${x.k} (${numberFmt.format(x.v)})`).join("<br/>") : "-"}
-          </div>
-          <div class="analysis-detail">Tips: prioritasin 1–2 channel teratas untuk scale sourcing, lalu optimasi conversion Qualified.</div>
-        </div>
-      </div>
-    </div>
-  `;
-}
+      // reset dependents
+      setSelectOptions("f-client", uniqueSorted(acmRows.map(r=>r[COL_CLIENT])), "Semua Client");
+      setSelectOptions("f-kota", uniqueSorted(acmRows.map(r=>r[COL_KOTA])), "Semua Kota");
 
-/* =========================================================
-   PERFORMANCE: generic matrix builder
-========================================================= */
-function renderMatrixHead(theadEl, leftTitle){
-  const tr = document.createElement("tr");
-  const th0 = document.createElement("th");
-  th0.textContent = leftTitle;
-  tr.appendChild(th0);
-  MONTHS.forEach(m=>{
-    const th = document.createElement("th");
-    th.textContent = m.label;
-    tr.appendChild(th);
-  });
-  theadEl.innerHTML = "";
-  theadEl.appendChild(tr);
-}
+      updateACMAll();
+    }
 
-function detectMonthCols(fields, metricToken){
-  const cols = [];
-  const fNorm = fields.map(f=>({f, n:norm(f)}));
+    /******************************************************************
+     * SOURCING ANALYST PAGE
+     ******************************************************************/
+    let saYearMS = null;
 
-  for(const m of MONTHS){
-    const found = fNorm.find(x=>{
-      const okMetric = metricToken ? x.n.includes(norm(metricToken)) : true;
-      const okMonth = m.tokens.some(t=>x.n.includes(t));
-      return okMetric && okMonth;
+    function initSourcingAnalystFilters(){
+      $("sa-status").textContent = `Data ACM siap · total rows ${acmRows.length.toLocaleString("id-ID")}`;
+
+      // Year MS uses GLOBAL_YEAR_OPTIONS from ACM
+      saYearMS = createMultiSelect("sa-ms-year", GLOBAL_YEAR_OPTIONS, "Semua Tahun", false, ()=>{
+        updateSaDependentOptions();
+        updateSourcingAnalystAnalysis();
+      });
+
+      // Build initial options
+      setSelectOptions("sa-industry", uniqueSorted(acmRows.map(r=>r[COL_INDUSTRY])), "Semua Industry");
+      setSelectOptions("sa-client", uniqueSorted(acmRows.map(r=>r[COL_CLIENT])), "Semua Client");
+      setSelectOptions("sa-area", uniqueSorted(acmRows.map(r=>r[COL_AREA])), "Semua Area");
+      setSelectOptions("sa-jobparent", uniqueSorted(acmRows.map(r=>r[COL_JOBPARENT])), "Semua Job Parent");
+
+      $("sa-industry").addEventListener("change", ()=>{
+        updateSaDependentOptions();
+        updateSourcingAnalystAnalysis();
+      });
+      $("sa-client").addEventListener("change", ()=>{
+        updateSaDependentOptions();
+        updateSourcingAnalystAnalysis();
+      });
+      $("sa-area").addEventListener("change", ()=>{
+        updateSaDependentOptions();
+        updateSourcingAnalystAnalysis();
+      });
+      $("sa-jobparent").addEventListener("change", updateSourcingAnalystAnalysis);
+
+      updateSaDependentOptions();
+      updateSourcingAnalystAnalysis();
+    }
+
+    function getSourcingAnalystFilteredRows(){
+      const yearSel = new Set(saYearMS ? saYearMS.getSelected() : []);
+      const ind = $("sa-industry").value;
+      const client = $("sa-client").value;
+      const area = $("sa-area").value;
+      const jp = $("sa-jobparent").value;
+
+      return acmRows.filter(r=>{
+        const y = getYearVal(r);
+        if(yearSel.size && !yearSel.has(y)) return false;
+
+        if(ind && trimStr(r[COL_INDUSTRY])!==ind) return false;
+        if(client && trimStr(r[COL_CLIENT])!==client) return false;
+        if(area && trimStr(r[COL_AREA])!==area) return false;
+        if(jp && trimStr(r[COL_JOBPARENT])!==jp) return false;
+        return true;
+      });
+    }
+
+    function updateSaDependentOptions(){
+      const yearSel = saYearMS ? saYearMS.getSelected() : [];
+      const ind = $("sa-industry").value;
+      const client = $("sa-client").value;
+      const area = $("sa-area").value;
+
+      // Filter base rows for option generation
+      let base = acmRows.slice();
+
+      if(yearSel.length){
+        base = base.filter(r=>yearSel.includes(getYearVal(r)));
+      }
+
+      // Industry is top-level (keep as is), but update clients based on industry
+      if(ind){
+        base = base.filter(r=>trimStr(r[COL_INDUSTRY])===ind);
+      }
+      const clients = uniqueSorted(base.map(r=>r[COL_CLIENT]));
+      const curClient = $("sa-client").value;
+      setSelectOptions("sa-client", clients, "Semua Client");
+      if(clients.includes(curClient)) $("sa-client").value = curClient;
+      else $("sa-client").value = "";
+
+      // If client selected, narrow for areas & jobparent
+      let base2 = base.slice();
+      const newClient = $("sa-client").value;
+      if(newClient){
+        base2 = base2.filter(r=>trimStr(r[COL_CLIENT])===newClient);
+      }
+      const areas = uniqueSorted(base2.map(r=>r[COL_AREA]));
+      const curArea = $("sa-area").value;
+      setSelectOptions("sa-area", areas, "Semua Area");
+      if(areas.includes(curArea)) $("sa-area").value = curArea;
+      else $("sa-area").value = "";
+
+      // Job Parent based on area too
+      let base3 = base2.slice();
+      const newArea = $("sa-area").value;
+      if(newArea){
+        base3 = base3.filter(r=>trimStr(r[COL_AREA])===newArea);
+      }
+      const parents = uniqueSorted(base3.map(r=>r[COL_JOBPARENT]));
+      const curJP = $("sa-jobparent").value;
+      setSelectOptions("sa-jobparent", parents, "Semua Job Parent");
+      if(parents.includes(curJP)) $("sa-jobparent").value = curJP;
+      else $("sa-jobparent").value = "";
+    }
+
+    function updateSourcingAnalystAnalysis(){
+      const rows = getSourcingAnalystFilteredRows();
+      const yearSel = saYearMS ? saYearMS.getSelected() : [];
+      $("sa-kpi-rows").textContent = rows.length.toLocaleString("id-ID");
+      $("sa-kpi-hint").textContent = yearSel.length ? `Tahun: ${yearSel.join(", ")}` : "Semua tahun";
+
+      const valid = rows.reduce((a,r)=>a+getValidFlag(r),0);
+      const buffer = rows.reduce((a,r)=>a+getBufferFlag(r),0);
+      $("sa-kpi-valid").textContent = valid.toLocaleString("id-ID");
+      $("sa-kpi-buffer").textContent = buffer.toLocaleString("id-ID");
+
+      // Table by job parent
+      const m = new Map(); // jp -> {rows,valid,buffer}
+      rows.forEach(r=>{
+        const jp = trimStr(r[COL_JOBPARENT]) || "(Kosong)";
+        if(!m.has(jp)) m.set(jp, {rows:0, valid:0, buffer:0});
+        const o = m.get(jp);
+        o.rows += 1;
+        o.valid += getValidFlag(r);
+        o.buffer += getBufferFlag(r);
+      });
+
+      const list = Array.from(m.entries())
+        .sort((a,b)=>b[1].rows - a[1].rows)
+        .slice(0, 30);
+
+      $("sa-tbl").innerHTML = list.map(([jp,o])=>`
+        <tr>
+          <td>${escapeHtml(jp)}</td>
+          <td class="right">${o.rows.toLocaleString("id-ID")}</td>
+          <td class="right">${o.valid.toLocaleString("id-ID")}</td>
+          <td class="right">${o.buffer.toLocaleString("id-ID")}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="4" class="muted">Tidak ada data</td></tr>`;
+
+      // Monthly chart
+      const validByM = Array(12).fill(0);
+      const bufferByM = Array(12).fill(0);
+      rows.forEach(r=>{
+        const mm = parseMonthIndexFromText(r[COL_PERIODE]);
+        if(mm<0) return;
+        validByM[mm] += getValidFlag(r);
+        bufferByM[mm] += getBufferFlag(r);
+      });
+      renderDualBarChart("chart-sa", validByM, bufferByM);
+    }
+
+    function clearSaFilters(){
+      saYearMS && saYearMS.clear();
+      ["sa-industry","sa-client","sa-area","sa-jobparent"].forEach(id=>{
+        const el = $(id);
+        if(el) el.value = "";
+      });
+      updateSaDependentOptions();
+      updateSourcingAnalystAnalysis();
+    }
+
+    /******************************************************************
+     * PERFORMANCE PAGES
+     ******************************************************************/
+    const perfClient = { rows:[], fields:[], yearField:null };
+    const perfArea = { rows:[], fields:[], yearField:null };
+    const perfJob = { rows:[], fields:[], yearField:null };
+
+    // Inferred column names per performance CSV
+    function detectPerfColumns(fields){
+      return {
+        periode: findField(fields, ["PERIODE","PERIODE PELAMAR","TIMESTAMP","WAKTU"]) || fields[0],
+        year: findField(fields, ["TAHUN","YEAR"]) || fields[colLetterToIndex("AK")] || null,
+        industry: findField(fields, ["INDUSTRY","INDUSTRI","GROUP"]) || "INDUSTRY",
+        client: findField(fields, ["CLIENT","KLIEN","COMPANY","PERUSAHAAN"]) || "CLIENT",
+        group: findField(fields, ["GROUP","INDUSTRY","INDUSTRI","CLUSTER"]) || "GROUP",
+        area: findField(fields, ["AREA","REGION","CABANG","BRANCH"]) || "AREA",
+        jobParent: findField(fields, ["JOB PARENT","JOBPARENT","PARENT"]) || "JOB PARENT",
+        jobType: findField(fields, ["JOB TYPE","JOBTYPE","TYPE","JENIS"]) || "JOB TYPE",
+        kategori: findField(fields, ["KATEGORI","CATEGORY","STATUS"]) || "KATEGORI",
+        qualified: findField(fields, ["QUALIFIED","KUALIFIKASI","QUALIFIED YES/NO"]) || "QUALIFIED",
+      };
+    }
+
+    // helpers for perf logic (re-use ACM logic by mapping globals temporarily)
+    function calcPerfKPIs(rows, cols){
+      const v = rows.reduce((a,r)=>a + (isKategoriValidPerf(r, cols) ? 1 : 0), 0);
+      const b = rows.reduce((a,r)=>a + (isBufferPerf(r, cols) ? 1 : 0), 0);
+      const qy = rows.reduce((a,r)=>a + (isYes(r?.[cols.qualified]) ? 1 : 0), 0);
+      return { rows: rows.length, valid:v, buffer:b, qyes:qy };
+    }
+
+    function isKategoriValidPerf(row, cols){
+      const k = trimStr(row?.[cols.kategori]).toLowerCase();
+      if(!k) return false;
+      if(k.includes("valid")) return true;
+      if(k.includes("ctc 1")) return true;
+      if(k.includes("aplikan valid")) return true;
+      return false;
+    }
+    function isBufferPerf(row, cols){
+      return (isYes(row?.[cols.qualified]) && !isKategoriValidPerf(row, cols)) ? 1 : 0;
+    }
+
+    function renderPerfChart(containerId, rows, cols){
+      const validByM = Array(12).fill(0);
+      const bufferByM = Array(12).fill(0);
+      rows.forEach(r=>{
+        const mm = parseMonthIndexFromText(r[cols.periode]);
+        if(mm<0) return;
+        validByM[mm] += isKategoriValidPerf(r, cols) ? 1 : 0;
+        bufferByM[mm] += isBufferPerf(r, cols);
+      });
+      renderDualBarChart(containerId, validByM, bufferByM);
+    }
+
+    /********** Performance Client **********/
+    let pcCols = null;
+
+    function initPerformanceClient(){
+      pcCols = detectPerfColumns(perfClient.fields);
+      perfClient.yearField = pcCols.year;
+
+      // Year dropdown
+      const years = perfClient.yearField ? uniqueSorted(perfClient.rows.map(r=>r[perfClient.yearField])).filter(v=>v!=="") : [];
+      setYearSelectOptions("pc-year", years);
+
+      // Industry dropdown
+      const industries = uniqueSorted(perfClient.rows.map(r=>r[pcCols.industry]));
+      setSelectOptions("pc-industry", industries, "Pilih Industry");
+      $("pc-industry").value = industries[0] || "";
+
+      $("pc-year").addEventListener("change", ()=>{
+        updateClientDropdown();
+        updatePerformanceClientView();
+      });
+
+      $("pc-industry").addEventListener("change", ()=>{
+        updateClientDropdown();
+        updatePerformanceClientView();
+      });
+      $("pc-client").addEventListener("change", updatePerformanceClientView);
+
+      updateClientDropdown();
+      updatePerformanceClientView();
+    }
+
+    function updateClientDropdown(){
+      const year = $("pc-year").value;
+      const ind = $("pc-industry").value;
+      let rows = perfClient.rows.filter(r => trimStr(r[pcCols.industry]) === ind);
+
+      if(year && perfClient.yearField){
+        rows = rows.filter(r => trimStr(r[perfClient.yearField]) === year);
+      }
+
+      const clients = uniqueSorted(rows.map(r=>r[pcCols.client]));
+      setSelectOptions("pc-client", clients, "Semua Client");
+      $("pc-client").value = "";
+      $("pc-status-text").textContent = (year ? `Tahun "${year}" · ` : "") + `Industry "${ind}" · ${clients.length} client`;
+    }
+
+    function updatePerformanceClientView(){
+      const year = $("pc-year").value;
+      const ind = $("pc-industry").value;
+      const client = $("pc-client").value;
+
+      let rows = perfClient.rows.filter(r => trimStr(r[pcCols.industry]) === ind);
+      if(year && perfClient.yearField){
+        rows = rows.filter(r => trimStr(r[perfClient.yearField]) === year);
+      }
+      if(client){
+        rows = rows.filter(r => trimStr(r[pcCols.client]) === client);
+      }
+
+      const k = calcPerfKPIs(rows, pcCols);
+      $("pc-kpi-rows").textContent = k.rows.toLocaleString("id-ID");
+      $("pc-kpi-valid").textContent = k.valid.toLocaleString("id-ID");
+      $("pc-kpi-buffer").textContent = k.buffer.toLocaleString("id-ID");
+      $("pc-kpi-qyes").textContent = k.qyes.toLocaleString("id-ID");
+      $("pc-status-text").textContent =
+        (year ? `Tahun "${year}" · ` : "") +
+        `Industry "${ind}"` +
+        (client ? ` · Client "${client}"` : ` · ${uniqueSorted(perfClient.rows.filter(r=>trimStr(r[pcCols.industry])===ind).map(r=>r[pcCols.client])).length} client`);
+
+      renderPerfChart("chart-pc", rows, pcCols);
+    }
+
+    function clearPC(){
+      $("pc-year").value = "";
+      $("pc-client").value = "";
+      updateClientDropdown();
+      updatePerformanceClientView();
+    }
+
+    /********** Performance Area **********/
+    let paCols = null;
+
+    function initPerformanceArea(){
+      paCols = detectPerfColumns(perfArea.fields);
+      perfArea.yearField = paCols.year;
+
+      const years = perfArea.yearField ? uniqueSorted(perfArea.rows.map(r=>r[perfArea.yearField])).filter(v=>v!=="") : [];
+      setYearSelectOptions("pa-year", years);
+
+      const groups = uniqueSorted(perfArea.rows.map(r=>r[paCols.group]));
+      setSelectOptions("pa-group", groups, "Pilih Group");
+      $("pa-group").value = groups[0] || "";
+
+      $("pa-year").addEventListener("change", ()=>{
+        updateAreaDropdown();
+        updatePerformanceAreaView();
+        refreshPJAreaOptions();
+      });
+      $("pa-group").addEventListener("change", ()=>{
+        updateAreaDropdown();
+        updatePerformanceAreaView();
+        refreshPJAreaOptions();
+      });
+      $("pa-area").addEventListener("change", ()=>{
+        updatePerformanceAreaView();
+        refreshPJAreaOptions();
+      });
+
+      updateAreaDropdown();
+      updatePerformanceAreaView();
+    }
+
+    function updateAreaDropdown(){
+      const year = $("pa-year").value;
+      const g = $("pa-group").value;
+
+      let rows = perfArea.rows.filter(r=>trimStr(r[paCols.group])===g);
+      if(year && perfArea.yearField){
+        rows = rows.filter(r=>trimStr(r[perfArea.yearField])===year);
+      }
+
+      const areas = uniqueSorted(rows.map(r=>r[paCols.area]));
+      setSelectOptions("pa-area", areas, "Semua Area");
+      $("pa-area").value = "";
+      $("pa-status-text").textContent = (year ? `Tahun "${year}" · ` : "") + `Group "${g}" · ${areas.length} area`;
+    }
+
+    function updatePerformanceAreaView(){
+      const year = $("pa-year").value;
+      const g = $("pa-group").value;
+      const a = $("pa-area").value;
+
+      let rows = perfArea.rows.filter(r=>trimStr(r[paCols.group])===g);
+      if(year && perfArea.yearField){
+        rows = rows.filter(r=>trimStr(r[perfArea.yearField])===year);
+      }
+      if(a){
+        rows = rows.filter(r=>trimStr(r[paCols.area])===a);
+      }
+
+      const k = calcPerfKPIs(rows, paCols);
+      $("pa-kpi-rows").textContent = k.rows.toLocaleString("id-ID");
+      $("pa-kpi-valid").textContent = k.valid.toLocaleString("id-ID");
+      $("pa-kpi-buffer").textContent = k.buffer.toLocaleString("id-ID");
+      $("pa-kpi-qyes").textContent = k.qyes.toLocaleString("id-ID");
+
+      const allAreas = uniqueSorted(perfArea.rows.filter(r=>trimStr(r[paCols.group])===g).map(r=>r[paCols.area]));
+      $("pa-status-text").textContent =
+        (year ? `Tahun "${year}" · ` : "") +
+        `Group "${g}"` +
+        (a ? ` · Area "${a}"` : ` · ${allAreas.length} area`);
+
+      renderPerfChart("chart-pa", rows, paCols);
+    }
+
+    function clearPA(){
+      $("pa-year").value = "";
+      $("pa-area").value = "";
+      updateAreaDropdown();
+      updatePerformanceAreaView();
+      refreshPJAreaOptions();
+    }
+
+    /********** Performance Jobtype **********/
+    let pjCols = null;
+
+    function initPerformanceJobtype(){
+      pjCols = detectPerfColumns(perfJob.fields);
+      perfJob.yearField = pjCols.year;
+
+      const years = perfJob.yearField ? uniqueSorted(perfJob.rows.map(r=>r[perfJob.yearField])).filter(v=>v!=="") : [];
+      setYearSelectOptions("pj-year", years);
+
+      const parents = uniqueSorted(perfJob.rows.map(r=>r[pjCols.jobParent]));
+      setSelectOptions("pj-parent", parents, "Pilih Job Parent");
+      $("pj-parent").value = parents[0] || "";
+
+      // area options initial (will be refreshed)
+      refreshPJAreaOptions();
+
+      $("pj-year").addEventListener("change", ()=>{
+        updatePJTypeOptions();
+        updatePerformanceJobtypeView();
+      });
+      $("pj-parent").addEventListener("change", ()=>{
+        refreshPJAreaOptions();
+        updatePJTypeOptions();
+        updatePerformanceJobtypeView();
+      });
+      $("pj-area").addEventListener("change", ()=>{
+        updatePJTypeOptions();
+        updatePerformanceJobtypeView();
+      });
+      $("pj-type").addEventListener("change", updatePerformanceJobtypeView);
+
+      updatePJTypeOptions();
+      updatePerformanceJobtypeView();
+    }
+
+    function refreshPJAreaOptions(){
+      // Prefer options from Performance Area selection if available
+      const year = $("pj-year") ? $("pj-year").value : "";
+      const parent = $("pj-parent") ? $("pj-parent").value : "";
+
+      // Use perfJob rows, but also allow pa selections to narrow
+      let rows = perfJob.rows.slice();
+
+      if(year && perfJob.yearField){
+        rows = rows.filter(r=>trimStr(r[perfJob.yearField])===year);
+      }
+      if(parent){
+        rows = rows.filter(r=>trimStr(r[pjCols.jobParent])===parent);
+      }
+      const areas = uniqueSorted(rows.map(r=>r[pjCols.area]));
+      setSelectOptions("pj-area", areas, "Semua Area");
+      $("pj-area").value = "";
+    }
+
+    function updatePJTypeOptions(){
+      const year = $("pj-year").value;
+      const parent = $("pj-parent").value;
+      const area = $("pj-area").value;
+
+      let rows = perfJob.rows.filter(r=>trimStr(r[pjCols.jobParent])===parent);
+
+      if(year && perfJob.yearField){
+        rows = rows.filter(r=>trimStr(r[perfJob.yearField])===year);
+      }
+      if(area){
+        rows = rows.filter(r=>trimStr(r[pjCols.area])===area);
+      }
+
+      const types = uniqueSorted(rows.map(r=>r[pjCols.jobType]));
+      setSelectOptions("pj-type", types, "Semua Job Type");
+      $("pj-type").value = "";
+    }
+
+    function updatePerformanceJobtypeView(){
+      const year = $("pj-year").value;
+      const parent = $("pj-parent").value;
+      const area = $("pj-area").value;
+      const type = $("pj-type").value;
+
+      let rows = perfJob.rows.filter(r=>trimStr(r[pjCols.jobParent])===parent);
+      if(year && perfJob.yearField){
+        rows = rows.filter(r=>trimStr(r[perfJob.yearField])===year);
+      }
+      if(area){
+        rows = rows.filter(r=>trimStr(r[pjCols.area])===area);
+      }
+      if(type){
+        rows = rows.filter(r=>trimStr(r[pjCols.jobType])===type);
+      }
+
+      const k = calcPerfKPIs(rows, pjCols);
+      $("pj-kpi-rows").textContent = k.rows.toLocaleString("id-ID");
+      $("pj-kpi-valid").textContent = k.valid.toLocaleString("id-ID");
+      $("pj-kpi-buffer").textContent = k.buffer.toLocaleString("id-ID");
+      $("pj-kpi-qyes").textContent = k.qyes.toLocaleString("id-ID");
+
+      const typesAll = uniqueSorted(perfJob.rows.filter(r=>trimStr(r[pjCols.jobParent])===parent).map(r=>r[pjCols.jobType]));
+      $("pj-status-text").textContent =
+        (year ? `Tahun "${year}" · ` : "") +
+        `Parent "${parent}"` +
+        (area ? ` · Area "${area}"` : "") +
+        (type ? ` · Type "${type}"` : ` · ${typesAll.length} job type`);
+
+      renderPerfChart("chart-pj", rows, pjCols);
+    }
+
+    function clearPJ(){
+      $("pj-year").value = "";
+      $("pj-area").value = "";
+      $("pj-type").value = "";
+      refreshPJAreaOptions();
+      updatePJTypeOptions();
+      updatePerformanceJobtypeView();
+    }
+
+    /******************************************************************
+     * TABS routing
+     ******************************************************************/
+    function switchPage(pageKey){
+      $$(".tab").forEach(t=>t.classList.toggle("active", t.dataset.page===pageKey));
+      $$(".page").forEach(p=>p.classList.remove("active"));
+      const pageId = "page-" + pageKey;
+      const el = $(pageId);
+      if(el) el.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    $("tabs").addEventListener("click", (e)=>{
+      const t = e.target.closest(".tab");
+      if(!t) return;
+      switchPage(t.dataset.page);
     });
-    cols.push(found ? found.f : null);
-  }
 
-  const okCount = cols.filter(Boolean).length;
-  return { cols, okCount };
-}
+    /******************************************************************
+     * INIT FLOW
+     ******************************************************************/
+    async function initAll(){
+      // Buttons
+      $("btn-clear-acm").addEventListener("click", clearACMFilters);
+      $("btn-clear-sa").addEventListener("click", clearSaFilters);
+      $("btn-clear-pc").addEventListener("click", clearPC);
+      $("btn-clear-pa").addEventListener("click", clearPA);
+      $("btn-clear-pj").addEventListener("click", clearPJ);
+      $("btn-reload").addEventListener("click", ()=>location.reload());
 
-function fallbackMonthColsByIndex(fields, startIndex){
-  const cols = [];
-  for(let i=0;i<12;i++){
-    cols.push(fields[startIndex+i] || null);
-  }
-  return cols;
-}
+      // Load ACM first
+      try{
+        $("acm-status").textContent = "Memuat ACM...";
+        const acm = await loadCsv(CONFIG.ACM_CSV_URL);
+        acmRows = acm.rows;
+        acmFields = acm.fields;
+        detectACMColumns(acmFields);
 
-function buildMatrixRows(rows, rowKeyField, monthCols){
-  const map = new Map();
-  rows.forEach(r=>{
-    const k = trimStr(r[rowKeyField]) || "(Kosong)";
-    if(!map.has(k)) map.set(k, {});
-    const obj = map.get(k);
-    MONTHS.forEach((m,i)=>{
-      const col = monthCols[i];
-      if(!col) return;
-      obj[m.idx] = fmtPercent(r[col]);
-    });
-  });
-  return map;
-}
+        $("acm-status").textContent = `ACM loaded: ${acmRows.length.toLocaleString("id-ID")} rows`;
+        initACMFilters();
+        initSourcingAnalystFilters();
+      }catch(err){
+        console.error(err);
+        $("acm-status").textContent = `Gagal load ACM: ${err.message}`;
+        $("sa-status").textContent = `Gagal load ACM: ${err.message}`;
+        toast("Gagal load ACM (cek CONFIG URL).");
+      }
 
-function buildAvgMatrixForGroup(rows, groupKeyField, monthCols){
-  const result = new Map();
-  const tmp = new Map();
-  rows.forEach(r=>{
-    const g = trimStr(r[groupKeyField]) || "(Kosong)";
-    if(!tmp.has(g)) tmp.set(g, {});
-    const grp = tmp.get(g);
-    MONTHS.forEach((m,i)=>{
-      const col = monthCols[i];
-      if(!col) return;
-      const val = toFloat(r[col]);
-      if(val==null) return;
-      const pct = (val>0 && val<=1) ? (val*100) : val;
-      if(!grp[m.idx]) grp[m.idx] = {sum:0,count:0};
-      grp[m.idx].sum += pct;
-      grp[m.idx].count += 1;
-    });
-  });
-
-  for(const [g,obj] of tmp.entries()){
-    const out = {};
-    MONTHS.forEach(m=>{
-      const s = obj[m.idx];
-      if(!s || !s.count) out[m.idx] = "-";
-      else out[m.idx] = `${percentFmt2.format(s.sum/s.count)}%`;
-    });
-    result.set(g, out);
-  }
-  return result;
-}
-
-function renderMatrixBody(tbodyEl, rowKeys, valueMap){
-  tbodyEl.innerHTML = "";
-  rowKeys.forEach(k=>{
-    const tr = document.createElement("tr");
-    const td0 = document.createElement("td");
-    td0.textContent = k;
-    td0.className = "col-label";
-    tr.appendChild(td0);
-
-    MONTHS.forEach(m=>{
-      const td = document.createElement("td");
-      td.className = "col-number";
-      const v = valueMap.get(k)?.[m.idx] ?? "-";
-      td.textContent = v;
-      tr.appendChild(td);
-    });
-
-    tbodyEl.appendChild(tr);
-  });
-}
-
-/* =========================================================
-   PERFORMANCE CLIENT
-========================================================= */
-let perfClient = { rows:[], fields:[], industryField:null, clientField:null, submitCols:[], qualCols:[] };
-
-function detectClientFields(fields){
-  const industry = findField(fields, ["INDUSTRY"]);
-  const client = findField(fields, ["CLIENT"]);
-  return {industry, client};
-}
-
-function updateClientDropdown(){
-  const ind = $("pc-industry").value;
-  const selC = $("pc-client");
-
-  if(!ind){
-    selC.innerHTML = `<option value="">Semua Client</option>`;
-    selC.disabled = true;
-    return;
-  }
-
-  const rows = perfClient.rows.filter(r => trimStr(r[perfClient.industryField]) === ind);
-  const clients = uniqueSorted(rows.map(r => r[perfClient.clientField]));
-
-  selC.innerHTML =
-    `<option value="">Semua Client</option>` +
-    clients.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-
-  selC.disabled = false;
-}
-
-function initPerformanceClient(){
-  $("pc-error-state").style.display = "none";
-  $("pc-status-text").textContent = "Memuat data...";
-  $("pc-col-note").textContent = "";
-
-  showSkeleton("pc-skeleton");
-
-  loadCsv(CSV_URL_CLIENT).then(({rows,fields})=>{
-    perfClient.rows = rows;
-    perfClient.fields = fields;
-
-    const {industry, client} = detectClientFields(fields);
-    perfClient.industryField = industry || fields[0] || null;
-    perfClient.clientField = client || fields[1] || null;
-
-    const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
-    const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
-
-    const okSubmit = fixedSubmit.filter(Boolean).length;
-    const okQual   = fixedQual.filter(Boolean).length;
-
-    if(okSubmit >= 8) perfClient.submitCols = fixedSubmit;
-    else{
-      const submitDetect = detectMonthCols(fields, "SUBMIT");
-      perfClient.submitCols = (submitDetect.okCount >= 6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
+      // Load Performance CSVs (optional)
+      await initPerfSafe("client", CONFIG.PERF_CLIENT_CSV_URL, perfClient, initPerformanceClient, "pc-status-text");
+      await initPerfSafe("area", CONFIG.PERF_AREA_CSV_URL, perfArea, initPerformanceArea, "pa-status-text");
+      await initPerfSafe("jobtype", CONFIG.PERF_JOBTYPE_CSV_URL, perfJob, initPerformanceJobtype, "pj-status-text");
     }
 
-    if(okQual >= 8) perfClient.qualCols = fixedQual;
-    else{
-      const qualDetect = detectMonthCols(fields, "QUALIFIED");
-      perfClient.qualCols = (qualDetect.okCount >= 6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
+    async function initPerfSafe(name, url, store, initFn, statusId){
+      try{
+        $(statusId).textContent = `Memuat Performance ${name}...`;
+        const res = await loadCsv(url);
+        store.rows = res.rows;
+        store.fields = res.fields;
+        initFn();
+        $(statusId).textContent = `Loaded: ${store.rows.length.toLocaleString("id-ID")} rows`;
+      }catch(err){
+        console.warn(`Perf ${name} skipped:`, err.message);
+        $(statusId).textContent = `Tidak aktif (isi CONFIG ${name} URL)`;
+      }
     }
 
-    renderMatrixHead($("pc-submit-head"), "Client");
-    renderMatrixHead($("pc-qual-head"), "Client");
-
-    const industryVals = uniqueSorted(rows.map(r=>r[perfClient.industryField]));
-    const sel = $("pc-industry");
-    sel.innerHTML = `<option value="">Pilih Industry...</option>` + industryVals.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-
-    hideSkeleton("pc-skeleton");
-
-    $("pc-col-note").textContent = "Jika header bulan tidak terbaca, sistem otomatis pakai urutan kolom setelah ID.";
-
-    $("pc-submit-empty").style.display = "block";
-    $("pc-qual-empty").style.display = "block";
-  }).catch(err=>{
-    console.error(err);
-    hideSkeleton("pc-skeleton");
-    $("pc-error-state").style.display = "block";
-    $("pc-error-state").textContent = "Gagal memuat Performance Client: " + (err.message || err);
-  });
-}
-
-/* ✅ FIX: fungsi ini dibersihkan (tidak ada kode nyasar lagi) */
-function updatePerformanceClientView(){
-  const ind = $("pc-industry").value;
-  const client = $("pc-client").value;
-
-  const emptySubmit = $("pc-submit-empty");
-  const emptyQual = $("pc-qual-empty");
-
-  if(!ind){
-    $("pc-submit-body").innerHTML = "";
-    $("pc-qual-body").innerHTML = "";
-    emptySubmit.style.display = "block";
-    emptyQual.style.display = "block";
-    $("pc-status-text").textContent = "Pilih Industry untuk menampilkan data.";
-    return;
-  }
-
-  let rows = perfClient.rows.filter(r => trimStr(r[perfClient.industryField]) === ind);
-  if(client){
-    rows = rows.filter(r => trimStr(r[perfClient.clientField]) === client);
-  }
-
-  const clients = uniqueSorted(rows.map(r => r[perfClient.clientField]));
-  const submitMap = buildMatrixRows(rows, perfClient.clientField, perfClient.submitCols);
-  const qualMap = buildMatrixRows(rows, perfClient.clientField, perfClient.qualCols);
-
-  renderMatrixBody($("pc-submit-body"), clients, submitMap);
-  renderMatrixBody($("pc-qual-body"), clients, qualMap);
-
-  emptySubmit.style.display = clients.length ? "none" : "block";
-  emptyQual.style.display = clients.length ? "none" : "block";
-
-  $("pc-status-text").textContent =
-    `Industry "${ind}"` +
-    (client ? ` · Client "${client}"` : ` · ${clients.length} client`);
-}
-
-function clearPC(){
-  $("pc-industry").value = "";
-  $("pc-client").innerHTML = `<option value="">Semua Client</option>`;
-  $("pc-client").disabled = true;
-  updatePerformanceClientView();
-}
-
-/* =========================================================
-   PERFORMANCE AREA
-========================================================= */
-let perfArea = { rows:[], fields:[], groupField:null, areaField:null, submitCols:[], qualCols:[] };
-
-function detectAreaFields(fields){
-  const group = findField(fields, ["GROUP CLIENT","GROUP"]);
-  const area = findField(fields, ["AREA"]);
-  return {group, area};
-}
-
-function initPerformanceArea(){
-  $("pa-error-state").style.display = "none";
-  $("pa-status-text").textContent = "Memuat data...";
-  $("pa-col-note").textContent = "";
-
-  showSkeleton("pa-skeleton");
-
-  loadCsv(CSV_URL_AREA).then(({rows,fields})=>{
-    perfArea.rows = rows;
-    perfArea.fields = fields;
-
-    const {group, area} = detectAreaFields(fields);
-    perfArea.groupField = group || fields[0] || null;
-    perfArea.areaField = area || fields[1] || null;
-
-    const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
-    const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
-
-    const okSubmit = fixedSubmit.filter(Boolean).length;
-    const okQual   = fixedQual.filter(Boolean).length;
-
-    if(okSubmit >= 8) perfArea.submitCols = fixedSubmit;
-    else{
-      const submitDetect = detectMonthCols(fields, "SUBMIT");
-      perfArea.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
-    }
-
-    if(okQual >= 8) perfArea.qualCols = fixedQual;
-    else{
-      const qualDetect = detectMonthCols(fields, "QUALIFIED");
-      perfArea.qualCols = (qualDetect.okCount>=6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
-    }
-
-    renderMatrixHead($("pa-submit-head"), "Area");
-    renderMatrixHead($("pa-qual-head"), "Area");
-
-    const groupVals = uniqueSorted(rows.map(r=>r[perfArea.groupField]));
-    const selG = $("pa-group");
-    selG.innerHTML = `<option value="">Pilih Group Client...</option>` + groupVals.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-
-    $("pa-area").innerHTML = `<option value="">Semua Area</option>`;
-    $("pa-area").disabled = true;
-
-    hideSkeleton("pa-skeleton");
-
-    $("pa-status-text").textContent = `Data siap. Kolom: Group="${perfArea.groupField}", Area="${perfArea.areaField}".`;
-    $("pa-col-note").textContent = "Area list akan muncul setelah Group Client dipilih.";
-
-    $("pa-submit-empty").style.display = "block";
-    $("pa-qual-empty").style.display = "block";
-  }).catch(err=>{
-    console.error(err);
-    hideSkeleton("pa-skeleton");
-    $("pa-error-state").style.display = "block";
-    $("pa-error-state").textContent = "Gagal memuat Performance Area: " + (err.message || err);
-  });
-}
-
-function updateAreaDropdown(){
-  const g = $("pa-group").value;
-  const selA = $("pa-area");
-  if(!g){
-    selA.innerHTML = `<option value="">Semua Area</option>`;
-    selA.disabled = true;
-    return;
-  }
-  const rows = perfArea.rows.filter(r=>trimStr(r[perfArea.groupField])===g);
-  const areas = uniqueSorted(rows.map(r=>r[perfArea.areaField]));
-  selA.innerHTML = `<option value="">Semua Area</option>` + areas.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-  selA.disabled = false;
-}
-
-function updatePerformanceAreaView(){
-  const g = $("pa-group").value;
-  const a = $("pa-area").value;
-
-  if(!g){
-    $("pa-submit-body").innerHTML = "";
-    $("pa-qual-body").innerHTML = "";
-    $("pa-submit-empty").style.display = "block";
-    $("pa-qual-empty").style.display = "block";
-    $("pa-status-text").textContent = "Pilih Group Client untuk menampilkan data.";
-    return;
-  }
-
-  let rows = perfArea.rows.filter(r=>trimStr(r[perfArea.groupField])===g);
-  if(a){
-    rows = rows.filter(r=>trimStr(r[perfArea.areaField])===a);
-  }
-
-  const areas = uniqueSorted(rows.map(r=>r[perfArea.areaField]));
-  const submitMap = buildMatrixRows(rows, perfArea.areaField, perfArea.submitCols);
-  const qualMap = buildMatrixRows(rows, perfArea.areaField, perfArea.qualCols);
-
-  renderMatrixBody($("pa-submit-body"), areas, submitMap);
-  renderMatrixBody($("pa-qual-body"), areas, qualMap);
-
-  $("pa-submit-empty").style.display = areas.length ? "none" : "block";
-  $("pa-qual-empty").style.display = areas.length ? "none" : "block";
-  $("pa-status-text").textContent = `Group "${g}"` + (a ? ` · Area "${a}"` : ` · ${areas.length} area`);
-}
-
-function clearPA(){
-  $("pa-group").value = "";
-  $("pa-area").value = "";
-  $("pa-area").innerHTML = `<option value="">Semua Area</option>`;
-  $("pa-area").disabled = true;
-  updatePerformanceAreaView();
-}
-
-/* =========================================================
-   PERFORMANCE JOBTYPE (Job Type = kolom A, Job Parent = kolom B)
-========================================================= */
-let perfJob = {
-  rows:[], fields:[],
-  jobTypeField:null,
-  jobParentField:null,
-  areaField:null,
-  submitCols:[], qualCols:[],
-  areaOptions:[]
-};
-
-function initPerformanceJobtype(){
-  $("pj-error-state").style.display = "none";
-  $("pj-status-text").textContent = "Memuat data...";
-  $("pj-col-note").textContent = "";
-
-  showSkeleton("pj-skeleton");
-
-  loadCsv(CSV_URL_JOBTYPE).then(({rows,fields})=>{
-    perfJob.rows = rows;
-    perfJob.fields = fields;
-
-    perfJob.jobTypeField = fields[0] || null;   // A
-    perfJob.jobParentField = fields[1] || null; // B
-    perfJob.areaField = findField(fields, ["AREA"]);
-
-    // ✅ FIXED: Query Report Jobtype mapping by column letters
-    const fixedSubmit = fieldsByLetters(fields, FIX_SUBMIT_LETTERS);
-    const fixedQual   = fieldsByLetters(fields, FIX_QUAL_LETTERS);
-
-    const okSubmit = fixedSubmit.filter(Boolean).length;
-    const okQual   = fixedQual.filter(Boolean).length;
-
-    // Kalau mapping kolom tersedia, pakai itu. Kalau tidak, fallback ke auto-detect lama.
-    if(okSubmit >= 8) perfJob.submitCols = fixedSubmit;
-    else{
-      const submitDetect = detectMonthCols(fields, "SUBMIT");
-      perfJob.submitCols = (submitDetect.okCount>=6) ? submitDetect.cols : fallbackMonthColsByIndex(fields, 2);
-    }
-
-    if(okQual >= 8) perfJob.qualCols = fixedQual;
-    else{
-      const qualDetect = detectMonthCols(fields, "QUALIFIED");
-      perfJob.qualCols = (qualDetect.okCount>=6) ? qualDetect.cols : fallbackMonthColsByIndex(fields, 14);
-    }
-
-    renderMatrixHead($("pj-parent-submit-head"), "Job Parent");
-    renderMatrixHead($("pj-submit-head"), "Job Type");
-    renderMatrixHead($("pj-qual-head"), "Job Type");
-
-    const parents = uniqueSorted(rows.map(r=>r[perfJob.jobParentField]));
-    const selP = $("pj-parent");
-    selP.innerHTML = `<option value="">Pilih Job Parent...</option>` + parents.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-
-    const selT = $("pj-type");
-    selT.innerHTML = `<option value="">Pilih Job Type...</option>`;
-    selT.disabled = true;
-
-    refreshPJAreaOptions();
-
-    hideSkeleton("pj-skeleton");
-
-    $("pj-status-text").textContent = `Data siap. JobType(A)="${perfJob.jobTypeField}", JobParent(B)="${perfJob.jobParentField}".`;
-    $("pj-col-note").textContent = perfJob.areaField ? `Kolom Area terdeteksi: "${perfJob.areaField}" (Area bisa memfilter).` : "Kolom Area tidak terdeteksi (dropdown Area hanya label).";
-
-    $("pj-parent-empty").style.display = "block";
-    $("pj-submit-empty").style.display = "block";
-    $("pj-qual-empty").style.display = "block";
-  }).catch(err=>{
-    console.error(err);
-    hideSkeleton("pj-skeleton");
-    $("pj-error-state").style.display = "block";
-    $("pj-error-state").textContent = "Gagal memuat Performance Jobtype: " + (err.message || err);
-  });
-}
-
-function refreshPJAreaOptions(){
-  let areas = [];
-  if(perfArea.rows && perfArea.rows.length && perfArea.areaField){
-    areas = uniqueSorted(perfArea.rows.map(r=>r[perfArea.areaField]));
-  }
-  perfJob.areaOptions = areas;
-
-  const selA = $("pj-area");
-  selA.innerHTML = `<option value="">Semua Area</option>` + areas.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-}
-
-function updatePJTypeOptions(){
-  const parent = $("pj-parent").value;
-  const selT = $("pj-type");
-  if(!parent){
-    selT.innerHTML = `<option value="">Pilih Job Type...</option>`;
-    selT.disabled = true;
-    return;
-  }
-
-  let rows = perfJob.rows.filter(r=>trimStr(r[perfJob.jobParentField])===parent);
-
-  const area = $("pj-area").value;
-  if(area && perfJob.areaField){
-    rows = rows.filter(r=>trimStr(r[perfJob.areaField])===area);
-  }
-
-  const types = uniqueSorted(rows.map(r=>r[perfJob.jobTypeField]));
-  selT.innerHTML = `<option value="">Semua Job Type (di parent ini)</option>` + types.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
-  selT.disabled = false;
-}
-
-function updatePerformanceJobtypeView(){
-  const area = $("pj-area").value;
-  const parent = $("pj-parent").value;
-  const type = $("pj-type").value;
-
-  if(!parent){
-    $("pj-parent-submit-body").innerHTML = "";
-    $("pj-submit-body").innerHTML = "";
-    $("pj-qual-body").innerHTML = "";
-    $("pj-parent-empty").style.display = "block";
-    $("pj-submit-empty").style.display = "block";
-    $("pj-qual-empty").style.display = "block";
-    $("pj-status-text").textContent = "Pilih Job Parent untuk menampilkan data.";
-    return;
-  }
-
-  let rows = perfJob.rows.filter(r=>trimStr(r[perfJob.jobParentField])===parent);
-  if(area && perfJob.areaField){
-    rows = rows.filter(r=>trimStr(r[perfJob.areaField])===area);
-  }
-
-  const parentAvgSubmit = buildAvgMatrixForGroup(rows, perfJob.jobParentField, perfJob.submitCols);
-  renderMatrixBody($("pj-parent-submit-body"), [parent], parentAvgSubmit);
-  $("pj-parent-empty").style.display = "none";
-
-  let rowsType = rows;
-  if(type){
-    rowsType = rowsType.filter(r=>trimStr(r[perfJob.jobTypeField])===type);
-  }
-
-  const types = uniqueSorted(rowsType.map(r=>r[perfJob.jobTypeField]));
-  const submitMap = buildMatrixRows(rowsType, perfJob.jobTypeField, perfJob.submitCols);
-  const qualMap = buildMatrixRows(rowsType, perfJob.jobTypeField, perfJob.qualCols);
-
-  renderMatrixBody($("pj-submit-body"), types, submitMap);
-  renderMatrixBody($("pj-qual-body"), types, qualMap);
-
-  $("pj-submit-empty").style.display = types.length ? "none" : "block";
-  $("pj-qual-empty").style.display = types.length ? "none" : "block";
-
-  $("pj-status-text").textContent =
-    `Parent "${parent}"` +
-    (area ? ` · Area "${area}"` : "") +
-    (type ? ` · Type "${type}"` : ` · ${types.length} job type`);
-}
-
-function clearPJ(){
-  $("pj-area").value = "";
-  $("pj-parent").value = "";
-  $("pj-type").value = "";
-  $("pj-type").innerHTML = `<option value="">Pilih Job Type...</option>`;
-  $("pj-type").disabled = true;
-  updatePerformanceJobtypeView();
-}
-
-/* =========================================================
-   TAB NAVIGATION
-========================================================= */
-function setActiveTab(tabId){
-  const tabs = ["acm","sa","pc","pa","pj"];
-  tabs.forEach(t=>{
-    $("tab-"+t).classList.toggle("active", t===tabId);
-    $("page-"+t).classList.toggle("active", t===tabId);
-  });
-}
-
-/* =========================================================
-   LOAD ALL
-========================================================= */
-function setPill(text){ $("pill-status").textContent = text; }
-
-async function loadAll(){
-  try{
-    setPill("Loading...");
-    $("acm-error-state").style.display = "none";
-
-    // Skeleton ON
-    showSkeleton("acm-skeleton");
-
-    const acm = await loadCsv(CSV_URL_ACM);
-    acmRows = acm.rows;
-    acmFields = acm.fields;
-
-    detectACMColumns(acmFields);
-
-    if(!acmRows.length){
-      $("acm-error-state").style.display = "block";
-      $("acm-error-state").textContent = "Data ACM kosong atau header tidak sesuai.";
-      setPill("ACM empty");
-      hideSkeleton("acm-skeleton");
-      return;
-    }
-
-    initACMFilters();
-    initSourcingAnalystFilters();
-    updateACMAll();
-
-    // Skeleton OFF (ACM ready)
-    hideSkeleton("acm-skeleton");
-
-    setPill("Loaded");
-
-    initPerformanceClient();
-    initPerformanceArea();
-    initPerformanceJobtype();
-  }catch(err){
-    console.error(err);
-    hideSkeleton("acm-skeleton");
-    $("acm-error-state").style.display = "block";
-    $("acm-error-state").textContent =
-      "Terjadi kesalahan saat memuat ACM: " + (err.message || err) +
-      ". Pastikan link CSV bisa dibuka tanpa login (Anyone with link - Viewer).";
-    setPill("Error");
-  }
-}
-
-document.addEventListener("DOMContentLoaded", ()=>{
-  // Tab handlers
-  $("tab-acm").addEventListener("click", ()=>setActiveTab("acm"));
-  $("tab-sa").addEventListener("click", ()=>setActiveTab("sa"));
-  $("tab-pc").addEventListener("click", ()=>setActiveTab("pc"));
-  $("tab-pa").addEventListener("click", ()=>setActiveTab("pa"));
-  $("tab-pj").addEventListener("click", ()=>setActiveTab("pj"));
-
-  // Filter card toggles
-  $("acm-filter-toggle-btn").addEventListener("click", ()=> $("acm-filter-card").classList.toggle("open"));
-  $("sa-filter-toggle-btn").addEventListener("click", ()=> $("sa-filter-card").classList.toggle("open"));
-  $("pc-filter-toggle-btn").addEventListener("click", ()=> $("pc-filter-card").classList.toggle("open"));
-  $("pa-filter-toggle-btn").addEventListener("click", ()=> $("pa-filter-card").classList.toggle("open"));
-  $("pj-filter-toggle-btn").addEventListener("click", ()=> $("pj-filter-card").classList.toggle("open"));
-
-  // Clear buttons
-  $("clear-filters-btn").addEventListener("click", clearACMFilters);
-  $("sa-clear-filters-btn").addEventListener("click", clearSaFilters);
-  $("pc-clear-btn").addEventListener("click", clearPC);
-  $("pa-clear-btn").addEventListener("click", clearPA);
-  $("pj-clear-btn").addEventListener("click", clearPJ);
-
-  // Perf events
-  $("pc-industry").addEventListener("change", ()=>{
-    updateClientDropdown();
-    updatePerformanceClientView();
-  });
-  $("pc-client").addEventListener("change", updatePerformanceClientView);
-
-  $("pa-group").addEventListener("change", ()=>{
-    updateAreaDropdown();
-    updatePerformanceAreaView();
-    refreshPJAreaOptions();
-  });
-  $("pa-area").addEventListener("change", updatePerformanceAreaView);
-
-  $("pj-area").addEventListener("change", ()=>{
-    updatePJTypeOptions();
-    updatePerformanceJobtypeView();
-  });
-  $("pj-parent").addEventListener("change", ()=>{
-    updatePJTypeOptions();
-    updatePerformanceJobtypeView();
-  });
-  $("pj-type").addEventListener("change", updatePerformanceJobtypeView);
-
-  loadAll();
-});
-</script>
+    initAll();
+  </script>
 </body>
 </html>
